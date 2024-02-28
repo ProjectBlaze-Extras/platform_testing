@@ -16,18 +16,15 @@
 
 package android.tools.common.flicker.assertors.assertions
 
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.ComponentTemplate
-import android.tools.common.flicker.subject.wm.WindowManagerTraceSubject
 
 /** Checks if the [component] window is visible at the end of the transition */
 class NonAppWindowIsVisibleAtEnd(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(
-        scenarioInstance: IScenarioInstance,
-        wmSubject: WindowManagerTraceSubject
-    ) {
-        wmSubject.last().isNonAppWindowVisible(component.build(scenarioInstance))
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+        flicker.assertWmEnd { isNonAppWindowVisible(component.build(scenarioInstance)) }
     }
 }

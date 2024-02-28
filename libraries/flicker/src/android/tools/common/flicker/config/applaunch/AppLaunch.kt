@@ -19,10 +19,10 @@ package android.tools.common.flicker.config.applaunch
 internal object AppLaunch {
     val SCENARIOS =
         listOf(
-            AppLaunchFromIcon(),
-            AppLaunchFromNotification(),
-            AppLaunchFromRecents(),
-            AppLaunchFromStatusBarCallChip(),
-            AppLaunchFromWidget()
+            AppLaunchFromIcon,
+            AppLaunchFromNotification,
+            AppLaunchFromRecents,
+            AppLaunchFromStatusBarCallChip,
+            AppLaunchFromWidget
         )
 }

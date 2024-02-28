@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,48 @@ public interface IAutoMapsHelper extends IAppHelper {
      * <p>This method is used to get searched address
      */
     String getAddress();
+
+    /**
+     * Setup expectations: Click on Mic button
+     *
+     * <p>This method is used to click on Mic button on maps
+     */
+    void openMapMicButton();
+
+    /**
+     * Setup expectations: verifies unblock message
+     *
+     * <p>Verify if unblock message is displayed
+     */
+    boolean isMicrophoneUnblockMessageDisplayed();
+
+    /**
+     * Setup expectations: click Cancel
+     *
+     * <p>Clicks on cancel button
+     */
+    void cancelUnblockMessage();
+
+    /**
+     * Setup expectations: Maps app is open
+     *
+     * <p>This method verifies the if searchBar is restricted when the drive mode is enabled.
+     */
+    boolean isSearchBarRestricted();
+
+    /**
+     * Setup expectations: Maps app is open
+     *
+     * <p>This method will launch the keyboard.
+     */
+    void launchKeyboard();
+
+    /**
+     * Setup expectations: Maps app is open
+     *
+     * <p>This method verifies the if keyboard is restricted when the drive mode is enabled.
+     */
+    boolean isKeyboardRestricted();
 
     /**
      * Setup expectations: Maps app is open
@@ -144,4 +186,52 @@ public interface IAutoMapsHelper extends IAppHelper {
      * @param durationMs The duration it takes to perform this gesture in milliseconds.
      */
     void tiltDown(float angle, long durationMs);
+
+    /**
+     * Setup expectations: Maps widget is displayed
+     *
+     * <p>This method is used to verify whether Maps widget is displayed.
+     */
+    boolean hasMapsWidget();
+
+    /**
+     * Setup expectations: Gas station widget is displayed in maps full screen
+     *
+     * <p>This method is used to verify whether Gas Station Widget is displayed.
+     */
+    boolean hasGasStationWidget();
+
+    /**
+     * Setup expectations: Restaurant widget is displayed in maps full screen
+     *
+     * <p>This method is used to verify whether Restaurant Widget is displayed.
+     */
+    boolean hasRestaurantWidget();
+
+    /**
+     * Setup expectations: Grocery Store widget is displayed in maps full screen
+     *
+     * <p>This method is used to verify whether Grocery Store Widget is displayed.
+     */
+    boolean hasGroceryStoreWidget();
+
+    /**
+     * Setup expectations: Coffee Shop widget is displayed in maps full screen
+     *
+     * <p>This method is used to verify whether Coffee Shop Widget is displayed.
+     */
+    boolean hasCoffeeShopsWidget();
+
+    /**
+     * Setup expectations: Maps Keyboard is Open
+     *
+     * <p>click on handwriting and speech to text on keyboard
+     */
+    void clickKeyboardSpeechToTextButton();
+    /**
+     * Setup expectations: Maps is Open
+     *
+     * <p>Returns true if Alert Message is displayed
+     */
+    boolean isAlertMessageDisplayed();
 }

@@ -16,11 +16,11 @@
 
 package android.tools.device.flicker.legacy
 
-abstract class AbstractFlickerTestData : IFlickerTestData {
+abstract class AbstractFlickerTestData : FlickerTestData {
     private var assertionsCheckedCallback: ((Boolean) -> Unit)? = null
     private var createTagCallback: (String) -> Unit = {}
 
-    final override fun withTag(tag: String, commands: IFlickerTestData.() -> Any) {
+    final override fun withTag(tag: String, commands: FlickerTestData.() -> Any) {
         commands()
         createTagCallback(tag)
     }

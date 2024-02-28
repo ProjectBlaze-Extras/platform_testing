@@ -22,6 +22,7 @@ android_test {
     static_libs: [
         "androidx.test.rules",
         "automotive-app-grid-helper",
+        "platform-test-junit-rules",
         "platform-test-options",
     ],
     srcs: ["src/**/*.java"],

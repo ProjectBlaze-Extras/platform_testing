@@ -16,10 +16,10 @@
 
 package android.tools.common.traces.wm
 
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.common.Cache
-import android.tools.common.CrossPlatform
+import android.tools.common.Timestamps
 import android.tools.getWmTraceReaderFromAsset
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import java.lang.reflect.Modifier
@@ -47,9 +47,7 @@ class WindowManagerTraceTest {
     @Test
     fun canDetectAppWindow() {
         val appWindows =
-            trace
-                .getEntryExactlyAt(CrossPlatform.timestamp.from(elapsedNanos = 9213763541297L))
-                .appWindows
+            trace.getEntryExactlyAt(Timestamps.from(elapsedNanos = 9213763541297L)).appWindows
         assertWithMessage("Unable to detect app windows").that(appWindows.size).isEqualTo(2)
     }
 
@@ -112,8 +110,7 @@ class WindowManagerTraceTest {
 
     @Test
     fun canDetectValidState() {
-        val entry =
-            trace.getEntryExactlyAt(CrossPlatform.timestamp.from(elapsedNanos = 9213763541297))
+        val entry = trace.getEntryExactlyAt(Timestamps.from(elapsedNanos = 9213763541297))
         assertWithMessage("${entry.timestamp}: ${entry.getIsIncompleteReason()}")
             .that(entry.isIncomplete())
             .isFalse()
@@ -121,8 +118,7 @@ class WindowManagerTraceTest {
 
     @Test
     fun canDetectInvalidState() {
-        val entry =
-            trace.getEntryExactlyAt(CrossPlatform.timestamp.from(elapsedNanos = 9215511235586))
+        val entry = trace.getEntryExactlyAt(Timestamps.from(elapsedNanos = 9215511235586))
         assertWithMessage("${entry.timestamp}: ${entry.getIsIncompleteReason()}")
             .that(entry.isIncomplete())
             .isTrue()
@@ -160,6 +156,6 @@ class WindowManagerTraceTest {
     }
 
     companion object {
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

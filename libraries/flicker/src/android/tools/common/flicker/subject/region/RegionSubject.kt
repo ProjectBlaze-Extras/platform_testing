@@ -23,7 +23,7 @@ import android.tools.common.datatypes.Region
 import android.tools.common.flicker.subject.FlickerSubject
 import android.tools.common.flicker.subject.exceptions.ExceptionMessageBuilder
 import android.tools.common.flicker.subject.exceptions.IncorrectRegionException
-import android.tools.common.io.IReader
+import android.tools.common.io.Reader
 import android.tools.common.traces.region.RegionEntry
 import kotlin.math.abs
 
@@ -33,42 +33,42 @@ import kotlin.math.abs
 class RegionSubject(
     val regionEntry: RegionEntry,
     override val timestamp: Timestamp,
-    override val reader: IReader? = null,
+    override val reader: Reader? = null,
 ) : FlickerSubject(), IRegionSubject {
 
     /** Custom constructor for existing android regions */
     constructor(
         region: Region?,
         timestamp: Timestamp,
-        reader: IReader? = null
+        reader: Reader? = null
     ) : this(RegionEntry(region ?: Region.EMPTY, timestamp), timestamp, reader)
 
     /** Custom constructor for existing rects */
     constructor(
         rect: Rect?,
         timestamp: Timestamp,
-        reader: IReader? = null
+        reader: Reader? = null
     ) : this(Region.from(rect), timestamp, reader)
 
     /** Custom constructor for existing rects */
     constructor(
         rect: RectF?,
         timestamp: Timestamp,
-        reader: IReader? = null
+        reader: Reader? = null
     ) : this(rect?.toRect(), timestamp, reader)
 
     /** Custom constructor for existing rects */
     constructor(
         rect: Array<RectF>,
         timestamp: Timestamp,
-        reader: IReader? = null
+        reader: Reader? = null
     ) : this(mergeRegions(rect.map { Region.from(it.toRect()) }.toTypedArray()), timestamp, reader)
 
     /** Custom constructor for existing regions */
     constructor(
         regions: Array<Region>,
         timestamp: Timestamp,
-        reader: IReader? = null
+        reader: Reader? = null
     ) : this(mergeRegions(regions), timestamp, reader)
 
     val region = regionEntry.region
@@ -266,10 +266,10 @@ class RegionSubject(
                 ExceptionMessageBuilder()
                     .forSubject(this)
                     .forIncorrectRegion("region. $region area should not be bigger than $testArea")
-                    .setExpected(other)
+                    .setExpected(testArea)
                     .setActual(area)
-                    .addExtraDescription("Expected area", testArea)
-                    .addExtraDescription("Actual area", area)
+                    .addExtraDescription("Expected region", other)
+                    .addExtraDescription("Actual region", regionEntry.region)
             throw IncorrectRegionException(errorMsgBuilder)
         }
     }

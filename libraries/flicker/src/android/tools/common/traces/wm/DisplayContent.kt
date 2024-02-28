@@ -20,6 +20,7 @@ import android.tools.common.PlatformConsts
 import android.tools.common.Rotation
 import android.tools.common.datatypes.Rect
 import android.tools.common.traces.component.IComponentMatcher
+import android.tools.common.traces.wm.Utils.collectDescendants
 import kotlin.js.JsExport
 import kotlin.js.JsName
 import kotlin.math.min
@@ -50,8 +51,8 @@ class DisplayContent(
     val rotation: Rotation,
     val lastOrientation: Int,
     val cutout: DisplayCutout?,
-    windowContainer: WindowContainer
-) : WindowContainer(windowContainer) {
+    private val windowContainer: IWindowContainer
+) : IWindowContainer by windowContainer {
     override val name: String = id.toString()
     override val isVisible: Boolean = false
 
@@ -64,7 +65,7 @@ class DisplayContent(
 
     val rootTasks: Array<Task>
         get() {
-            val tasks = this.collectDescendants<Task> { it.isRootTask }.toMutableList()
+            val tasks = collectDescendants<Task> { it.isRootTask }.toMutableList()
             // TODO(b/149338177): figure out how CTS tests deal with organizer. For now,
             //                    don't treat them as regular stacks
             val rootOrganizedTasks = mutableListOf<Task>()
@@ -138,6 +139,7 @@ class DisplayContent(
         if (name != other.name) return false
         if (singleTaskInstance != other.singleTaskInstance) return false
         if (surfaceSize != other.surfaceSize) return false
+        if (windowContainer != other.windowContainer) return false
 
         return true
     }
@@ -164,6 +166,7 @@ class DisplayContent(
         result = 31 * result + cutout.hashCode()
         result = 31 * result + name.hashCode()
         result = 31 * result + isVisible.hashCode()
+        result = 31 * result + windowContainer.hashCode()
         return result
     }
 

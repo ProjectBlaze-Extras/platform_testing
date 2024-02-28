@@ -21,6 +21,7 @@ import android.graphics.Rect;
 import android.media.MediaMetadata;
 import android.media.session.PlaybackState;
 import android.platform.test.scenario.tapl_common.Gestures;
+import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.uiautomator.By;
@@ -36,7 +37,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class MediaController {
-
+    private static final String TAG = MediaController.class.getSimpleName();
     private static final String PKG = "com.android.systemui";
     private static final String HIDE_BTN_RES = "dismiss";
     private static final BySelector PLAY_BTN_SELECTOR =
@@ -56,6 +57,7 @@ public class MediaController {
     private final UiDevice mDevice = UiDevice.getInstance(mInstrumentation);
     private final List<Integer> mStateChanges;
     private Runnable mStateListener;
+    private static final Object sStateListenerLock = new Object();
 
     MediaController(MediaInstrumentation media, UiObject2 uiObject) {
         media.addMediaSessionStateChangedListeners(this::onMediaSessionStageChanged);
@@ -65,17 +67,21 @@ public class MediaController {
 
     public void play() {
         runToNextState(
-            () -> mUiObject
-                .wait(Until.findObject(PLAY_BTN_SELECTOR), WAIT_TIME_MILLIS)
-                .click(),
-            PlaybackState.STATE_PLAYING);
+                () -> {
+                    mInstrumentation.getUiAutomation().clearCache();
+                    mUiObject.wait(Until.findObject(PLAY_BTN_SELECTOR), WAIT_TIME_MILLIS).click();
+                },
+                PlaybackState.STATE_PLAYING);
     }
 
     public void pause() {
         runToNextState(
-                () -> Gestures.click(
-                        mUiObject.wait(Until.findObject(PAUSE_BTN_SELECTOR), WAIT_TIME_MILLIS),
-                        "Pause button"),
+                () -> {
+                    mInstrumentation.getUiAutomation().clearCache();
+                    Gestures.click(
+                            mUiObject.wait(Until.findObject(PAUSE_BTN_SELECTOR), WAIT_TIME_MILLIS),
+                            "Pause button");
+                },
                 PlaybackState.STATE_PAUSED);
     }
 
@@ -98,11 +104,14 @@ public class MediaController {
     private void runToNextState(Runnable runnable, int state) {
         mStateChanges.clear();
         CountDownLatch latch = new CountDownLatch(1);
-        mStateListener = latch::countDown;
+        synchronized (sStateListenerLock) {
+            mStateListener = latch::countDown;
+        }
         runnable.run();
         try {
             if (!latch.await(WAIT_TIME_MILLIS, TimeUnit.MILLISECONDS)) {
-                throw new RuntimeException("PlaybackState didn't change and timeout.");
+                throw new RuntimeException(
+                        "PlaybackState didn't change to state:" + state + " and timeout.");
             }
         } catch (InterruptedException e) {
             throw new RuntimeException();
@@ -115,8 +124,10 @@ public class MediaController {
     private void onMediaSessionStageChanged(int state) {
         mStateChanges.add(state);
         if (mStateListener != null) {
-            mStateListener.run();
-            mStateListener = null;
+            synchronized (sStateListenerLock) {
+                mStateListener.run();
+                mStateListener = null;
+            }
         }
     }
 
@@ -153,12 +164,25 @@ public class MediaController {
      * @return boolean
      */
     public boolean hasMetadata(MediaMetadata meta) {
+        Log.d(
+                TAG,
+                "[Check metadata] hasMetadata: By.header_title="
+                        + meta.getString(MediaMetadata.METADATA_KEY_TITLE)
+                        + "By.header_artist="
+                        + meta.getString(MediaMetadata.METADATA_KEY_ARTIST));
         final BySelector mediaTitleSelector =
             By.res(PKG, "header_title").text(meta.getString(MediaMetadata.METADATA_KEY_TITLE));
         final BySelector mediaArtistSelector =
             By.res(PKG, "header_artist")
                 .text(meta.getString(MediaMetadata.METADATA_KEY_ARTIST));
-        return mUiObject.hasObject(mediaTitleSelector) && mUiObject.hasObject(mediaArtistSelector);
+        mInstrumentation.getUiAutomation().clearCache();
+        final boolean titleCheckResult = mUiObject.hasObject(mediaTitleSelector);
+        final boolean artistCheckResult = mUiObject.hasObject(mediaArtistSelector);
+
+        Log.d(
+                TAG,
+                "[Check metadata] title: " + titleCheckResult + ". artist: " + artistCheckResult);
+        return titleCheckResult && artistCheckResult;
     }
 
     public boolean swipe(Direction direction) {

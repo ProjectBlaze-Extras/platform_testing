@@ -29,6 +29,7 @@ import org.junit.internal.AssumptionViolatedException
 import org.junit.internal.runners.model.EachTestNotifier
 import org.junit.internal.runners.model.ReflectiveCallable
 import org.junit.internal.runners.statements.Fail
+import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runner.manipulation.Filter
 import org.junit.runner.manipulation.InvalidOrderingException
@@ -40,18 +41,32 @@ import org.junit.runner.notification.RunNotifier
 import org.junit.runner.notification.StoppedByUserException
 import org.junit.runners.BlockJUnit4ClassRunner
 import org.junit.runners.model.FrameworkMethod
+import org.junit.runners.model.InvalidTestClassError
 import org.junit.runners.model.RunnerScheduler
 import org.junit.runners.model.Statement
 
-open class FlickerServiceJUnit4ClassRunner
+class FlickerServiceJUnit4ClassRunner
 @JvmOverloads
 constructor(testClass: Class<*>?, paramString: String? = null) :
     BlockJUnit4ClassRunner(testClass), IFlickerJUnitDecorator {
     private val arguments: Bundle = InstrumentationRegistry.getArguments()
-    private val flickerDecorator =
-        testClass?.let {
-            FlickerServiceDecorator(this.testClass, paramString = paramString, inner = this)
+
+    private val flickerDecorator: FlickerServiceDecorator =
+        FlickerServiceDecorator(this.testClass, paramString = paramString, inner = this)
+
+    private var initialized: Boolean? = null
+
+    init {
+        val errors = mutableListOf<Throwable>()
+        flickerDecorator.doValidateInstanceMethods().let { errors.addAll(it) }
+        flickerDecorator.doValidateConstructor().let { errors.addAll(it) }
+
+        if (errors.isNotEmpty()) {
+            throw InvalidTestClassError(testClass, errors)
         }
+
+        initialized = true
+    }
 
     override fun run(notifier: RunNotifier) {
         val testNotifier = EachTestNotifier(notifier, description)
@@ -119,14 +134,17 @@ constructor(testClass: Class<*>?, paramString: String? = null) :
      */
     public override fun computeTestMethods(): List<FrameworkMethod> {
         val result = mutableListOf<FrameworkMethod>()
-        val testInstance = createTest()
-        result.addAll(flickerDecorator?.getTestMethods(testInstance) ?: emptyList())
+        if (initialized != null) {
+            val testInstance = createTest()
+            result.addAll(flickerDecorator.getTestMethods(testInstance))
+        } else {
+            result.addAll(getTestMethods({} /* placeholder param */))
+        }
         return result
     }
 
-    override fun describeChild(method: FrameworkMethod?): Description {
-        return flickerDecorator?.getChildDescription(method)
-            ?: error("There are no children to describe")
+    override fun describeChild(method: FrameworkMethod): Description {
+        return flickerDecorator.getChildDescription(method)
     }
 
     /** {@inheritDoc} */
@@ -140,31 +158,13 @@ constructor(testClass: Class<*>?, paramString: String? = null) :
     }
 
     override fun methodInvoker(method: FrameworkMethod, test: Any): Statement {
-        return flickerDecorator?.getMethodInvoker(method, test)
-            ?: error("No statements to invoke for $method in $test")
-    }
-
-    override fun validateConstructor(errors: MutableList<Throwable>) {
-        super.validateConstructor(errors)
-
-        if (errors.isEmpty()) {
-            flickerDecorator?.doValidateConstructor()?.let { errors.addAll(it) }
-        }
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun validateInstanceMethods(errors: MutableList<Throwable>?) {
-        flickerDecorator?.doValidateInstanceMethods()?.let { errors?.addAll(it) }
+        return flickerDecorator.getMethodInvoker(method, test)
     }
 
     /** IFlickerJunitDecorator implementation */
-    override fun getTestMethods(test: Any): List<FrameworkMethod> {
-        val tests = mutableListOf<FrameworkMethod>()
-        tests.addAll(super.computeTestMethods())
-        return tests
-    }
+    override fun getTestMethods(test: Any): List<FrameworkMethod> = super.computeTestMethods()
 
-    override fun getChildDescription(method: FrameworkMethod?): Description? {
+    override fun getChildDescription(method: FrameworkMethod): Description {
         return super.describeChild(method)
     }
 
@@ -374,19 +374,46 @@ constructor(testClass: Class<*>?, paramString: String? = null) :
         var statement: Statement? = methodInvoker(method!!, test)
         statement = possiblyExpectingExceptions(method, test, statement)
         statement = withPotentialTimeout(method, test, statement)
-        if (flickerDecorator?.shouldRunBeforeOn(method) ?: true) {
-            statement = withBefores(method, test, statement)
+
+        if (method.declaringClass != InjectedTestCase::class.java) {
+            if (flickerDecorator.shouldRunBeforeOn(method)) {
+                statement = withBefores(method, test, statement)
+            }
+            if (flickerDecorator.shouldRunAfterOn(method)) {
+                statement = withAfters(method, test, statement)
+            }
+            statement = withRules(method, test, statement)
         }
-        if (flickerDecorator?.shouldRunAfterOn(method) ?: true) {
-            statement = withAfters(method, test, statement)
-        }
-        //        statement = withRules(method, test, statement)
+
         statement = withInterruptIsolation(statement)
         return statement
     }
 
     private fun comparator(sorter: Sorter): Comparator<in FrameworkMethod> {
         return Comparator { o1, o2 -> sorter.compare(describeChild(o1), describeChild(o2)) }
+    }
+
+    private fun withRules(method: FrameworkMethod, target: Any, statement: Statement): Statement? {
+        val ruleContainer = RuleContainer()
+        CURRENT_RULE_CONTAINER.set(ruleContainer)
+        try {
+            val testRules = getTestRules(target)
+            for (each in rules(target)) {
+                if (!(each is TestRule && testRules.contains(each))) {
+                    ruleContainer.add(each)
+                }
+            }
+            for (rule in testRules) {
+                ruleContainer.add(rule)
+            }
+        } finally {
+            CURRENT_RULE_CONTAINER.remove()
+        }
+        return ruleContainer.apply(method, describeChild(method), target, statement)
+    }
+
+    companion object {
+        private val CURRENT_RULE_CONTAINER = ThreadLocal<RuleContainer>()
     }
 
     /**

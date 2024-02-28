@@ -114,6 +114,11 @@ public class ArtifactSaver {
         dumpCommandOutput(
                 "dumpsys meminfo",
                 artifactFile("MemInfo-OnFailure-" + getClassAndMethodName(description) + ".txt"));
+
+        dumpCommandOutput(
+                "cmd statusbar flag | tail +11", // Flags info starts at line 11
+                artifactFile("Flags-OnFailure-" + getClassAndMethodName(description) + ".txt"));
+
         Trace.endSection();
     }
 

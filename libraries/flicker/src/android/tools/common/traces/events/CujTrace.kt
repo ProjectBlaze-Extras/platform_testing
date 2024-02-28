@@ -16,9 +16,9 @@
 
 package android.tools.common.traces.events
 
-import android.tools.common.CrossPlatform
 import android.tools.common.ITrace
 import android.tools.common.Timestamp
+import android.tools.common.Timestamps
 import kotlin.js.JsExport
 
 @JsExport
@@ -60,7 +60,7 @@ class CujTrace(override val entries: Array<Cuj>) : ITrace<Cuj> {
 
                 val closingEvent =
                     listOf(matchingCancelEvent, matchingEndEvent).minBy {
-                        it?.timestamp ?: CrossPlatform.timestamp.max()
+                        it?.timestamp ?: Timestamps.max()
                     }
                         ?: error("Should have found one matching closing event")
                 val canceled = closingEvent.type == CujEvent.Companion.Type.CANCEL

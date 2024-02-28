@@ -55,6 +55,7 @@ object WaitUtils {
         timeout: Duration = DEFAULT_DEADLINE,
         errorProvider: (() -> String)? = null,
         ignoreFailure: Boolean = false,
+        ignoreException: Boolean = false,
         condition: () -> Boolean,
     ) {
         val traceName =
@@ -82,7 +83,9 @@ object WaitUtils {
                             }
                         } catch (t: Throwable) {
                             log("[#$i] Condition failing with exception")
-                            throw RuntimeException("[#$i] iteration failed.", t)
+                            if (!ignoreException) {
+                                throw RuntimeException("[#$i] iteration failed.", t)
+                            }
                         }
 
                         log("[#$i] Condition false, might retry.")

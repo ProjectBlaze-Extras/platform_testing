@@ -19,23 +19,22 @@ package android.tools.device.flicker.legacy.runner
 import android.annotation.SuppressLint
 import android.app.Instrumentation
 import android.os.SystemClock
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.TEST_SCENARIO
 import android.tools.assertExceptionMessage
 import android.tools.common.io.RunStatus
 import android.tools.createMockedFlicker
-import android.tools.device.flicker.legacy.IFlickerTestData
+import android.tools.device.flicker.legacy.FlickerTestData
 import android.tools.device.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.device.traces.io.ResultReader
 import android.tools.device.traces.io.ResultWriter
 import android.tools.device.traces.monitors.ITransitionMonitor
+import android.tools.rules.CleanFlickerEnvironmentRule
 import android.view.WindowManagerGlobal
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth
 import org.junit.After
 import org.junit.ClassRule
 import org.junit.FixMethodOrder
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runners.MethodSorters
 
@@ -45,19 +44,19 @@ import org.junit.runners.MethodSorters
 class TransitionRunnerTest {
     private val executionOrder = mutableListOf<String>()
 
-    private val runSetup: IFlickerTestData.() -> Unit = {
+    private val runSetup: FlickerTestData.() -> Unit = {
         executionOrder.add(Consts.SETUP)
         SystemClock.sleep(100)
     }
-    private val runTeardown: IFlickerTestData.() -> Unit = {
+    private val runTeardown: FlickerTestData.() -> Unit = {
         executionOrder.add(Consts.TEARDOWN)
         SystemClock.sleep(100)
     }
-    private val runTransition: IFlickerTestData.() -> Unit = {
+    private val runTransition: FlickerTestData.() -> Unit = {
         executionOrder.add(Consts.TRANSITION)
         SystemClock.sleep(100)
     }
-    private val throwError: IFlickerTestData.() -> Unit = { error(Consts.FAILURE) }
+    private val throwError: FlickerTestData.() -> Unit = { error(Consts.FAILURE) }
 
     @After
     fun assertTracingStopped() {
@@ -217,6 +216,6 @@ class TransitionRunnerTest {
     companion object {
         private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
 
-        @Rule @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

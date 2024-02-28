@@ -39,7 +39,9 @@ public class PerfettoHelper {
     // returning from the original shell invocation.
     //   perfetto --background-wait -c /data/misc/perfetto-traces/trace_config.pb -o
     //   /data/misc/perfetto-traces/trace_output.perfetto-trace
-    private static final String PERFETTO_START_CMD = "perfetto --background-wait -c %s%s -o %s";
+    private static final String PERFETTO_START_BG_WAIT_CMD =
+            "perfetto --background-wait -c %s%s -o %s";
+    private static final String PERFETTO_START_CMD = "perfetto --background -c %s%s -o %s";
     private static final String PERFETTO_TMP_OUTPUT_FILE =
             "/data/misc/perfetto-traces/trace_output.perfetto-trace";
     // Additional arg to indicate that the perfetto config file is text format.
@@ -60,6 +62,8 @@ public class PerfettoHelper {
     private UiDevice mUIDevice;
 
     private String mConfigRootDir;
+
+    private boolean mPerfettoStartBgWait;
 
     private int mPerfettoProcId = 0;
 
@@ -91,8 +95,12 @@ public class PerfettoHelper {
                     PERFETTO_TMP_OUTPUT_FILE));
             Log.i(LOG_TAG, String.format("Perfetto output file cleanup - %s", output));
 
-            String perfettoCmd = String.format(PERFETTO_START_CMD,
-                    mConfigRootDir, configFileName, PERFETTO_TMP_OUTPUT_FILE);
+            String perfettoCmd =
+                    String.format(
+                            mPerfettoStartBgWait ? PERFETTO_START_BG_WAIT_CMD : PERFETTO_START_CMD,
+                            mConfigRootDir,
+                            configFileName,
+                            PERFETTO_TMP_OUTPUT_FILE);
 
             if(isTextProtoConfig) {
                perfettoCmd = perfettoCmd + PERFETTO_TXT_PROTO_ARG;
@@ -104,6 +112,12 @@ public class PerfettoHelper {
             Log.i(LOG_TAG, String.format("Perfetto start command output - %s", startOutput));
             if (startOutput != null && !startOutput.isEmpty()) {
                 mPerfettoProcId = Integer.parseInt(startOutput.trim());
+            }
+
+            // If the perfetto background wait option is not used then add a explicit wait after
+            // starting the perfetto trace.
+            if (!mPerfettoStartBgWait) {
+                SystemClock.sleep(1000);
             }
 
             if(!isTestPerfettoRunning()) {
@@ -239,5 +253,9 @@ public class PerfettoHelper {
 
     public void setPerfettoConfigRootDir(String rootDir) {
         mConfigRootDir = rootDir;
+    }
+
+    public void setPerfettoStartBgWait(boolean perfettoStartBgWait) {
+        mPerfettoStartBgWait = perfettoStartBgWait;
     }
 }

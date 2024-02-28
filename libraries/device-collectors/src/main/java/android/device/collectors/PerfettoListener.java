@@ -22,8 +22,14 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemClock;
 import android.util.Log;
+
 import androidx.annotation.VisibleForTesting;
+
 import com.android.helpers.PerfettoHelper;
+
+import org.junit.runner.Description;
+import org.junit.runner.Result;
+import org.junit.runner.notification.Failure;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -32,9 +38,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Supplier;
-import org.junit.runner.Description;
-import org.junit.runner.Result;
-import org.junit.runner.notification.Failure;
 
 /**
  * A {@link PerfettoListener} that captures the perfetto trace during each test method
@@ -70,6 +73,7 @@ public class PerfettoListener extends BaseMetricListener {
     private static final String PERFETTO_FILE_PATH = "perfetto_file_path";
     // Collect per run if it is set to true otherwise collect per test.
     public static final String COLLECT_PER_RUN = "per_run";
+    public static final String PERFETTO_START_BG_WAIT = "perfetto_start_bg_wait";
     public static final String PERFETTO_PREFIX = "perfetto_";
     // Skip failure metrics collection if this flag is set to true.
     public static final String SKIP_TEST_FAILURE_METRICS = "skip_test_failure_metrics";
@@ -104,6 +108,8 @@ public class PerfettoListener extends BaseMetricListener {
     private boolean mPerfettoStartSuccess = false;
     private boolean mIsConfigTextProto = false;
     private boolean mIsCollectPerRun;
+    // Enable the perfetto background wait during perfetto trace startup by default.
+    private boolean mPerfettoStartBgWait = true;
     private boolean mSkipTestFailureMetrics;
     private boolean mIsTestFailed = false;
 
@@ -290,6 +296,11 @@ public class PerfettoListener extends BaseMetricListener {
 
         // Whether to collect the for the entire test run or per test.
         mIsCollectPerRun = Boolean.parseBoolean(args.getString(COLLECT_PER_RUN));
+
+        // Option used to decide whether to use background wait option during perfetto start.
+        mPerfettoStartBgWait =
+                Boolean.parseBoolean(args.getString(PERFETTO_START_BG_WAIT, String.valueOf(true)));
+        mPerfettoHelper.setPerfettoStartBgWait(mPerfettoStartBgWait);
 
         // Root directory path containing the perfetto config file.
         mConfigRootDir =

@@ -16,16 +16,29 @@
 
 package android.security.sts;
 
-import static com.android.sts.common.CommandUtil.runAndCheck;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
+import com.android.sts.common.CommandUtil;
+import com.android.sts.common.MallocDebug;
 import com.android.sts.common.NativePoc;
+import com.android.sts.common.NativePocCrashAsserter;
 import com.android.sts.common.NativePocStatusAsserter;
+import com.android.sts.common.ProcessUtil;
+import com.android.sts.common.RegexUtils;
+import com.android.sts.common.SystemUtil;
+import com.android.sts.common.UserUtils;
 import com.android.sts.common.tradefed.testtype.NonRootSecurityTestCase;
+import com.android.sts.common.util.TombstoneUtils;
+import com.android.tradefed.device.IFileEntry;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 @RunWith(DeviceJUnit4ClassRunner.class)
 public class StsHostSideTestCase extends NonRootSecurityTestCase {
@@ -34,32 +47,126 @@ public class StsHostSideTestCase extends NonRootSecurityTestCase {
     static final String TEST_PKG = "android.security.sts.sts_test_app_package";
     static final String TEST_CLASS = TEST_PKG + "." + "DeviceTest";
 
+    /** An app test, which uses this host Java test to launch an Android instrumented test */
     @Test
     public void testWithApp() throws Exception {
-        // Note: this test is for CVE-2020-0215
         ITestDevice device = getDevice();
-        device.enableAdbRoot();
+        assertTrue("could not disable root", device.disableAdbRoot());
         uninstallPackage(device, TEST_PKG);
-
-        runAndCheck(device, "input keyevent KEYCODE_WAKEUP");
-        runAndCheck(device, "input keyevent KEYCODE_MENU");
-        runAndCheck(device, "input keyevent KEYCODE_HOME");
 
         installPackage(TEST_APP);
         runDeviceTests(TEST_PKG, TEST_CLASS, "testDeviceSideMethod");
     }
 
+    /**
+     * A native PoC test, which uses this host Java test to push an executable with resources and
+     * execute with environment variables and more. This API uses a "NativePocAsserter" that handles
+     * the most common ways to retrieve data from the native PoC. It can be overloaded to handle the
+     * specific side-effect that your PoC generates. It also demonstrates how to add extra memory
+     * checking with Malloc Debug.
+     */
     @Test
     public void testWithNativePoc() throws Exception {
         NativePoc.builder()
+                // the name of the PoC
                 .pocName("native-poc")
+                // extra files pushed to the device
                 .resources("res.txt")
+                // command-line arguments for the PoC
                 .args("res.txt", "arg2")
+                // other options allow different linker paths for library shims
                 .useDefaultLdLibraryPath(true)
+                // test ends with ASSUMPTION_FAILURE if not EXIT_OK
                 .assumePocExitSuccess(true)
+                // run code after the PoC is executed for cleanup or other
                 .after(r -> getDevice().executeShellV2Command("ls -l /"))
-                .asserter(NativePocStatusAsserter.assertNotVulnerableExitCode()) // not 113
+                // fail if the poc returns exit status 113
+                .asserter(NativePocStatusAsserter.assertNotVulnerableExitCode())
                 .build()
                 .run(this);
+    }
+
+    /** Run native PoCs with Malloc Debug memory checking enabled */
+    @Test
+    public void testWithMallocDebug() throws Exception {
+        // Set up Malloc Debug for this test, which may be required if the vulnerability needs
+        // memory checking to crash. This is useful when an ASan/HWASan/MTE build is not available.
+        // https://android.googlesource.com/platform/bionic/+/master/libc/malloc_debug/README.md
+        try (AutoCloseable mallocDebug =
+                MallocDebug.withLibcMallocDebugOnNewProcess(
+                        getDevice(),
+                        "backtrace guard", // malloc debug options
+                        "native-poc" // process name
+                        )) {
+            // run a native PoC
+            NativePoc.builder()
+                    .pocName("native-poc")
+                    .build() // add more as needed
+                    .run(this);
+        }
+    }
+
+    /** Run code after applying device settings */
+    @Test
+    public void testWithSetting() throws Exception {
+        // allow reflection, which is not a security boundary
+        try (AutoCloseable setting =
+                SystemUtil.withSetting(getDevice(), "global", "hidden_api_policy", "1")) {
+            // run app
+            installPackage(TEST_APP);
+            runDeviceTests(TEST_PKG, TEST_CLASS, "testDeviceSideMethod");
+        }
+    }
+
+    /** Link a native PoC against a vulnerable system library */
+    @Test
+    public void testWithVulnerableLibrary() throws Exception {
+        // get the path of the vulnerable library
+        Optional<IFileEntry> libFileEntry =
+                ProcessUtil.findFileLoadedByProcess(
+                        getDevice(), "media.metrics", Pattern.quote("libmediametrics.so"));
+        assumeTrue("shared library not loaded by target process", libFileEntry.isPresent());
+
+        // attack the service
+        NativePoc.builder()
+                .pocName("native-poc")
+                // pass the library path to the PoC
+                .args(libFileEntry.get().getFullPath())
+                .asserter(
+                        NativePocCrashAsserter.assertNoCrash(
+                                new TombstoneUtils.Config()
+                                        // Because the vulnerability is in the shared library, the
+                                        // process crash is the PoC.
+                                        .setProcessPatterns(Pattern.compile("native-poc"))))
+                .build()
+                .run(this);
+    }
+
+    /** Match a log against a known vulnerable pattern regex */
+    @Test
+    public void testWithLogMessage() throws Exception {
+        // this is only for dmesg/logcat messages that are not controlled by the test.
+
+        // attack the device, which can be native poc, echo to socket, send intent, app, etc
+        NativePoc.builder()
+                .pocName("native-poc")
+                .build() // add more as needed
+                .run(this);
+
+        String dmesg = CommandUtil.runAndCheck(getDevice(), "dmesg -c").getStdout();
+
+        // It's preferred to use this for matching text because the regex has a timeout to
+        // protect against catastrophic backtracking. It also formats the test assert message.
+        RegexUtils.assertNotContainsMultiline(
+                "Call trace:.*?__arm_lpae_unmap.*?kgsl_iommu_unmap", dmesg);
+    }
+
+    /** Install and run an app as a secondary user */
+    @Test
+    public void testWithSecondaryUser() throws Exception {
+        try (AutoCloseable su = new UserUtils.SecondaryUser(getDevice()).restricted().withUser()) {
+            installPackage(TEST_APP);
+            runDeviceTests(TEST_PKG, TEST_CLASS, "testDeviceSideMethod");
+        }
     }
 }

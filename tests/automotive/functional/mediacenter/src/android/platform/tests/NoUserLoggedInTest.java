@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,8 @@
 
 package android.platform.tests;
 
-import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
-import android.platform.helpers.AutoUtility;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoHomeHelper;
 import android.platform.helpers.IAutoMediaHelper;
@@ -27,7 +25,6 @@ import android.platform.test.option.StringOption;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,10 +43,6 @@ public class NoUserLoggedInTest {
         mAutoHomeHelper = new HelperAccessor<>(IAutoHomeHelper.class);
     }
 
-    @BeforeClass
-    public static void exitSuw() {
-        AutoUtility.exitSuw();
-    }
 
     @Test
     public void testNoUserLogInMessage() {

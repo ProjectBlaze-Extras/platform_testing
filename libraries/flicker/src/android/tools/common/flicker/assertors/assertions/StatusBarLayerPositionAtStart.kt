@@ -18,9 +18,9 @@ package android.tools.common.flicker.assertors.assertions
 
 import android.tools.common.PlatformConsts
 import android.tools.common.datatypes.Region
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.AssertionTemplate
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
 import android.tools.common.traces.component.ComponentNameMatcher
 
 /**
@@ -29,18 +29,18 @@ import android.tools.common.traces.component.ComponentNameMatcher
  */
 class StatusBarLayerPositionAtStart : AssertionTemplate() {
     /** {@inheritDoc} */
-    override fun doEvaluate(scenarioInstance: IScenarioInstance, layerSubject: LayersTraceSubject) {
-        layerSubject
-            .first()
-            .visibleRegion(ComponentNameMatcher.STATUS_BAR)
-            .coversExactly(getExpectedStatusbarPosition(scenarioInstance))
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+        flicker.assertWmStart {
+            visibleRegion(ComponentNameMatcher.STATUS_BAR)
+                .coversExactly(getExpectedStatusBarPosition(scenarioInstance))
+        }
     }
 
     // TODO: Maybe find another way to get the expected position that doesn't rely on use the data
     // from the WM trace
     // can we maybe dump another trace that just has system info for this purpose?
     // TODO: Also this is duplicated code we can probably extract this out
-    private fun getExpectedStatusbarPosition(scenarioInstance: IScenarioInstance): Region {
+    private fun getExpectedStatusBarPosition(scenarioInstance: ScenarioInstance): Region {
         val wmState =
             scenarioInstance.reader.readWmTrace()?.entries?.last()
                 ?: error("Missing wm trace entries")

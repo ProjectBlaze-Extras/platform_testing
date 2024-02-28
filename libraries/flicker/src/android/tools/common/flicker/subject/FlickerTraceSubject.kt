@@ -16,7 +16,7 @@
 
 package android.tools.common.flicker.subject
 
-import android.tools.common.CrossPlatform
+import android.tools.common.Timestamps
 import android.tools.common.flicker.assertions.AssertionsChecker
 import android.tools.common.flicker.subject.exceptions.ExceptionMessageBuilder
 import android.tools.common.flicker.subject.exceptions.SubjectAssertionError
@@ -24,7 +24,7 @@ import android.tools.common.flicker.subject.exceptions.SubjectAssertionError
 /** Base subject for flicker trace assertions */
 abstract class FlickerTraceSubject<EntrySubject : FlickerSubject> : FlickerSubject() {
     override val timestamp
-        get() = subjects.firstOrNull()?.timestamp ?: CrossPlatform.timestamp.empty()
+        get() = subjects.firstOrNull()?.timestamp ?: Timestamps.empty()
 
     protected val assertionsChecker = AssertionsChecker<EntrySubject>()
     private var newAssertionBlock = true

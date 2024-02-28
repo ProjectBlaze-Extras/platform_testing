@@ -16,8 +16,8 @@
 
 package android.tools.common.parsers.events
 
-import android.tools.common.CrossPlatform
 import android.tools.common.Timestamp
+import android.tools.common.Timestamps
 import android.tools.common.parsers.AbstractParser
 import android.tools.common.traces.events.CujEvent
 import android.tools.common.traces.events.Event
@@ -50,8 +50,7 @@ class EventLogParser : AbstractParser<Array<String>, EventLog>() {
                 val (rawTimestamp, uid, pid, tid, priority, tag) =
                     metaData.split(" ").filter { it.isNotEmpty() }
 
-                val timestamp =
-                    CrossPlatform.timestamp.from(unixNanos = rawTimestamp.replace(".", "").toLong())
+                val timestamp = Timestamps.from(unixNanos = rawTimestamp.replace(".", "").toLong())
                 parseEvent(timestamp, pid.toInt(), uid, tid.toInt(), tag, eventData)
             }
 
@@ -105,7 +104,7 @@ class EventLogParser : AbstractParser<Array<String>, EventLog>() {
     private fun getTimestampFromRawEntry(entry: String): Timestamp {
         val (metaData, _) = entry.split(":", limit = 2).map { it.trim() }
         val (rawTimestamp, _, _, _, _, _) = metaData.split(" ").filter { it.isNotEmpty() }
-        return CrossPlatform.timestamp.from(unixNanos = rawTimestamp.replace(".", "").toLong())
+        return Timestamps.from(unixNanos = rawTimestamp.replace(".", "").toLong())
     }
 
     companion object {

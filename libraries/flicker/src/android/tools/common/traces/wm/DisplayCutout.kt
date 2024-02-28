@@ -18,15 +18,67 @@ package android.tools.common.traces.wm
 
 import android.tools.common.datatypes.Insets
 import android.tools.common.datatypes.Rect
+import android.tools.common.withCache
 import kotlin.js.JsExport
+import kotlin.js.JsName
 
 /** Representation of a display cutout from a WM trace */
 @JsExport
-data class DisplayCutout(
+class DisplayCutout
+private constructor(
     val insets: Insets,
     val boundLeft: Rect,
     val boundTop: Rect,
     val boundRight: Rect,
     val boundBottom: Rect,
     val waterfallInsets: Insets
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is DisplayCutout) return false
+
+        if (insets != other.insets) return false
+        if (boundLeft != other.boundLeft) return false
+        if (boundTop != other.boundTop) return false
+        if (boundRight != other.boundRight) return false
+        if (boundBottom != other.boundBottom) return false
+        if (waterfallInsets != other.waterfallInsets) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = insets.hashCode()
+        result = 31 * result + boundLeft.hashCode()
+        result = 31 * result + boundTop.hashCode()
+        result = 31 * result + boundRight.hashCode()
+        result = 31 * result + boundBottom.hashCode()
+        result = 31 * result + waterfallInsets.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "DisplayCutout(" +
+            "insets=$insets, " +
+            "boundLeft=$boundLeft, " +
+            "boundTop=$boundTop, " +
+            "boundRight=$boundRight, " +
+            "boundBottom=$boundBottom, " +
+            "waterfallInsets=$waterfallInsets" +
+            ")"
+    }
+
+    companion object {
+        @JsName("from")
+        fun from(
+            insets: Insets,
+            boundLeft: Rect,
+            boundTop: Rect,
+            boundRight: Rect,
+            boundBottom: Rect,
+            waterfallInsets: Insets
+        ): DisplayCutout = withCache {
+            DisplayCutout(insets, boundLeft, boundTop, boundRight, boundBottom, waterfallInsets)
+        }
+    }
+}

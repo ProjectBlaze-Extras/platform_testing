@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,10 @@ import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.BySelector;
 import androidx.test.uiautomator.UiObject2;
 
+import java.util.ArrayList;
+import java.util.List;
+
+/** DialHelperImpl class for Android Auto platform functional tests */
 public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDialHelper {
     private static final String LOG_TAG = DialHelperImpl.class.getSimpleName();
 
@@ -41,6 +45,7 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
     private BySelector mForwardButtonSelector;
     private BySelector mScrollableElementSelector;
     private ScrollDirection mScrollDirection;
+    private UiObject2 mHomeAddress;
 
     public DialHelperImpl(Instrumentation instr) {
         super(instr);
@@ -71,6 +76,16 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
     }
 
     /** {@inheritDoc} */
+    @Override
+    public void pressDeviceOnPrompt() {
+        BySelector deviceButtonSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.DEVICE_TITLE);
+        UiObject2 deviceButton = getSpectatioUiUtil().findUiObject(deviceButtonSelector);
+
+        if (deviceButton != null) getSpectatioUiUtil().clickAndWait(deviceButton);
+    }
+
+    /** {@inheritDoc} */
     public void open() {
         getSpectatioUiUtil().pressHome();
         getSpectatioUiUtil().wait1Second();
@@ -97,7 +112,7 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
     public void makeCall() {
         BySelector dialButtonSelector = getUiElementFromConfig(AutomotiveConfigConstants.MAKE_CALL);
         UiObject2 dialButton = getSpectatioUiUtil().findUiObject(dialButtonSelector);
-        validateUiObject(dialButton, AutomotiveConfigConstants.MAKE_CALL);
+        getSpectatioUiUtil().validateUiObject(dialButton, AutomotiveConfigConstants.MAKE_CALL);
         getSpectatioUiUtil().clickAndWait(dialButton);
         getSpectatioUiUtil().wait5Seconds(); // Wait for the call to go through
     }
@@ -106,7 +121,7 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
     public void endCall() {
         BySelector endButtonSelector = getUiElementFromConfig(AutomotiveConfigConstants.END_CALL);
         UiObject2 endButton = getSpectatioUiUtil().findUiObject(endButtonSelector);
-        validateUiObject(endButton, AutomotiveConfigConstants.END_CALL);
+        getSpectatioUiUtil().validateUiObject(endButton, AutomotiveConfigConstants.END_CALL);
         getSpectatioUiUtil().clickAndWait(endButton);
         getSpectatioUiUtil().wait5Seconds();
     }
@@ -122,7 +137,8 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
         BySelector callHistorySelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.CALL_HISTORY_MENU);
         UiObject2 historyMenuButton = getSpectatioUiUtil().findUiObject(callHistorySelector);
-        validateUiObject(historyMenuButton, AutomotiveConfigConstants.CALL_HISTORY_MENU);
+        getSpectatioUiUtil()
+                .validateUiObject(historyMenuButton, AutomotiveConfigConstants.CALL_HISTORY_MENU);
         getSpectatioUiUtil().clickAndWait(historyMenuButton);
     }
 
@@ -136,14 +152,17 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
     /** {@inheritDoc} */
     public String getRecentCallHistory() {
         UiObject2 recentCallHistory = getCallHistory();
-        validateUiObject(recentCallHistory, /* action= */ "Recent Call History");
+        getSpectatioUiUtil()
+                .validateUiObject(recentCallHistory, /* action= */ "Recent Call History");
         return recentCallHistory.getText();
     }
 
     /** {@inheritDoc} */
     public void callMostRecentHistory() {
         UiObject2 recentCallHistory = getCallHistory();
-        validateUiObject(recentCallHistory, /* action= */ "Calling Most Recent Call From History");
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        recentCallHistory, /* action= */ "Calling Most Recent Call From History");
         getSpectatioUiUtil().clickAndWait(recentCallHistory);
     }
 
@@ -153,7 +172,8 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
         BySelector deleteButtonSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.DELETE_NUMBER);
         UiObject2 deleteButton = getSpectatioUiUtil().findUiObject(deleteButtonSelector);
-        validateUiObject(deleteButton, AutomotiveConfigConstants.DELETE_NUMBER);
+        getSpectatioUiUtil()
+                .validateUiObject(deleteButton, AutomotiveConfigConstants.DELETE_NUMBER);
         for (int index = 0; index < phoneNumber.length(); ++index) {
             getSpectatioUiUtil().clickAndWait(deleteButton);
         }
@@ -164,7 +184,8 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
         BySelector dialedInNumberSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.DIAL_IN_NUMBER);
         UiObject2 dialInNumber = getSpectatioUiUtil().findUiObject(dialedInNumberSelector);
-        validateUiObject(dialInNumber, AutomotiveConfigConstants.DIAL_IN_NUMBER);
+        getSpectatioUiUtil()
+                .validateUiObject(dialInNumber, AutomotiveConfigConstants.DIAL_IN_NUMBER);
         return dialInNumber.getText();
     }
 
@@ -173,7 +194,8 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
         BySelector dialedNumberSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.DIALED_CONTACT_TITLE);
         UiObject2 dialedNumber = getSpectatioUiUtil().findUiObject(dialedNumberSelector);
-        validateUiObject(dialedNumber, AutomotiveConfigConstants.DIALED_CONTACT_TITLE);
+        getSpectatioUiUtil()
+                .validateUiObject(dialedNumber, AutomotiveConfigConstants.DIALED_CONTACT_TITLE);
         return dialedNumber.getText();
     }
 
@@ -182,7 +204,9 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
         BySelector dialedContactNameSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.DIALED_CONTACT_TITLE);
         UiObject2 dialedContactName = getSpectatioUiUtil().findUiObject(dialedContactNameSelector);
-        validateUiObject(dialedContactName, AutomotiveConfigConstants.DIALED_CONTACT_TITLE);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        dialedContactName, AutomotiveConfigConstants.DIALED_CONTACT_TITLE);
         return dialedContactName.getText();
     }
 
@@ -191,7 +215,8 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
         BySelector dialPadSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.SWITCH_TO_DIAL_PAD);
         UiObject2 dialPad = getSpectatioUiUtil().findUiObject(dialPadSelector);
-        validateUiObject(dialPad, AutomotiveConfigConstants.SWITCH_TO_DIAL_PAD);
+        getSpectatioUiUtil()
+                .validateUiObject(dialPad, AutomotiveConfigConstants.SWITCH_TO_DIAL_PAD);
         getSpectatioUiUtil().clickAndWait(dialPad);
         enterNumber(phoneNumber);
         getSpectatioUiUtil().wait1Second();
@@ -201,7 +226,7 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
     public void muteCall() {
         BySelector muteButtonSelector = getUiElementFromConfig(AutomotiveConfigConstants.MUTE_CALL);
         UiObject2 muteButton = getSpectatioUiUtil().findUiObject(muteButtonSelector);
-        validateUiObject(muteButton, AutomotiveConfigConstants.MUTE_CALL);
+        getSpectatioUiUtil().validateUiObject(muteButton, AutomotiveConfigConstants.MUTE_CALL);
         getSpectatioUiUtil().clickAndWait(muteButton);
     }
 
@@ -209,7 +234,7 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
     public void unmuteCall() {
         BySelector muteButtonSelector = getUiElementFromConfig(AutomotiveConfigConstants.MUTE_CALL);
         UiObject2 muteButton = getSpectatioUiUtil().findUiObject(muteButtonSelector);
-        validateUiObject(muteButton, AutomotiveConfigConstants.MUTE_CALL);
+        getSpectatioUiUtil().validateUiObject(muteButton, AutomotiveConfigConstants.MUTE_CALL);
         getSpectatioUiUtil().clickAndWait(muteButton);
     }
 
@@ -224,14 +249,16 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
                         mScrollableElementSelector,
                         contactSelector,
                         String.format("scroll to find %s", contact));
-            validateUiObject(contactFromList, String.format("Given Contact %s", contact));
-            return contactFromList;
+        getSpectatioUiUtil()
+                .validateUiObject(contactFromList, String.format("Given Contact %s", contact));
+        return contactFromList;
     }
 
     /** {@inheritDoc} */
     public void dialFromList(String contact) {
         UiObject2 contactToCall = getContactFromContactList(contact);
         getSpectatioUiUtil().clickAndWait(contactToCall);
+        executeWorkflow(AutomotiveConfigConstants.DIAL_CONTACT_WORKFLOW);
     }
 
     /** {@inheritDoc} */
@@ -240,7 +267,9 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
                 getUiElementFromConfig(AutomotiveConfigConstants.CHANGE_VOICE_CHANNEL);
         UiObject2 voiceChannelButton =
                 getSpectatioUiUtil().findUiObject(voiceChannelButtonSelector);
-        validateUiObject(voiceChannelButton, AutomotiveConfigConstants.CHANGE_VOICE_CHANNEL);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        voiceChannelButton, AutomotiveConfigConstants.CHANGE_VOICE_CHANNEL);
         getSpectatioUiUtil().clickAndWait(voiceChannelButton);
         BySelector voiceChannelSelector;
         if (source == AudioSource.PHONE) {
@@ -251,7 +280,8 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
                     getUiElementFromConfig(AutomotiveConfigConstants.VOICE_CHANNEL_CAR);
         }
         UiObject2 channelButton = getSpectatioUiUtil().findUiObject(voiceChannelSelector);
-        validateUiObject(channelButton, String.format("Voice Channel %s", source));
+        getSpectatioUiUtil()
+                .validateUiObject(channelButton, String.format("Voice Channel %s", source));
         getSpectatioUiUtil().clickAndWait(channelButton);
         getSpectatioUiUtil().wait5Seconds();
     }
@@ -260,8 +290,12 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
     public String getContactName() {
         BySelector contactNameSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.DIALED_CONTACT_TITLE);
+        String action =
+                String.format(
+                        "Find contact name using BySelector: %s", contactNameSelector.toString());
+
         UiObject2 contactName = getSpectatioUiUtil().findUiObject(contactNameSelector);
-        validateUiObject(contactName, AutomotiveConfigConstants.DIALED_CONTACT_TITLE);
+        getSpectatioUiUtil().validateUiObject(contactName, action);
         return contactName.getText();
     }
 
@@ -272,27 +306,22 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
         BySelector contactTypeSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.DIALED_CONTACT_TYPE);
         UiObject2 contactType = getSpectatioUiUtil().findUiObject(contactTypeSelector);
-        validateUiObject(contactType, AutomotiveConfigConstants.DIALED_CONTACT_TYPE);
+        getSpectatioUiUtil()
+                .validateUiObject(contactType, AutomotiveConfigConstants.DIALED_CONTACT_TYPE);
         return contactType.getText();
     }
 
     /** {@inheritDoc} */
     public void searchContactsByName(String contact) {
         openSearchContact();
-        BySelector searchBoxSelector =
-                getUiElementFromConfig(AutomotiveConfigConstants.CONTACT_SEARCH_BAR);
-        UiObject2 searchBox = getSpectatioUiUtil().findUiObject(searchBoxSelector);
-        validateUiObject(searchBox, AutomotiveConfigConstants.CONTACT_SEARCH_BAR);
+        UiObject2 searchBox = getSearchBox();
         searchBox.setText(contact);
     }
 
     /** {@inheritDoc} */
     public void searchContactsByNumber(String number) {
         openSearchContact();
-        BySelector searchBoxSelector =
-                getUiElementFromConfig(AutomotiveConfigConstants.CONTACT_SEARCH_BAR);
-        UiObject2 searchBox = getSpectatioUiUtil().findUiObject(searchBoxSelector);
-        validateUiObject(searchBox, AutomotiveConfigConstants.CONTACT_SEARCH_BAR);
+        UiObject2 searchBox = getSearchBox();
         searchBox.setText(number);
     }
 
@@ -301,7 +330,8 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
         BySelector searchResultSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.SEARCH_RESULT);
         UiObject2 searchResult = getSpectatioUiUtil().findUiObject(searchResultSelector);
-        validateUiObject(searchResult, AutomotiveConfigConstants.SEARCH_RESULT);
+        getSpectatioUiUtil()
+                .validateUiObject(searchResult, AutomotiveConfigConstants.SEARCH_RESULT);
         String result = searchResult.getText();
         exitSearchResultPage();
         return result;
@@ -311,11 +341,17 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
         BySelector searchBackButtonSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.SEARCH_BACK_BUTTON);
         UiObject2 searchBackButton = getSpectatioUiUtil().findUiObject(searchBackButtonSelector);
-        validateUiObject(searchBackButton, AutomotiveConfigConstants.SEARCH_BACK_BUTTON);
+        getSpectatioUiUtil()
+                .validateUiObject(searchBackButton, AutomotiveConfigConstants.SEARCH_BACK_BUTTON);
         getSpectatioUiUtil().clickAndWait(searchBackButton);
     }
 
-    private void openContactOrder() {
+    /**
+     * Setup expectations: The Dialer app is open.
+     *
+     * <p>This method is used to open contact order for Dialer
+     */
+    public void openContactOrder() {
         try {
             ScrollActions scrollAction =
                     ScrollActions.valueOf(
@@ -362,7 +398,8 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
                                             + " %s.",
                                     scrollAction));
             }
-            validateUiObject(contactOrder, AutomotiveConfigConstants.CONTACT_ORDER);
+            getSpectatioUiUtil()
+                    .validateUiObject(contactOrder, AutomotiveConfigConstants.CONTACT_ORDER);
             getSpectatioUiUtil().clickAndWait(contactOrder);
         } catch (MissingUiElementException ex) {
             throw new RuntimeException("Unable to open contact order menu.", ex);
@@ -381,7 +418,8 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
             orderBySelector = getUiElementFromConfig(AutomotiveConfigConstants.SORT_BY_LAST_NAME);
         }
         UiObject2 orderButton = getSpectatioUiUtil().findUiObject(orderBySelector);
-        validateUiObject(orderButton, String.format("sorting by %s", orderType));
+        getSpectatioUiUtil()
+                .validateUiObject(orderButton, String.format("sorting by %s", orderType));
         getSpectatioUiUtil().clickAndWait(orderButton);
         BySelector contactsMenuSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.CONTACTS_MENU);
@@ -408,17 +446,72 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
         BySelector contactNameSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.CONTACT_NAME);
         UiObject2 firstContact = getSpectatioUiUtil().findUiObject(contactNameSelector);
-        validateUiObject(
-                firstContact,
-                String.format("%s to get first contact", AutomotiveConfigConstants.CONTACT_NAME));
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        firstContact,
+                        String.format(
+                                "%s to get first contact", AutomotiveConfigConstants.CONTACT_NAME));
         return firstContact.getText();
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isContactInFavorites(String contact) {
         openFavorites();
         UiObject2 uiObject = getSpectatioUiUtil().findUiObject(contact);
         return uiObject != null;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void addFavoritesFromFavoritesTab(String contact) {
+        openFavorites();
+        openAddFavoriteDialog(contact);
+
+        BySelector addfavoriteSelector =
+                getUiElementFromConfig(
+                        AutomotiveConfigConstants.ADD_CONTACT_TO_FAVORITE_FROM_DIALOG_BOX);
+        UiObject2 addfavorite = getSpectatioUiUtil().findUiObject(addfavoriteSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        addfavorite,
+                        AutomotiveConfigConstants.ADD_CONTACT_TO_FAVORITE_FROM_DIALOG_BOX);
+        getSpectatioUiUtil().clickAndWait(addfavorite);
+
+        BySelector closeDialogSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.ADD_TO_FAVORITE_DIALOG_OK);
+        UiObject2 closeDialog = getSpectatioUiUtil().findUiObject(closeDialogSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(closeDialog, AutomotiveConfigConstants.ADD_TO_FAVORITE_DIALOG_OK);
+        getSpectatioUiUtil().clickAndWait(closeDialog);
+    }
+
+    private void openAddFavoriteDialog(String contact) {
+        BySelector favoriteButtonSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.ADD_TO_FAVORITE_BUTTON);
+        UiObject2 favoriteButton = getSpectatioUiUtil().findUiObject(favoriteButtonSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(favoriteButton, AutomotiveConfigConstants.ADD_TO_FAVORITE_BUTTON);
+        getSpectatioUiUtil().clickAndWait(favoriteButton);
+
+        UiObject2 searchBox = getSearchBox();
+        searchBox.setText(contact);
+
+        BySelector searchResultSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.SEARCH_RESULT);
+        UiObject2 searchResult = getSpectatioUiUtil().findUiObject(searchResultSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(searchResult, AutomotiveConfigConstants.SEARCH_RESULT);
+        getSpectatioUiUtil().clickAndWait(searchResult);
+    }
+
+    private UiObject2 getSearchBox() {
+        BySelector searchBoxSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.CONTACT_SEARCH_BAR);
+        UiObject2 searchBox = getSpectatioUiUtil().findUiObject(searchBoxSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(searchBox, AutomotiveConfigConstants.CONTACT_SEARCH_BAR);
+        return searchBox;
     }
 
     /** {@inheritDoc} */
@@ -438,12 +531,39 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
         getSpectatioUiUtil().clickAndWait(contactDetailButton);
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public String getHomeAddress() {
+
+        BySelector homeAddressSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.CONTACT_HOME_ADDRESS);
+
+        BySelector detailsScrollableSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.CONTACT_DETAILS_PAGE);
+
+        UiObject2 homeAddress =
+                mScrollUtility.scrollAndFindUiObject(
+                        mScrollAction,
+                        mScrollDirection,
+                        mForwardButtonSelector,
+                        mBackwardButtonSelector,
+                        detailsScrollableSelector,
+                        homeAddressSelector,
+                        String.format("scroll to find home address."));
+
+        getSpectatioUiUtil()
+                .validateUiObject(homeAddress, AutomotiveConfigConstants.CONTACT_HOME_ADDRESS);
+
+        return homeAddress.getText();
+    }
+
     /** This method is used to get the first history in the Recents tab. */
     private UiObject2 getCallHistory() {
         BySelector callHistorySelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.CALL_HISTORY_INFO);
         UiObject2 callHistory = getSpectatioUiUtil().findUiObject(callHistorySelector);
-        validateUiObject(callHistory, AutomotiveConfigConstants.CALL_HISTORY_INFO);
+        getSpectatioUiUtil()
+                .validateUiObject(callHistory, AutomotiveConfigConstants.CALL_HISTORY_INFO);
         UiObject2 recentCallHistory = callHistory.getParent().getChildren().get(2);
         return recentCallHistory;
     }
@@ -453,8 +573,19 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
         BySelector contactMenuSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.CONTACTS_MENU);
         UiObject2 contactMenuButton = getSpectatioUiUtil().findUiObject(contactMenuSelector);
-        validateUiObject(contactMenuButton, AutomotiveConfigConstants.CONTACTS_MENU);
+        getSpectatioUiUtil()
+                .validateUiObject(contactMenuButton, AutomotiveConfigConstants.CONTACTS_MENU);
         getSpectatioUiUtil().clickAndWait(contactMenuButton);
+    }
+
+    /** This method opens the details page of the first contact on the page. */
+    public void openFirstContactDetails() {
+        BySelector contactDetailsSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.CONTACT_DETAIL);
+        UiObject2 contactDetailButton = getSpectatioUiUtil().findUiObject(contactDetailsSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(contactDetailButton, AutomotiveConfigConstants.CONTACT_DETAIL);
+        getSpectatioUiUtil().clickAndWait(contactDetailButton);
     }
 
     /** This method opens the contact search window. */
@@ -462,7 +593,8 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
         BySelector searchContactSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.SEARCH_CONTACT);
         UiObject2 searchContact = getSpectatioUiUtil().findUiObject(searchContactSelector);
-        validateUiObject(searchContact, AutomotiveConfigConstants.SEARCH_CONTACT);
+        getSpectatioUiUtil()
+                .validateUiObject(searchContact, AutomotiveConfigConstants.SEARCH_CONTACT);
         getSpectatioUiUtil().clickAndWait(searchContact);
     }
 
@@ -471,7 +603,8 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
         BySelector contactSettingSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.CONTACT_SETTINGS);
         UiObject2 settingButton = getSpectatioUiUtil().findUiObject(contactSettingSelector);
-        validateUiObject(settingButton, AutomotiveConfigConstants.CONTACT_SETTINGS);
+        getSpectatioUiUtil()
+                .validateUiObject(settingButton, AutomotiveConfigConstants.CONTACT_SETTINGS);
         getSpectatioUiUtil().clickAndWait(settingButton);
     }
 
@@ -480,7 +613,8 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
         BySelector favoritesMenuSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.FAVORITES_MENU);
         UiObject2 favoritesMenuButton = getSpectatioUiUtil().findUiObject(favoritesMenuSelector);
-        validateUiObject(favoritesMenuButton, AutomotiveConfigConstants.FAVORITES_MENU);
+        getSpectatioUiUtil()
+                .validateUiObject(favoritesMenuButton, AutomotiveConfigConstants.FAVORITES_MENU);
         getSpectatioUiUtil().clickAndWait(favoritesMenuButton);
     }
 
@@ -505,7 +639,7 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
         BySelector dialPadSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.DIAL_PAD_FRAGMENT);
         UiObject2 dialPad = getSpectatioUiUtil().findUiObject(dialPadSelector);
-        validateUiObject(dialPad, AutomotiveConfigConstants.DIAL_PAD_FRAGMENT);
+        getSpectatioUiUtil().validateUiObject(dialPad, AutomotiveConfigConstants.DIAL_PAD_FRAGMENT);
         char[] array = phoneNumber.toCharArray();
         for (char ch : array) {
             UiObject2 numberButton =
@@ -514,15 +648,95 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
             if (numberButton == null) {
                 numberButton = getSpectatioUiUtil().findUiObject(Character.toString(ch));
             }
-            validateUiObject(numberButton, String.format("Number %s", Character.toString(ch)));
+            getSpectatioUiUtil()
+                    .validateUiObject(
+                            numberButton, String.format("Number %s", Character.toString(ch)));
             getSpectatioUiUtil().clickAndWait(numberButton);
         }
     }
 
-    private void validateUiObject(UiObject2 uiObject, String action) {
-        if (uiObject == null) {
-            throw new UnknownUiException(
-                    String.format("Unable to find UI Element for %s.", action));
+    /** This method is used check if ongoing call is displayed on home. */
+    public boolean isOngoingCallDisplayedOnHome() {
+        getSpectatioUiUtil().wait5Seconds();
+        getSpectatioUiUtil().pressHome();
+        BySelector ongoingCallSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.ONGOING_CALL);
+        return getSpectatioUiUtil().hasUiElement(ongoingCallSelector);
+    }
+
+    /** This method opens the phone app on tapping the home phone card on home screen */
+    public void openPhoneAppFromHome() {
+        BySelector homePhoneCardSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.HOME_PHONE_CARD);
+        UiObject2 homePhoneCard = getSpectatioUiUtil().findUiObject(homePhoneCardSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(homePhoneCard, AutomotiveConfigConstants.HOME_PHONE_CARD);
+        getSpectatioUiUtil().clickAndWait(homePhoneCard);
+    }
+
+    @Override
+    public boolean isBluetoothHfpErrorDisplayed() {
+        BySelector bluetoothHfpErrorSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.DIALER_VIEW);
+        return getSpectatioUiUtil().hasUiElement(bluetoothHfpErrorSelector);
+    }
+
+    /** This method is used to get list of visible contacts */
+    @Override
+    public List<String> getListOfAllVisibleContacts() {
+        List<String> listOfContactsResults = new ArrayList<>();
+        BySelector contactNameSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.CONTACT_NAME_TITLE);
+        List<UiObject2> listOfContacts = getSpectatioUiUtil().findUiObjects(contactNameSelector);
+
+        // Going through each displayed contact and adding contact`s text value to the list
+        for (UiObject2 contact : listOfContacts) {
+            listOfContactsResults.add(contact.getText().trim());
         }
+        if (listOfContactsResults.size() == 0) {
+            throw new UnknownUiException("Unable to find any contacts on the screen");
+        }
+        return listOfContactsResults;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void clickPhoneButton() {
+        BySelector phoneSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.CLICK_PHONE_BUTTON);
+        UiObject2 phoneLink = getSpectatioUiUtil().findUiObject(phoneSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(phoneLink, AutomotiveConfigConstants.CLICK_PHONE_BUTTON);
+        getSpectatioUiUtil().clickAndWait(phoneLink);
+        getSpectatioUiUtil().wait5Seconds();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean verifyDialerRecentsTab() {
+        BySelector dialerRecentsSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.DIALER_RECENTS);
+        return getSpectatioUiUtil().hasUiElement(dialerRecentsSelector);
+    }
+    /** {@inheritDoc} */
+    @Override
+    public boolean verifyDialerContactsTab() {
+        BySelector dialerContactsSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.DIALER_CONTACTS);
+        return getSpectatioUiUtil().hasUiElement(dialerContactsSelector);
+    }
+    /** {@inheritDoc} */
+    @Override
+    public boolean verifyDialerFavoritesTab() {
+        BySelector dialerFavoritesSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.DIALER_FAVORITES);
+        return getSpectatioUiUtil().hasUiElement(dialerFavoritesSelector);
+    }
+    /** {@inheritDoc} */
+    @Override
+    public boolean verifyDialerDialpadTab() {
+        BySelector dialerDialpadSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.DIALER_DIALPAD);
+        return getSpectatioUiUtil().hasUiElement(dialerDialpadSelector);
     }
 }

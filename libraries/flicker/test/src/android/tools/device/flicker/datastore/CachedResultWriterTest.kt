@@ -17,19 +17,20 @@
 package android.tools.device.flicker.datastore
 
 import android.annotation.SuppressLint
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.TEST_SCENARIO
 import android.tools.assertExceptionMessage
 import android.tools.assertThrows
 import android.tools.newTestCachedResultWriter
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
-import org.junit.ClassRule
 import org.junit.Rule
 import org.junit.Test
 
 /** Tests for [CachedResultWriterTest] */
 @SuppressLint("VisibleForTests")
 class CachedResultWriterTest {
+    @Rule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+
     @Test
     fun writeToStore() {
         val writer = newTestCachedResultWriter()
@@ -54,9 +55,5 @@ class CachedResultWriterTest {
             .isTrue()
         assertExceptionMessage(failure, TEST_SCENARIO.toString())
         assertExceptionMessage(failure, "already in data store")
-    }
-
-    companion object {
-        @Rule @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
     }
 }

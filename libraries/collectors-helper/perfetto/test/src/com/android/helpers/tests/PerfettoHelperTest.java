@@ -53,6 +53,7 @@ public class PerfettoHelperTest {
     public void setUp() {
         mPerfettoHelper = new PerfettoHelper();
         mPerfettoHelper.setPerfettoConfigRootDir("/data/misc/perfetto-traces/");
+        mPerfettoHelper.setPerfettoStartBgWait(true);
         isPerfettoStartSuccess = false;
     }
 
@@ -111,6 +112,14 @@ public class PerfettoHelperTest {
      */
     @Test
     public void testPerfettoStartSuccess() throws Exception {
+        assertTrue(mPerfettoHelper.startCollecting("trace_config.textproto", true));
+        isPerfettoStartSuccess = true;
+    }
+
+    /** Test perfetto collection returns true if the background wait option is not used. */
+    @Test
+    public void testPerfettoStartSuccessNoBgWait() throws Exception {
+        mPerfettoHelper.setPerfettoStartBgWait(false);
         assertTrue(mPerfettoHelper.startCollecting("trace_config.textproto", true));
         isPerfettoStartSuccess = true;
     }

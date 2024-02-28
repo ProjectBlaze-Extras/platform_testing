@@ -17,7 +17,7 @@
 package android.tools.common.flicker.subject.inputmethod
 
 import android.tools.common.flicker.subject.FlickerSubject
-import android.tools.common.io.IReader
+import android.tools.common.io.Reader
 import android.tools.common.traces.inputmethod.ImeClientEntry
 import android.tools.common.traces.inputmethod.ImeClientTrace
 
@@ -36,7 +36,7 @@ import android.tools.common.traces.inputmethod.ImeClientTrace
 class ImeClientEntrySubject(
     val entry: ImeClientEntry,
     val trace: ImeClientTrace?,
-    override val reader: IReader? = null
+    override val reader: Reader? = null
 ) : FlickerSubject(), IImeClientSubject<ImeClientEntrySubject> {
     override val timestamp = entry.timestamp
 

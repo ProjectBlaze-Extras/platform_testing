@@ -16,7 +16,6 @@
 
 package android.tools.common.flicker.subject.wm
 
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.TestComponents
 import android.tools.assertFail
 import android.tools.assertThatErrorContainsDebugInfo
@@ -31,6 +30,7 @@ import android.tools.common.traces.wm.WindowContainer
 import android.tools.common.traces.wm.WindowManagerState
 import android.tools.getWmDumpReaderFromAsset
 import android.tools.getWmTraceReaderFromAsset
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
 import org.junit.Before
 import org.junit.ClassRule
@@ -338,8 +338,8 @@ class WindowManagerStateSubjectTest {
                     orientation = 0,
                     layerId = 0,
                     _isVisible = true,
-                    children = emptyArray(),
-                    configurationContainer = ConfigurationContainer(null, null, null),
+                    _children = emptyArray(),
+                    configurationContainer = ConfigurationContainer.EMPTY,
                     computedZ = 0
                 )
             )
@@ -450,6 +450,6 @@ class WindowManagerStateSubjectTest {
     }
 
     companion object {
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

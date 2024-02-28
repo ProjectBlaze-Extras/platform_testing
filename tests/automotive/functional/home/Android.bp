@@ -22,7 +22,9 @@ android_test {
     static_libs: [
         "androidx.test.rules",
         "automotive-home-helper",
+        "platform-test-junit-rules",
         "platform-test-options",
+        "automotive-facet-bar-helper",
     ],
     srcs: ["src/**/*.java"],
     test_suites: [

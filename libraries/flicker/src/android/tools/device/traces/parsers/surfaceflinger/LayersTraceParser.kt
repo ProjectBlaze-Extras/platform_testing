@@ -20,8 +20,8 @@ import android.surfaceflinger.Common
 import android.surfaceflinger.Display
 import android.surfaceflinger.Layers
 import android.surfaceflinger.Layerstrace
-import android.tools.common.CrossPlatform
 import android.tools.common.Timestamp
+import android.tools.common.Timestamps
 import android.tools.common.datatypes.ActiveBuffer
 import android.tools.common.datatypes.Color
 import android.tools.common.datatypes.Matrix33
@@ -65,7 +65,7 @@ class LayersTraceParser(
 
     override fun getTimestamp(entry: Layerstrace.LayersTraceProto): Timestamp {
         require(legacyTrace || realToElapsedTimeOffsetNanos != 0L)
-        return CrossPlatform.timestamp.from(
+        return Timestamps.from(
             systemUptimeNanos = entry.elapsedRealtimeNanos,
             unixNanos = entry.elapsedRealtimeNanos + realToElapsedTimeOffsetNanos
         )

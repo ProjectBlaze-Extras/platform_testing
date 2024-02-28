@@ -29,6 +29,7 @@ import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.Until;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import junit.framework.Assert;
@@ -314,6 +315,7 @@ public class UiBenchJankHelper extends AbstractStandardAppHelper implements IUiB
     @Override
     public void openEditTextTyping() {
         launchActivity("EditTextTypeActivity", "Text/EditText Typing");
+        mContents = mDevice.wait(Until.findObject(By.clazz(EditText.class)), FIND_OBJECT_TIMEOUT);
     }
 
     // Open Layout Cache High Hitrate

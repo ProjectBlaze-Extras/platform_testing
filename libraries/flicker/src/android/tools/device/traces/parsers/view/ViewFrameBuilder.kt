@@ -16,7 +16,7 @@
 
 package android.tools.device.traces.parsers.view
 
-import android.tools.common.CrossPlatform
+import android.tools.common.Timestamps
 import android.tools.common.datatypes.Point
 import android.tools.common.datatypes.PointF
 import android.tools.common.datatypes.Rect
@@ -63,7 +63,7 @@ class ViewFrameBuilder {
         require(systemUptimeNanos > 0) { "Timestamp not specified" }
 
         return ViewFrame(
-            timestamp = CrossPlatform.timestamp.from(systemUptimeNanos = systemUptimeNanos),
+            timestamp = Timestamps.from(systemUptimeNanos = systemUptimeNanos),
             root = parseViewNode(root)
         )
     }

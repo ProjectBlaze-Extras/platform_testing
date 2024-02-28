@@ -21,7 +21,7 @@ package android.tools.device.traces
 import android.app.UiAutomation
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
-import android.tools.common.CrossPlatform
+import android.tools.common.Logger
 import android.tools.common.MILLISECOND_AS_NANOSECONDS
 import android.tools.common.io.TraceType
 import android.tools.common.traces.DeviceStateDump
@@ -100,7 +100,7 @@ fun getCurrentState(
         throw IllegalArgumentException("Only dump types are supported. Invalid types: $traceTypes")
     }
 
-    CrossPlatform.log.d(LOG_TAG, "Requesting new device state dump")
+    Logger.d(LOG_TAG, "Requesting new device state dump")
     val wmTraceData =
         if (dumpTypes.contains(TraceType.WM_DUMP)) {
             getCurrentWindowManagerState()

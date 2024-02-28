@@ -16,13 +16,13 @@
 
 package android.tools.common.flicker.subject.wm
 
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.TestComponents
 import android.tools.assertThatErrorContainsDebugInfo
 import android.tools.assertThrows
 import android.tools.common.Cache
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.getWmTraceReaderFromAsset
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
 import org.junit.Before
 import org.junit.ClassRule
@@ -292,6 +292,6 @@ class WindowManagerTraceSubjectTest {
     }
 
     companion object {
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

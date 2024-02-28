@@ -17,7 +17,7 @@
 package android.tools.common.flicker.subject.inputmethod
 
 import android.tools.common.flicker.subject.FlickerTraceSubject
-import android.tools.common.io.IReader
+import android.tools.common.io.Reader
 import android.tools.common.traces.inputmethod.InputMethodManagerServiceEntry
 import android.tools.common.traces.inputmethod.InputMethodManagerServiceTrace
 
@@ -36,7 +36,7 @@ import android.tools.common.traces.inputmethod.InputMethodManagerServiceTrace
 class InputMethodManagerServiceTraceSubject
 private constructor(
     val trace: InputMethodManagerServiceTrace,
-    override val reader: IReader? = null
+    override val reader: Reader? = null
 ) :
     FlickerTraceSubject<InputMethodManagerServiceEntrySubject>(),
     IInputMethodManagerServiceSubject<InputMethodManagerServiceTraceSubject> {

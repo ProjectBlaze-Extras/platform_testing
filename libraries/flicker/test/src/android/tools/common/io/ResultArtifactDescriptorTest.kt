@@ -16,8 +16,8 @@
 
 package android.tools.common.io
 
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.common.Tag
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
 import org.junit.ClassRule
 import org.junit.FixMethodOrder
@@ -129,6 +129,6 @@ class ResultArtifactDescriptorTest {
     companion object {
         private const val TEST_TAG = "testTag"
 
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

@@ -30,25 +30,23 @@ import kotlin.js.JsName
 @JsExport
 class WindowManagerPolicy
 private constructor(
-    @JsName("focusedAppToken") val focusedAppToken: String = "",
-    @JsName("forceStatusBar") val forceStatusBar: Boolean = false,
-    @JsName("forceStatusBarFromKeyguard") val forceStatusBarFromKeyguard: Boolean = false,
-    @JsName("keyguardDrawComplete") val keyguardDrawComplete: Boolean = false,
-    @JsName("keyguardOccluded") val keyguardOccluded: Boolean = false,
-    @JsName("keyguardOccludedChanged") val keyguardOccludedChanged: Boolean = false,
-    @JsName("keyguardOccludedPending") val keyguardOccludedPending: Boolean = false,
-    @JsName("lastSystemUiFlags") val lastSystemUiFlags: Int = 0,
-    @JsName("orientation") val orientation: Int = 0,
-    @JsName("rotation") val rotation: Rotation = Rotation.ROTATION_0,
-    @JsName("rotationMode") val rotationMode: Int = 0,
-    @JsName("screenOnFully") val screenOnFully: Boolean = false,
-    @JsName("windowManagerDrawComplete") val windowManagerDrawComplete: Boolean = false
+    val focusedAppToken: String = "",
+    val forceStatusBar: Boolean = false,
+    val forceStatusBarFromKeyguard: Boolean = false,
+    val keyguardDrawComplete: Boolean = false,
+    val keyguardOccluded: Boolean = false,
+    val keyguardOccludedChanged: Boolean = false,
+    val keyguardOccludedPending: Boolean = false,
+    val lastSystemUiFlags: Int = 0,
+    val orientation: Int = 0,
+    val rotation: Rotation = Rotation.ROTATION_0,
+    val rotationMode: Int = 0,
+    val screenOnFully: Boolean = false,
+    val windowManagerDrawComplete: Boolean = false
 ) {
-    @JsName("isOrientationNoSensor")
     val isOrientationNoSensor: Boolean
         get() = orientation == SCREEN_ORIENTATION_NOSENSOR
 
-    @JsName("isFixedOrientation")
     val isFixedOrientation: Boolean
         get() =
             isFixedOrientationLandscape ||

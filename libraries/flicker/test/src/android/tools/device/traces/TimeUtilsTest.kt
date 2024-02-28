@@ -16,9 +16,9 @@
 
 package android.tools.device.traces
 
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.common.Timestamp
 import android.tools.device.flicker.Utils
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
 import org.junit.ClassRule
 import org.junit.FixMethodOrder
@@ -92,6 +92,6 @@ class TimeUtilsTest {
         private const val DAY = 24 * HOUR
         private const val NOV_10_2022 = 1668038400000 * MILLISECOND
 
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

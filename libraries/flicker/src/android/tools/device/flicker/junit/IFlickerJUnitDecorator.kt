@@ -21,7 +21,7 @@ import org.junit.runners.model.FrameworkMethod
 import org.junit.runners.model.Statement
 
 interface IFlickerJUnitDecorator {
-    fun getChildDescription(method: FrameworkMethod?): Description?
+    fun getChildDescription(method: FrameworkMethod): Description
 
     /** Returns the methods that run tests. */
     fun getTestMethods(test: Any): List<FrameworkMethod>

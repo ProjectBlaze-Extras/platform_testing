@@ -95,7 +95,8 @@ public class LockScreenHelperImpl extends AbstractStandardAppHelper
         BySelector enterButtonSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.LOCK_SCREEN_ENTER_KEY);
         UiObject2 enter_button = getSpectatioUiUtil().findUiObject(enterButtonSelector);
-        validateUiObject(enter_button, AutomotiveConfigConstants.LOCK_SCREEN_ENTER_KEY);
+        getSpectatioUiUtil()
+                .validateUiObject(enter_button, AutomotiveConfigConstants.LOCK_SCREEN_ENTER_KEY);
         getSpectatioUiUtil().clickAndWait(enter_button);
         getSpectatioUiUtil().waitForIdle();
         BySelector pinPadSelector =
@@ -117,13 +118,6 @@ public class LockScreenHelperImpl extends AbstractStandardAppHelper
                             resourceId);
             UiObject2 number = getSpectatioUiUtil().findUiObject(number_selector);
             number.click();
-        }
-    }
-
-    private void validateUiObject(UiObject2 uiObject, String action) {
-        if (uiObject == null) {
-            throw new UnknownUiException(
-                    String.format("Unable to find UI Element for %s.", action));
         }
     }
 }

@@ -28,7 +28,7 @@ open class NamedAssertion<T>(
     val predicate: (T) -> Unit,
     override val name: String,
     override val isOptional: Boolean = false
-) : IAssertion<T> {
+) : Assertion<T> {
     override operator fun invoke(target: T) = predicate(target)
     override fun toString(): String = "Assertion($name)${if (isOptional) "[optional]" else ""}"
 

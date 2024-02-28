@@ -19,12 +19,14 @@ package android.tools.device.flicker.rules
 import android.platform.test.rule.TestWatcher
 import android.tools.common.CrossPlatform
 import android.tools.common.FLICKER_TAG
+import android.tools.common.Logger
 import android.tools.common.TimestampFactory
+import android.tools.common.flicker.annotation.FlickerTest
+import android.tools.common.flicker.config.ScenarioId
+import android.tools.device.AndroidLogger
 import android.tools.device.flicker.FlickerServiceResultsCollector
 import android.tools.device.flicker.FlickerServiceTracesCollector
 import android.tools.device.flicker.IFlickerServiceResultsCollector
-import android.tools.device.flicker.annotation.FlickerTest
-import android.tools.device.traces.ANDROID_LOGGER
 import android.tools.device.traces.formatRealTimestamp
 import android.tools.device.traces.getDefaultFlickerOutputDir
 import androidx.test.platform.app.InstrumentationRegistry
@@ -64,7 +66,7 @@ constructor(
             ?: failTestOnFaasFailure
 
     init {
-        CrossPlatform.setLogger(ANDROID_LOGGER)
+        CrossPlatform.setLogger(AndroidLogger())
             .setTimestampFactory(TimestampFactory { formatRealTimestamp(it) })
     }
 
@@ -104,21 +106,21 @@ constructor(
     }
 
     private fun handleStarting(description: Description) {
-        CrossPlatform.log.i(LOG_TAG, "Test starting $description")
+        Logger.i(LOG_TAG, "Test starting $description")
         metricsCollector.testStarted(description)
     }
 
     private fun handleSucceeded(description: Description) {
-        CrossPlatform.log.i(LOG_TAG, "Test succeeded $description")
+        Logger.i(LOG_TAG, "Test succeeded $description")
     }
 
     private fun handleFailed(e: Throwable?, description: Description) {
-        CrossPlatform.log.e(LOG_TAG, "$description test failed  with $e")
+        Logger.e(LOG_TAG, "$description test failed  with $e")
         metricsCollector.testFailure(Failure(description, e))
     }
 
     private fun handleSkipped(e: AssumptionViolatedException, description: Description) {
-        CrossPlatform.log.i(LOG_TAG, "Test skipped $description with $e")
+        Logger.i(LOG_TAG, "Test skipped $description with $e")
         metricsCollector.testSkipped(description)
     }
 
@@ -135,16 +137,20 @@ constructor(
     }
 
     private fun handleFinished(description: Description) {
-        CrossPlatform.log.i(LOG_TAG, "Test finished $description")
+        Logger.i(LOG_TAG, "Test finished $description")
         metricsCollector.testFinished(description)
         if (metricsCollector.executionErrors.isNotEmpty()) {
             for (executionError in metricsCollector.executionErrors) {
-                CrossPlatform.log.e(LOG_TAG, "FaaS reported execution errors", executionError)
+                Logger.e(LOG_TAG, "FaaS reported execution errors", executionError)
             }
             throw metricsCollector.executionErrors[0]
         }
         if (failTestOnFaasFailure && testContainsFlicker(description)) {
-            throw metricsCollector.resultsForTest(description).first { it.failed }.assertionError
+            throw metricsCollector
+                .resultsForTest(description)
+                .first { it.failed }
+                .assertionErrors
+                .firstOrNull()
                 ?: error("Unexpectedly missing assertion error")
         }
         val flickerTestAnnotation: FlickerTest? =
@@ -152,7 +158,7 @@ constructor(
         if (failTestOnFaasFailure && flickerTestAnnotation != null) {
             val detectedScenarios = metricsCollector.detectedScenariosForTest(description)
             Truth.assertThat(detectedScenarios)
-                .containsAtLeastElementsIn(flickerTestAnnotation.expected)
+                .containsAtLeastElementsIn(flickerTestAnnotation.expected.map { ScenarioId(it) })
         }
     }
 

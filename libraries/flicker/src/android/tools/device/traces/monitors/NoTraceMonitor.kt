@@ -16,7 +16,7 @@
 
 package android.tools.device.traces.monitors
 
-import android.tools.common.CrossPlatform
+import android.tools.common.Timestamps
 import android.tools.device.traces.io.ResultWriter
 
 /**
@@ -29,8 +29,8 @@ class NoTraceMonitor(private val resultSetter: (ResultWriter) -> Unit) : ITransi
     }
 
     override fun stop(writer: ResultWriter) {
-        writer.setTransitionStartTime(CrossPlatform.timestamp.min())
-        writer.setTransitionEndTime(CrossPlatform.timestamp.max())
+        writer.setTransitionStartTime(Timestamps.min())
+        writer.setTransitionEndTime(Timestamps.max())
         this.resultSetter.invoke(writer)
     }
 }

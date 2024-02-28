@@ -45,9 +45,9 @@ class FlickerBuilder(
     private val outputDir: File = getDefaultFlickerOutputDir(),
     private val wmHelper: WindowManagerStateHelper =
         WindowManagerStateHelper(instrumentation, clearCacheAfterParsing = false),
-    private val setupCommands: MutableList<IFlickerTestData.() -> Any> = mutableListOf(),
-    private val transitionCommands: MutableList<IFlickerTestData.() -> Any> = mutableListOf(),
-    private val teardownCommands: MutableList<IFlickerTestData.() -> Any> = mutableListOf(),
+    private val setupCommands: MutableList<FlickerTestData.() -> Any> = mutableListOf(),
+    private val transitionCommands: MutableList<FlickerTestData.() -> Any> = mutableListOf(),
+    private val teardownCommands: MutableList<FlickerTestData.() -> Any> = mutableListOf(),
     val device: UiDevice = UiDevice.getInstance(instrumentation),
     private val traceMonitors: MutableList<ITransitionMonitor> =
         mutableListOf<ITransitionMonitor>().also {
@@ -138,17 +138,17 @@ class FlickerBuilder(
     }
 
     /** Defines the setup commands executed before the [transitions] to test */
-    fun setup(commands: IFlickerTestData.() -> Unit): FlickerBuilder = apply {
+    fun setup(commands: FlickerTestData.() -> Unit): FlickerBuilder = apply {
         setupCommands.add(commands)
     }
 
     /** Defines the teardown commands executed after the [transitions] to test */
-    fun teardown(commands: IFlickerTestData.() -> Unit): FlickerBuilder = apply {
+    fun teardown(commands: FlickerTestData.() -> Unit): FlickerBuilder = apply {
         teardownCommands.add(commands)
     }
 
     /** Defines the commands that trigger the behavior to test */
-    fun transitions(command: IFlickerTestData.() -> Unit): FlickerBuilder = apply {
+    fun transitions(command: FlickerTestData.() -> Unit): FlickerBuilder = apply {
         require(!usingExistingTraces) {
             "Can't update transition after calling usingExistingTraces"
         }
@@ -190,8 +190,8 @@ class FlickerBuilder(
     }
 
     /** Creates a new Flicker runner based on the current builder configuration */
-    fun build(): IFlickerTestData {
-        return FlickerTestData(
+    fun build(): FlickerTestData {
+        return FlickerTestDataImpl(
             instrumentation,
             device,
             outputDir,

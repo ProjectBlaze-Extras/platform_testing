@@ -19,7 +19,6 @@ package android.platform.helpers;
 import android.app.Instrumentation;
 import android.platform.helpers.ScrollUtility.ScrollActions;
 import android.platform.helpers.ScrollUtility.ScrollDirection;
-import android.platform.helpers.exceptions.UnknownUiException;
 import android.util.Log;
 
 import androidx.test.uiautomator.By;
@@ -96,7 +95,7 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
         if (isUserPresent(user)) {
             BySelector userSelector = By.text(user);
             UiObject2 userObject = getSpectatioUiUtil().findUiObject(userSelector);
-            validateUiObject(userObject, String.format("User %s", user));
+            getSpectatioUiUtil().validateUiObject(userObject, String.format("User %s", user));
             getSpectatioUiUtil().clickAndWait(userObject);
             clickbutton(AutomotiveConfigConstants.USER_SETTINGS_DELETE);
             clickbutton(AutomotiveConfigConstants.USER_SETTINGS_DELETE);
@@ -156,11 +155,11 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
         goToQuickSettings();
         BySelector userFromSelector = By.text(userFrom);
         UiObject2 userFromObject = getSpectatioUiUtil().findUiObject(userFromSelector);
-        validateUiObject(userFromObject, String.format("User %s", userFrom));
+        getSpectatioUiUtil().validateUiObject(userFromObject, String.format("User %s", userFrom));
         getSpectatioUiUtil().clickAndWait(userFromObject);
         BySelector userToSelector = By.text(userTo);
         UiObject2 userToObject = getSpectatioUiUtil().findUiObject(userToSelector);
-        validateUiObject(userToObject, String.format("User %s", userTo));
+        getSpectatioUiUtil().validateUiObject(userToObject, String.format("User %s", userTo));
         getSpectatioUiUtil().clickAndWait(userToObject);
         getSpectatioUiUtil().wait5Seconds();
     }
@@ -171,8 +170,7 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
         goToQuickSettings();
         BySelector userFromSelector = By.text(userFrom);
         UiObject2 userFromObject = getSpectatioUiUtil().findUiObject(userFromSelector);
-        validateUiObject(userFromObject, String.format("user %s", userFrom));
-        getSpectatioUiUtil().clickAndWait(userFromObject);
+        getSpectatioUiUtil().validateUiObject(userFromObject, String.format("user %s", userFrom));
         getSpectatioUiUtil().wait1Second();
         addUser();
     }
@@ -183,7 +181,7 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
         if (isUserPresent(user)) {
             BySelector userSelector = By.text(user);
             UiObject2 userObject = getSpectatioUiUtil().findUiObject(userSelector);
-            validateUiObject(userObject, String.format("user %s", user));
+            getSpectatioUiUtil().validateUiObject(userObject, String.format("user %s", user));
             getSpectatioUiUtil().clickAndWait(userObject);
             clickbutton(AutomotiveConfigConstants.USER_SETTINGS_MAKE_ADMIN);
             clickbutton(AutomotiveConfigConstants.USER_SETTINGS_MAKE_ADMIN_CONFIRM);
@@ -203,9 +201,35 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
                         buttonSelector,
                         String.format("Scroll to find %s", button_text));
         Log.v(TAG, String.format("button =  %s ; UI_Obj = %s", button_text, buttonObject));
-        validateUiObject(buttonObject, String.format("button %s", button_text));
+        getSpectatioUiUtil()
+                .validateUiObject(buttonObject, String.format("button %s", button_text));
         getSpectatioUiUtil().clickAndWait(buttonObject);
         getSpectatioUiUtil().wait1Second();
+    }
+
+    @Override
+    public boolean isNewUserAnAdmin(String user) {
+        boolean isUserAdmin = true;
+        clickbutton(AutomotiveConfigConstants.USER_SETTINGS_MANAGE_OTHER_PROFILES);
+        getSpectatioUiUtil().wait5Seconds();
+        UiObject2 UserObject =
+                mScrollUtility.scrollAndFindUiObject(
+                        mScrollAction,
+                        mScrollDirection,
+                        mForwardButtonSelector,
+                        mBackwardButtonSelector,
+                        mScrollableElementSelector,
+                        By.text(user),
+                        String.format("Scroll to find %s", user));
+        getSpectatioUiUtil().clickAndWait(UserObject);
+        getSpectatioUiUtil().wait1Second();
+        if (getSpectatioUiUtil()
+                .hasUiElement(
+                        getUiElementFromConfig(
+                                AutomotiveConfigConstants.USER_SETTINGS_MAKE_ADMIN))) {
+            return !isUserAdmin;
+        }
+        return isUserAdmin;
     }
 
     // go to quick Settings for switching User
@@ -213,10 +237,4 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
         clickbutton(AutomotiveConfigConstants.USER_SETTINGS_MAKE_TIME_PATTERN);
     }
 
-    private void validateUiObject(UiObject2 uiObject, String action) {
-        if (uiObject == null) {
-            throw new UnknownUiException(
-                    String.format("Unable to find UI Element for %s.", action));
-        }
-    }
 }

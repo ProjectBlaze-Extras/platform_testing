@@ -32,11 +32,11 @@
 
 package android.tools.device.traces.io
 
-import android.tools.common.CrossPlatform
-import android.tools.common.IScenario
+import android.tools.common.Logger
+import android.tools.common.Scenario
+import android.tools.common.io.Artifact
 import android.tools.common.io.BUFFER_SIZE
 import android.tools.common.io.FLICKER_IO_TAG
-import android.tools.common.io.IArtifact
 import android.tools.common.io.ResultArtifactDescriptor
 import android.tools.common.io.RunStatus
 import android.tools.device.traces.deleteIfExists
@@ -51,11 +51,8 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 class Artifact
-internal constructor(
-    private val scenario: IScenario,
-    artifactFile: File,
-    private val counter: Int
-) : IArtifact {
+internal constructor(private val scenario: Scenario, artifactFile: File, private val counter: Int) :
+    Artifact {
     var file: File = artifactFile
         private set
 
@@ -123,7 +120,7 @@ internal constructor(
 
     @Throws(IOException::class)
     override fun readBytes(descriptor: ResultArtifactDescriptor): ByteArray? {
-        CrossPlatform.log.d(FLICKER_IO_TAG, "Reading descriptor=$descriptor from $this")
+        Logger.d(FLICKER_IO_TAG, "Reading descriptor=$descriptor from $this")
 
         var foundFile = false
         val outByteArray = ByteArrayOutputStream()

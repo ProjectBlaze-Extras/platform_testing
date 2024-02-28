@@ -26,47 +26,30 @@ import kotlin.js.JsName
  *
  * ```
  *          |dsdx dsdy  tx|
- * ```
- *
  * matrix = |dtdx dtdy ty|
- *
- * ```
  *          |0    0     1 |
  * ```
  */
 @JsExport
 class Matrix33
 private constructor(
-    dsdx: Float = 0F,
-    dtdx: Float = 0F,
+    @JsName("dsdx") val dsdx: Float,
+    @JsName("dtdx") val dtdx: Float,
     @JsName("tx") val tx: Float = 0F,
-    dsdy: Float = 0F,
-    dtdy: Float = 0F,
+    @JsName("dsdy") val dsdy: Float,
+    @JsName("dtdy") val dtdy: Float,
     @JsName("ty") val ty: Float = 0F
-) : Matrix22(dsdx, dtdx, dsdy, dtdy) {
-    override fun prettyPrint(): String {
-        val parentPrint = super.prettyPrint()
-        val tx = FloatFormatter.format(dsdx)
-        val ty = FloatFormatter.format(dtdx)
-        return "$parentPrint   tx:$tx   ty:$ty"
-    }
+) : DataType() {
+    override val isEmpty =
+        dsdx == 0f && dtdx == 0f && tx == 0f && dsdy == 0f && dtdy == 0f && ty == 0f
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is Matrix33) return false
-        if (!super.equals(other)) return false
-
-        if (tx != other.tx) return false
-        if (ty != other.ty) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = super.hashCode()
-        result = 31 * result + tx.hashCode()
-        result = 31 * result + ty.hashCode()
-        return result
+    override fun doPrintValue() = buildString {
+        append("dsdx:${FloatFormatter.format(dsdx)}   ")
+        append("dtdx:${FloatFormatter.format(dtdx)}   ")
+        append("dsdy:${FloatFormatter.format(dsdy)}   ")
+        append("dtdy:${FloatFormatter.format(dtdy)}   ")
+        append("tx:${FloatFormatter.format(tx)}   ")
+        append("ty:${FloatFormatter.format(ty)}")
     }
 
     companion object {

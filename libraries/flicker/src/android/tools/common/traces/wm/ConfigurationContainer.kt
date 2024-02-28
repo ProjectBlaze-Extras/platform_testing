@@ -16,31 +16,25 @@
 
 package android.tools.common.traces.wm
 
+import android.tools.common.withCache
 import kotlin.js.JsExport
 import kotlin.js.JsName
 
-/**
- * Represents the configuration of an element in the window manager hierarchy
- *
- * This is a generic object that is reused by both Flicker and Winscope and cannot access internal
- * Java/Android functionality
- */
 @JsExport
-open class ConfigurationContainer(
-    @JsName("overrideConfiguration") val overrideConfiguration: Configuration?,
-    @JsName("fullConfiguration") val fullConfiguration: Configuration?,
-    @JsName("mergedOverrideConfiguration") val mergedOverrideConfiguration: Configuration?
-) {
-    @JsName("windowingMode")
-    val windowingMode: Int
+/** {@inheritDoc} */
+class ConfigurationContainer
+private constructor(
+    override val overrideConfiguration: Configuration?,
+    override val fullConfiguration: Configuration?,
+    override val mergedOverrideConfiguration: Configuration?
+) : IConfigurationContainer {
+    override val windowingMode: Int
         get() = fullConfiguration?.windowConfiguration?.windowingMode ?: 0
 
-    @JsName("activityType")
-    open val activityType: Int
+    override val activityType: Int
         get() = fullConfiguration?.windowConfiguration?.activityType ?: 0
 
-    @JsName("isEmpty")
-    open val isEmpty: Boolean
+    override val isEmpty: Boolean
         get() =
             (overrideConfiguration?.isEmpty
                 ?: true) &&
@@ -63,5 +57,24 @@ open class ConfigurationContainer(
         result = 31 * result + (fullConfiguration?.hashCode() ?: 0)
         result = 31 * result + (mergedOverrideConfiguration?.hashCode() ?: 0)
         return result
+    }
+
+    companion object {
+        @JsName("EMPTY")
+        val EMPTY: ConfigurationContainer
+            get() = withCache { ConfigurationContainer(null, null, null) }
+
+        @JsName("from")
+        fun from(
+            overrideConfiguration: Configuration?,
+            fullConfiguration: Configuration?,
+            mergedOverrideConfiguration: Configuration?
+        ): ConfigurationContainer = withCache {
+            ConfigurationContainer(
+                overrideConfiguration,
+                fullConfiguration,
+                mergedOverrideConfiguration
+            )
+        }
     }
 }

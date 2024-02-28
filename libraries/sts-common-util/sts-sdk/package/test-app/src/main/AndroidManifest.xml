@@ -32,13 +32,5 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver android:name=".PocReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.android.nfc.handover.action.ALLOW_CONNECT" />
-                <action android:name="com.android.nfc.handover.action.DENY_CONNECT" />
-                <action android:name="com.android.nfc.handover.action.TIMEOUT_CONNECT" />
-            </intent-filter>
-        </receiver>
     </application>
 </manifest>

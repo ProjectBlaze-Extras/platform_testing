@@ -16,15 +16,15 @@
 
 package android.tools.common.flicker.assertors.assertions
 
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.ComponentTemplate
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
 
 /** Checks if the [component] layer is visible at the end of the transition */
 class LayerIsVisibleAtEnd(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(scenarioInstance: IScenarioInstance, layerSubject: LayersTraceSubject) {
-        layerSubject.last().isVisible(component.build(scenarioInstance))
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+        flicker.assertLayersEnd { isVisible(component.build(scenarioInstance)) }
     }
 }

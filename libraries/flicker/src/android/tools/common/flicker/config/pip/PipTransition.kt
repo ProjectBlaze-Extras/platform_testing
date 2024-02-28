@@ -17,24 +17,22 @@
 package android.tools.common.flicker.config.pip
 
 import android.tools.common.flicker.config.AssertionTemplates
-import android.tools.common.flicker.config.FaasScenarioType
-import android.tools.common.flicker.config.IScenarioConfig
+import android.tools.common.flicker.config.FlickerConfigEntry
+import android.tools.common.flicker.config.ScenarioId
 import android.tools.common.flicker.extractors.TaggedCujTransitionMatcher
-import android.tools.common.flicker.extractors.TaggedScenarioExtractor
+import android.tools.common.flicker.extractors.TaggedScenarioExtractorBuilder
 import android.tools.common.traces.events.CujType
 
-class PipTransition : IScenarioConfig {
-    override val enabled = false
-
-    override val type = FaasScenarioType.PIP_TRANSITION
-
-    override val assertionTemplates =
-        AssertionTemplates.COMMON_ASSERTIONS // TODO: Add specific assertions
-
-    override val extractor =
-        TaggedScenarioExtractor(
-            targetTag = CujType.CUJ_PIP_TRANSITION,
-            type,
-            transitionMatcher = TaggedCujTransitionMatcher(associatedTransitionRequired = false),
-        )
-}
+val PipTransition =
+    FlickerConfigEntry(
+        enabled = false,
+        scenarioId = ScenarioId("PIP_TRANSITION"),
+        assertions = AssertionTemplates.COMMON_ASSERTIONS,
+        extractor =
+            TaggedScenarioExtractorBuilder()
+                .setTargetTag(CujType.CUJ_PIP_TRANSITION)
+                .setTransitionMatcher(
+                    TaggedCujTransitionMatcher(associatedTransitionRequired = false)
+                )
+                .build()
+    )

@@ -18,7 +18,6 @@ package android.tools.common.traces.wm
 
 import android.tools.common.datatypes.Rect
 import kotlin.js.JsExport
-import kotlin.js.JsName
 
 /**
  * Represents WindowContainer classes such as DisplayContent.WindowContainers and
@@ -31,73 +30,30 @@ import kotlin.js.JsName
 @JsExport
 open class WindowContainer
 constructor(
-    @JsName("title") val title: String,
-    @JsName("token") val token: String,
-    @JsName("orientation") val orientation: Int,
-    @JsName("layerId") val layerId: Int,
+    override val title: String,
+    override val token: String,
+    override val orientation: Int,
+    override val layerId: Int,
     _isVisible: Boolean,
-    configurationContainer: ConfigurationContainer,
-    @JsName("children") val children: Array<WindowContainer>,
-    @JsName("computedZ") val computedZ: Int
-) :
-    ConfigurationContainer(
-        configurationContainer.overrideConfiguration,
-        configurationContainer.fullConfiguration,
-        configurationContainer.mergedOverrideConfiguration
-    ) {
-    protected constructor(
-        windowContainer: WindowContainer,
-        titleOverride: String? = null,
-        isVisibleOverride: Boolean? = null
-    ) : this(
-        titleOverride ?: windowContainer.title,
-        windowContainer.token,
-        windowContainer.orientation,
-        windowContainer.layerId,
-        isVisibleOverride ?: windowContainer.isVisible,
-        windowContainer,
-        windowContainer.children,
-        windowContainer.computedZ
-    )
+    private val configurationContainer: IConfigurationContainer,
+    _children: Array<IWindowContainer>,
+    override val computedZ: Int
+) : IConfigurationContainer by configurationContainer, IWindowContainer {
+    override val children: Array<IWindowContainer> = _children
 
-    var parent: WindowContainer? = null
-        private set
+    override var parent: IWindowContainer? = null
 
     init {
-        children.forEach { it.parent = this }
+        _children.forEach { it.parent = this }
     }
 
-    @JsName("isVisible") open val isVisible: Boolean = _isVisible
-    @JsName("name") open val name: String = title
-    @JsName("stableId")
-    open val stableId: String
+    override val isVisible: Boolean = _isVisible
+    override val name: String
+        get() = title
+    override val stableId: String
         get() = "${this::class.simpleName} $token $title"
-    open val isFullscreen: Boolean = false
-    @JsName("bounds") open val bounds: Rect = Rect.EMPTY
-
-    internal fun traverseTopDown(): List<WindowContainer> {
-        val traverseList = mutableListOf(this)
-
-        this.children.reversed().forEach { childLayer ->
-            traverseList.addAll(childLayer.traverseTopDown())
-        }
-
-        return traverseList
-    }
-
-    /**
-     * For a given WindowContainer, traverse down the hierarchy and collect all children of type [T]
-     * if the child passes the test [predicate].
-     *
-     * @param predicate Filter function
-     */
-    internal inline fun <reified T : WindowContainer> collectDescendants(
-        predicate: (T) -> Boolean = { true }
-    ): Array<T> {
-        val traverseList = traverseTopDown()
-
-        return traverseList.filterIsInstance<T>().filter { predicate(it) }.toTypedArray()
-    }
+    override val isFullscreen: Boolean = false
+    override val bounds: Rect = Rect.EMPTY
 
     override fun toString(): String {
         if (
@@ -156,5 +112,5 @@ constructor(
     }
 
     override val isEmpty: Boolean
-        get() = super.isEmpty && title.isEmpty() && token.isEmpty()
+        get() = configurationContainer.isEmpty && title.isEmpty() && token.isEmpty()
 }

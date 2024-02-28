@@ -17,7 +17,7 @@
 package android.platform.spectatio.exceptions;
 
 /** Indicates that an expected ui did not show up on the device under test. */
-public final class MissingUiElementException extends Exception {
+public final class MissingUiElementException extends RuntimeException {
     public MissingUiElementException(String msg) {
         super(msg);
     }

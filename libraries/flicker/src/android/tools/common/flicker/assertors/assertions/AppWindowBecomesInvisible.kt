@@ -16,9 +16,9 @@
 
 package android.tools.common.flicker.assertors.assertions
 
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.ComponentTemplate
-import android.tools.common.flicker.subject.wm.WindowManagerTraceSubject
 
 /**
  * Checks that the app layer doesn't exist or is invisible at the start of the transition, but is
@@ -27,14 +27,11 @@ import android.tools.common.flicker.subject.wm.WindowManagerTraceSubject
 class AppWindowBecomesInvisible(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(
-        scenarioInstance: IScenarioInstance,
-        wmSubject: WindowManagerTraceSubject
-    ) {
-        wmSubject
-            .isAppWindowVisible(component.build(scenarioInstance))
-            .then()
-            .isAppWindowInvisible(component.build(scenarioInstance))
-            .forAllEntries()
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+        flicker.assertWm {
+            isAppWindowVisible(component.build(scenarioInstance))
+                .then()
+                .isAppWindowInvisible(component.build(scenarioInstance))
+        }
     }
 }

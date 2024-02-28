@@ -16,8 +16,8 @@
 
 package android.tools.device.traces.parsers.wm
 
-import android.tools.common.CrossPlatform
 import android.tools.common.Timestamp
+import android.tools.common.Timestamps
 import android.tools.common.traces.wm.TransitionsTrace
 
 class TransitionTraceParser {
@@ -27,8 +27,8 @@ class TransitionTraceParser {
     fun parse(
         wmSideTraceData: ByteArray,
         shellSideTraceData: ByteArray,
-        from: Timestamp = CrossPlatform.timestamp.min(),
-        to: Timestamp = CrossPlatform.timestamp.max(),
+        from: Timestamp = Timestamps.min(),
+        to: Timestamp = Timestamps.max(),
     ): TransitionsTrace {
         val wmTransitionTrace = wmTransitionTraceParser.parse(wmSideTraceData, from, to)
         val shellTransitionTrace = shellTransitionTraceParser.parse(shellSideTraceData, from, to)

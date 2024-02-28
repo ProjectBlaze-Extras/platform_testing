@@ -19,7 +19,6 @@ package android.platform.helpers;
 import android.app.Instrumentation;
 import android.platform.helpers.ScrollUtility.ScrollActions;
 import android.platform.helpers.ScrollUtility.ScrollDirection;
-import android.platform.helpers.exceptions.UnknownUiException;
 
 import androidx.test.uiautomator.BySelector;
 import androidx.test.uiautomator.UiObject2;
@@ -95,7 +94,9 @@ public class ContactDetailsHelperImpl extends AbstractStandardAppHelper
         BySelector favoriteButtonSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.ADD_CONTACT_TO_FAVORITE);
         UiObject2 favoriteButton = getSpectatioUiUtil().findUiObject(favoriteButtonSelector);
-        validateUiObject(favoriteButton, AutomotiveConfigConstants.ADD_CONTACT_TO_FAVORITE);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        favoriteButton, AutomotiveConfigConstants.ADD_CONTACT_TO_FAVORITE);
         getSpectatioUiUtil().clickAndWait(favoriteButton);
     }
 
@@ -109,7 +110,7 @@ public class ContactDetailsHelperImpl extends AbstractStandardAppHelper
                         mScrollableElementSelector,
                         getUiElementFromConfig(type),
                         String.format("scroll to find %s", type));
-            validateUiObject(contactByType, String.format("Given type %s", type));
+        getSpectatioUiUtil().validateUiObject(contactByType, String.format("Given type %s", type));
             return contactByType;
     }
 
@@ -129,7 +130,8 @@ public class ContactDetailsHelperImpl extends AbstractStandardAppHelper
             default:
                 number = getSpectatioUiUtil().findUiObject("undefined");
         }
-        validateUiObject(number, String.format("Contact Type %s", contactType));
+        getSpectatioUiUtil()
+                .validateUiObject(number, String.format("Contact Type %s", contactType));
         getSpectatioUiUtil().clickAndWait(number);
     }
 
@@ -147,13 +149,6 @@ public class ContactDetailsHelperImpl extends AbstractStandardAppHelper
             getSpectatioUiUtil().pressBack();
             getSpectatioUiUtil().wait5Seconds();
             count--;
-        }
-    }
-
-    private void validateUiObject(UiObject2 uiObject, String action) {
-        if (uiObject == null) {
-            throw new UnknownUiException(
-                    String.format("Unable to find UI Element for %s.", action));
         }
     }
 }

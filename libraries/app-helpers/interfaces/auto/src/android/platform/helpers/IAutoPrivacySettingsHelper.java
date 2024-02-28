@@ -18,6 +18,13 @@ package android.platform.helpers;
 
 /** Interface class for privacy setting helper */
 public interface IAutoPrivacySettingsHelper extends IAppHelper {
+    /** enum for permission allow or don't allow state */
+    enum Permission {
+        ALLOW,
+        ALLOW_ALL_THE_TIME,
+        ALLOW_WHILE_USING_APP,
+        DONT_ALLOW
+    }
 
     /**
      * Setup expectation: MicroPhone settings is open.
@@ -153,4 +160,68 @@ public interface IAutoPrivacySettingsHelper extends IAppHelper {
      * <p>Tap on unmuted microphone status bar
      */
     void clickUnMutedMicroPhoneStatusBar();
+
+    /**
+     * Setup expectation: Microphone status bar is opened
+     *
+     * <p>This method clicks on microphone on status bar
+     *
+     * @param target is config constant of the Status message
+     */
+    boolean verifyMicrophoneStatusMessage(String target);
+
+    /**
+     * Setup expectation: Privacy Dashboard/Permission is open for given app
+     *
+     * <p>This method opens Privacy Dashboard/permissions page for given app
+     *
+     * @param target app name to open permission page in Privacy dashboard/permission
+     */
+    void privacyDashboardPermissionPage(String target);
+
+    /**
+     * Setup expectation: Get the Permission decision
+     *
+     * <p>This method will get the text from App Permission
+     *
+     * @param appName of the app that decision message need to be verified
+     */
+    String getRecentPermissionDecisionMessage(String appName);
+
+    /**
+     * Setup expectation: Get the Permission decision
+     *
+     * <p>This method will click on given permission
+     *
+     * @param permission Permission status allow or don't allow
+     */
+    void changePermissions(Permission permission);
+
+    /**
+     * Setup expectation: Message should be displayed
+     *
+     * <p>This method will click while changing permission message is displayed
+     */
+    boolean isMessageDisplayed();
+
+    /**
+     * Setup expectation: Cancel the Message displayed
+     *
+     * <p>This method will click on cancel button
+     */
+    void cancelButton();
+
+    /**
+     * Setup expectation: Permission Allow
+     *
+     * <p>To verify if Permission default status is Allow
+     */
+    boolean isAllowDefaultPermission();
+
+    /**
+     * Setup expectation: verify microphone manage permissions page
+     *
+     * <p>To verify if microphone manage permissions page is displayed
+     */
+    boolean verifyMicrophoneManagePermissionsPage();
 }

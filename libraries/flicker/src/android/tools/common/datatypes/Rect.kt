@@ -31,29 +31,18 @@ import kotlin.js.JsName
  * This class is used by flicker and Winscope
  */
 @JsExport
-open class Rect
-protected constructor(
+open class Rect(
     @JsName("left") val left: Int = 0,
     @JsName("top") val top: Int = 0,
     @JsName("right") val right: Int = 0,
     @JsName("bottom") val bottom: Int = 0
-) {
-    @JsName("height")
-    val height: Int
-        get() = bottom - top
-    @JsName("width")
-    val width: Int
-        get() = right - left
+) : DataType() {
+    @JsName("height") val height: Int = bottom - top
+    @JsName("width") val width: Int = right - left
     @JsName("centerX") fun centerX(): Int = (left + right) / 2
     @JsName("centerY") fun centerY(): Int = (top + bottom) / 2
     /** Returns true if the rectangle is empty (left >= right or top >= bottom) */
-    @JsName("isEmpty")
-    open val isEmpty: Boolean
-        get() = width <= 0 || height <= 0
-
-    @JsName("isNotEmpty")
-    val isNotEmpty: Boolean
-        get() = !isEmpty
+    override val isEmpty: Boolean = width <= 0 || height <= 0
 
     /** Returns a [RectF] version fo this rectangle. */
     @JsName("toRectF")
@@ -61,8 +50,7 @@ protected constructor(
         return RectF.from(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat())
     }
 
-    @JsName("prettyPrint")
-    fun prettyPrint(): String = if (isEmpty) "[empty]" else "($left, $top) - ($right, $bottom)"
+    override fun doPrintValue() = "($left, $top) - ($right, $bottom)"
 
     /**
      * Returns true iff the specified rectangle r is inside or equal to this rectangle. An empty
@@ -126,31 +114,9 @@ protected constructor(
         return thisRect.intersection(otherRect).toRect()
     }
 
-    override fun hashCode(): Int {
-        var result = left
-        result = 31 * result + top
-        result = 31 * result + right
-        result = 31 * result + bottom
-        return result
-    }
-
-    override fun toString(): String = prettyPrint()
-
     @JsName("clone")
     fun clone(): Rect {
         return from(left, top, right, bottom)
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is Rect) return false
-
-        if (left != other.left) return false
-        if (top != other.top) return false
-        if (right != other.right) return false
-        if (bottom != other.bottom) return false
-
-        return true
     }
 
     companion object {

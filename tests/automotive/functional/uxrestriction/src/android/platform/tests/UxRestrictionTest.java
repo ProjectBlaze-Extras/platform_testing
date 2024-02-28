@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package android.platform.tests;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
-import android.platform.helpers.AutoUtility;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoAppGridHelper;
 import android.platform.helpers.IAutoSettingHelper;
@@ -31,7 +30,6 @@ import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -48,11 +46,6 @@ public class UxRestrictionTest {
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
         mAppGridHelper = new HelperAccessor<>(IAutoAppGridHelper.class);
         mHardKeysHelper = new HelperAccessor<>(IAutoVehicleHardKeysHelper.class);
-    }
-
-    @BeforeClass
-    public static void exitSuw() {
-        AutoUtility.exitSuw();
     }
 
     @Before
@@ -149,12 +142,5 @@ public class UxRestrictionTest {
                 mSettingHelper.get().checkMenuExists("Languages & input"));
         String newTitle = mSettingHelper.get().getPageTitleText();
         assertTrue("System settings is not disabled", currentTitle.equals(newTitle));
-    }
-
-    @Test
-    public void testRestrictedApp() {
-        mAppGridHelper.get().open();
-        mAppGridHelper.get().openApp("Play Store");
-        assertTrue("app is not restricted", mAppGridHelper.get().isAppInForeground());
     }
 }

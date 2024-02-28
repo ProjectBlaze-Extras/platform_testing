@@ -19,8 +19,8 @@ package android.tools.device.flicker.rules
 import android.app.Instrumentation
 import android.content.Context
 import android.os.RemoteException
-import android.tools.common.CrossPlatform
 import android.tools.common.FLICKER_TAG
+import android.tools.common.Logger
 import android.tools.common.Rotation
 import android.tools.device.traces.parsers.WindowManagerStateHelper
 import android.view.WindowManager
@@ -51,8 +51,8 @@ constructor(
     private var initialOrientation = Rotation.ROTATION_0
 
     override fun starting(description: Description?) {
-        CrossPlatform.log.withTracing("ChangeDisplayOrientationRule:starting") {
-            CrossPlatform.log.v(
+        Logger.withTracing("ChangeDisplayOrientationRule:starting") {
+            Logger.v(
                 FLICKER_TAG,
                 "Changing display orientation to " +
                     "$targetOrientation ${targetOrientation.description}"
@@ -65,7 +65,7 @@ constructor(
     }
 
     override fun finished(description: Description?) {
-        CrossPlatform.log.withTracing("ChangeDisplayOrientationRule:finished") {
+        Logger.withTracing("ChangeDisplayOrientationRule:finished") {
             if (resetOrientationAfterTest) {
                 setRotation(initialOrientation, instrumentation, clearCacheAfterParsing)
             }
@@ -98,7 +98,7 @@ constructor(
                     wmHelper.StateSyncBuilder().withRotation(rotation).waitForAndVerify()
                 } else {
                     wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
-                    CrossPlatform.log.v(FLICKER_TAG, "Rotation is not allowed in the state")
+                    Logger.v(FLICKER_TAG, "Rotation is not allowed in the state")
                     return
                 }
 

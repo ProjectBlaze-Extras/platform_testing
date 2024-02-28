@@ -16,9 +16,9 @@
 
 package android.tools.common.flicker.assertors.assertions
 
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.AssertionTemplate
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
 
 /**
  * Checks if the stack space of all displays is fully covered by any visible layer, at the start of
@@ -26,12 +26,11 @@ import android.tools.common.flicker.subject.layers.LayersTraceSubject
  */
 class EntireScreenCoveredAtStart : AssertionTemplate() {
     /** {@inheritDoc} */
-    override fun doEvaluate(scenarioInstance: IScenarioInstance, layerSubject: LayersTraceSubject) {
-        val subject = layerSubject.first()
-        subject.containsAtLeastOneDisplay()
-        val onDisplays = subject.entry.displays.filter { it.isOn }
-        onDisplays.forEach { display ->
-            subject.visibleRegion().coversAtLeast(display.layerStackSpace)
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+        flicker.assertLayersStart {
+            containsAtLeastOneDisplay()
+            val onDisplays = entry.displays.filter { it.isOn }
+            onDisplays.forEach { display -> visibleRegion().coversAtLeast(display.layerStackSpace) }
         }
     }
 }

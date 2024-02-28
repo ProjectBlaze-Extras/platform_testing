@@ -23,23 +23,32 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.platform.helpers.ScrollUtility.ScrollActions;
 import android.platform.helpers.ScrollUtility.ScrollDirection;
-import android.platform.helpers.exceptions.UnknownUiException;
+import android.util.Log;
 
 import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.BySelector;
+import androidx.test.uiautomator.Direction;
 import androidx.test.uiautomator.UiObject2;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 /** App info settings helper file */
 public class SettingsAppInfoHelperImpl extends AbstractStandardAppHelper
         implements IAutoAppInfoSettingsHelper {
 
+    private static final int MAX_SCROLL_COUNT = 100;
+    private static final String LOGGING_TAG = "SettingsAppInfoHelperImpl";
+
+    private static final String PERMISSION_HEADER = "Apps with this permission";
     private ScrollUtility mScrollUtility;
     private ScrollActions mScrollAction;
     private BySelector mBackwardButtonSelector;
     private BySelector mForwardButtonSelector;
     private BySelector mAppInfoPermissionsScrollableElementSelector;
-    private BySelector mAppInfoPermissionsBackwardButtonSelector;
-    private BySelector mAppInfoPermissionsForwardButtonSelector;
     private BySelector mScrollableElementSelector;
     private ScrollDirection mScrollDirection;
 
@@ -61,14 +70,6 @@ public class SettingsAppInfoHelperImpl extends AbstractStandardAppHelper
         mAppInfoPermissionsScrollableElementSelector =
                 getUiElementFromConfig(
                         AutomotiveConfigConstants.APP_INFO_SETTINGS_PERMISSIONS_SCROLL_ELEMENT);
-        mAppInfoPermissionsBackwardButtonSelector =
-                getUiElementFromConfig(
-                        AutomotiveConfigConstants
-                                .APP_INFO_SETTINGS_PERMISSIONS_SCROLL_BACKWARD_BUTTON);
-        mAppInfoPermissionsForwardButtonSelector =
-                getUiElementFromConfig(
-                        AutomotiveConfigConstants
-                                .APP_INFO_SETTINGS_PERMISSIONS_SCROLL_FORWARD_BUTTON);
         mScrollDirection =
                 ScrollDirection.valueOf(
                         getActionFromConfig(
@@ -125,8 +126,61 @@ public class SettingsAppInfoHelperImpl extends AbstractStandardAppHelper
                         mScrollableElementSelector,
                         selector,
                         "Scroll on Apps to find View all button");
-        validateUiObject(show_all_apps_menu, "View all button");
+        getSpectatioUiUtil().validateUiObject(show_all_apps_menu, "View all button");
         getSpectatioUiUtil().clickAndWait(show_all_apps_menu);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void openPermissionManager() {
+        BySelector permissions_selector =
+                getUiElementFromConfig(
+                        AutomotiveConfigConstants.APP_INFO_SETTINGS_PERMISSION_MANAGER);
+
+        final String action = "Scroll to find the Permission manager";
+        UiObject2 permissionsManager =
+                mScrollUtility.scrollAndFindUiObject(
+                        mScrollAction,
+                        mScrollDirection,
+                        mForwardButtonSelector,
+                        mBackwardButtonSelector,
+                        mScrollableElementSelector,
+                        permissions_selector,
+                        action);
+
+        getSpectatioUiUtil().validateUiObject(permissionsManager, action);
+        getSpectatioUiUtil().clickAndWait(permissionsManager);
+    }
+
+    /**
+     * Assumes we are on the Permission manager settings page. Returns the summary (text field in
+     * form "[X] of [Y] apps allowed") for a given permission.
+     *
+     * @param permissionName - The permission to be summarized
+     * @return - The text field holding the permission's summary (how many apps are allowed).
+     */
+    private UiObject2 getPermissionSummary(String permissionName) {
+        BySelector permissionSummarySelector =
+                getUiElementFromConfig(
+                        AutomotiveConfigConstants.APP_INFO_SETTINGS_SINGLE_PERMISSION_SUMMARY);
+
+        BySelector permissionObjectSelector =
+                permissionSummarySelector.hasChild(By.text(permissionName));
+
+        getSpectatioUiUtil().scrollToBeginning(mAppInfoPermissionsScrollableElementSelector, true);
+        UiObject2 permissionSummary =
+                mScrollUtility.scrollAndFindUiObject(
+                        mScrollAction,
+                        mScrollDirection,
+                        mForwardButtonSelector,
+                        mBackwardButtonSelector,
+                        mAppInfoPermissionsScrollableElementSelector,
+                        permissionObjectSelector,
+                        String.format(
+                                "Scroll on Permission manager to find permission: %s",
+                                permissionName));
+
+        return permissionSummary;
     }
 
     /** {@inheritDoc} */
@@ -144,7 +198,8 @@ public class SettingsAppInfoHelperImpl extends AbstractStandardAppHelper
                         mScrollableElementSelector,
                         enableDisableBtnSelector,
                         String.format("Scroll on App info to find %s", state));
-        validateUiObject(enableDisableBtn, String.format("Enable Disable Button"));
+        getSpectatioUiUtil()
+                .validateUiObject(enableDisableBtn, String.format("Enable Disable Button"));
         getSpectatioUiUtil().clickAndWait(enableDisableBtn.getParent());
         if (state == State.ENABLE) {
             assertTrue(
@@ -160,7 +215,8 @@ public class SettingsAppInfoHelperImpl extends AbstractStandardAppHelper
                     getUiElementFromConfig(
                             AutomotiveConfigConstants.APP_INFO_SETTINGS_DISABLE_APP_BUTTON);
             UiObject2 disableAppBtn = getSpectatioUiUtil().findUiObject(disableAppBtnSelector);
-            validateUiObject(disableAppBtn, String.format("Disable app button"));
+            getSpectatioUiUtil()
+                    .validateUiObject(disableAppBtn, String.format("Disable app button"));
             getSpectatioUiUtil().clickAndWait(disableAppBtn);
             assertTrue(
                     "application is not disabled",
@@ -187,12 +243,12 @@ public class SettingsAppInfoHelperImpl extends AbstractStandardAppHelper
     @Override
     public void forceStop() {
         UiObject2 forceStopButton = getForceStopButton();
-        validateUiObject(forceStopButton, "force stop button");
+        getSpectatioUiUtil().validateUiObject(forceStopButton, "force stop button");
         getSpectatioUiUtil().clickAndWait(forceStopButton);
         BySelector okBtnSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.APP_INFO_SETTINGS_OK_BUTTON);
         UiObject2 okBtn = getSpectatioUiUtil().findUiObject(okBtnSelector);
-        validateUiObject(okBtn, "Ok button");
+        getSpectatioUiUtil().validateUiObject(okBtn, "Ok button");
         getSpectatioUiUtil().clickAndWait(okBtn);
     }
 
@@ -208,7 +264,7 @@ public class SettingsAppInfoHelperImpl extends AbstractStandardAppHelper
                         mScrollDirection,
                         mForwardButtonSelector,
                         mBackwardButtonSelector,
-                        mScrollableElementSelector,
+                        mAppInfoPermissionsScrollableElementSelector,
                         permissions_selector,
                         String.format("Scroll on %s permission to find %s", permission, state));
         getSpectatioUiUtil().clickAndWait(permissions_menu);
@@ -217,8 +273,8 @@ public class SettingsAppInfoHelperImpl extends AbstractStandardAppHelper
                 mScrollUtility.scrollAndFindUiObject(
                         mScrollAction,
                         mScrollDirection,
-                        mAppInfoPermissionsForwardButtonSelector,
-                        mAppInfoPermissionsBackwardButtonSelector,
+                        mForwardButtonSelector,
+                        mBackwardButtonSelector,
                         mAppInfoPermissionsScrollableElementSelector,
                         permission_selector,
                         String.format("Scroll on %s permission to find %s", permission, state));
@@ -231,22 +287,22 @@ public class SettingsAppInfoHelperImpl extends AbstractStandardAppHelper
                     mScrollUtility.scrollAndFindUiObject(
                             mScrollAction,
                             mScrollDirection,
-                            mAppInfoPermissionsForwardButtonSelector,
-                            mAppInfoPermissionsBackwardButtonSelector,
-                            mAppInfoPermissionsScrollableElementSelector,
+                            mForwardButtonSelector,
+                            mBackwardButtonSelector,
+                            mScrollableElementSelector,
                             getUiElementFromConfig(
                                     AutomotiveConfigConstants.APP_INFO_SETTINGS_ALLOW_BUTTON),
                             "Scroll on App info to find Allow Button");
-            validateUiObject(allow_btn, "Allow button");
+            getSpectatioUiUtil().validateUiObject(allow_btn, "Allow button");
             getSpectatioUiUtil().clickAndWait(allow_btn);
         } else {
             UiObject2 dont_allow_btn =
                     mScrollUtility.scrollAndFindUiObject(
                             mScrollAction,
                             mScrollDirection,
-                            mAppInfoPermissionsForwardButtonSelector,
-                            mAppInfoPermissionsBackwardButtonSelector,
-                            mAppInfoPermissionsScrollableElementSelector,
+                            mForwardButtonSelector,
+                            mBackwardButtonSelector,
+                            mScrollableElementSelector,
                             getUiElementFromConfig(
                                     AutomotiveConfigConstants.APP_INFO_SETTINGS_DONT_ALLOW_BUTTON),
                             "Scroll on App info to find Don't Allow Button");
@@ -278,9 +334,9 @@ public class SettingsAppInfoHelperImpl extends AbstractStandardAppHelper
                 mScrollUtility.scrollAndFindUiObject(
                         mScrollAction,
                         mScrollDirection,
-                        mAppInfoPermissionsForwardButtonSelector,
-                        mAppInfoPermissionsBackwardButtonSelector,
-                        mAppInfoPermissionsScrollableElementSelector,
+                        mForwardButtonSelector,
+                        mBackwardButtonSelector,
+                        mScrollableElementSelector,
                         permissions_selector,
                         "Scroll on App info to find permission menu");
         String currentPermissions = permission_menu.getParent().getChildren().get(1).getText();
@@ -301,7 +357,7 @@ public class SettingsAppInfoHelperImpl extends AbstractStandardAppHelper
                         mScrollableElementSelector,
                         applicationSelector,
                         String.format("Scroll on App info to find %s", application));
-        validateUiObject(object, String.format("App %s", application));
+        getSpectatioUiUtil().validateUiObject(object, String.format("App %s", application));
         getSpectatioUiUtil().clickAndWait(object);
         getSpectatioUiUtil().wait5Seconds();
     }
@@ -337,28 +393,151 @@ public class SettingsAppInfoHelperImpl extends AbstractStandardAppHelper
 
     /** {@inheritDoc} */
     @Override
-    public boolean hasUIElement(String element) {
-        boolean isElementPresent;
-        BySelector elementSelector = getUiElementFromConfig(element);
-        isElementPresent = getSpectatioUiUtil().hasUiElement(elementSelector);
-        if (!isElementPresent) {
-            isElementPresent =
-                    mScrollUtility.scrollAndCheckIfUiElementExist(
-                            mScrollAction,
-                            mScrollDirection,
-                            mForwardButtonSelector,
-                            mBackwardButtonSelector,
-                            mScrollableElementSelector,
-                            elementSelector,
-                            "scroll and find UI Element");
-        }
-        return isElementPresent;
+    public List<Integer> validateAppsPermissionManager(String permissionName) {
+
+        UiObject2 permissionSummary = getPermissionSummary(permissionName);
+
+        BySelector counterSelector =
+                getUiElementFromConfig(
+                        AutomotiveConfigConstants.APP_INFO_SETTINGS_PERMISSION_MANAGER_APP_COUNTER);
+
+        // Get the text displaying the number of allowed apps.
+        String appTally = permissionSummary.findObject(counterSelector).getText();
+        // Parse out the number of apps (allowed and total)
+        List<Integer> appNums = parseAppNumbers(appTally);
+
+        // Check in the individual permission object for the listed apps
+        // This call will click into the object for the check,
+        // then click 'back' to return to the permission manager page
+        // causing the permissionObject to expire.
+        List<Integer> listedApps = numAppsAllowedAndTotal(permissionSummary);
+
+        appNums.addAll(listedApps);
+        return appNums;
     }
 
-    private void validateUiObject(UiObject2 uiObject, String action) {
-        if (uiObject == null) {
-            throw new UnknownUiException(
-                    String.format("Unable to find UI Element for %s.", action));
+    /**
+     * Assumes we are on a detailed permission screen (listing the apps that are allowed).
+     *
+     * @return An arraylist of two integers: the number of allowed apps listed, and the total number
+     *     of apps listed.
+     */
+    private List<Integer> numAppsAllowedAndTotal(UiObject2 permissionObject) {
+
+        getSpectatioUiUtil().clickAndWait(permissionObject);
+        List<String> textFields = scrollForTextFields();
+        int allowed = 0;
+        int notAllowed = 0;
+
+        boolean inAllowedList = false;
+
+        for (String text : textFields) {
+
+            switch (text) {
+                case "Allowed":
+                    inAllowedList = true;
+                    break;
+                case "Not allowed":
+                    inAllowedList = false;
+                    break;
+                default:
+                    if (inAllowedList) allowed++;
+                    else notAllowed++;
+                    break;
+            }
         }
+
+        List<Integer> appNums = new ArrayList<>();
+        appNums.add(allowed);
+        appNums.add(notAllowed + allowed);
+
+        assertTrue(
+                "Could not return from individual permission screen.",
+                getSpectatioUiUtil().pressBack()); // Return to the general permissions screen
+
+        return appNums;
+    }
+
+    /**
+     * Assumes unique text fields on the permission app list screens, except for the first text
+     * field, containing the permission title. For example, this method assumes that no two apps
+     * share the same name, or share a name with the "Allowed" or "Not Allowed" tags.
+     *
+     * @return An arraylist of each text field on this (scrollable) view, in the order that it
+     *     appears on screen.
+     */
+    private List<String> scrollForTextFields() {
+
+        Set<String> textSeen = new HashSet<>();
+        List<String> textFields = new ArrayList<>();
+
+        BySelector layoutWithText =
+                getUiElementFromConfig(
+                        AutomotiveConfigConstants.APP_INFO_SETTINGS_APP_NAME_ELEMENT);
+        BySelector permissionAppListView =
+                getUiElementFromConfig(
+                        AutomotiveConfigConstants.APP_INFO_SETTINGS_PERMISSION_APP_LIST_VIEW);
+
+        // Get a complete list of text from UI elements.
+        // While scrolling
+        int scrollCount = 0;
+        boolean canScroll = true;
+        while (scrollCount < MAX_SCROLL_COUNT) {
+            UiObject2 permissionView = getSpectatioUiUtil().findUiObject(permissionAppListView);
+            getSpectatioUiUtil()
+                    .validateUiObject(permissionView, "Searching for permission app list view.");
+            List<UiObject2> layoutsWithText = permissionView.findObjects(layoutWithText);
+
+            boolean newText = false;
+            for (UiObject2 layout : layoutsWithText) {
+
+                // Filter out the permission name header.
+                if (layout.getChildCount() < 2
+                        || !layout.getChildren().get(1).getText().contains(PERMISSION_HEADER)) {
+
+                    UiObject2 textView = layout.getChildren().get(0);
+                    String content = textView.getText();
+
+                    // Scrolling may leave text fields on screen, so only unique values are added.
+                    if (!textSeen.contains(content)) {
+                        textFields.add(content);
+                        textSeen.add(content);
+                        newText = true;
+                    }
+                }
+            }
+            if (!canScroll || !newText) {
+                break;
+            }
+            scrollCount++;
+            canScroll = permissionView.scroll(Direction.DOWN, 0.6f);
+        }
+
+        // Debug statements
+        Log.d(LOGGING_TAG, "Gathered text fields: \n " + textFields.toString());
+
+        return textFields;
+    }
+
+    /**
+     * @param appTally - The string containing the app permission summary ('X of Y apps allowed')
+     * @return A list of all integers found in the String.
+     */
+    private List<Integer> parseAppNumbers(String appTally) {
+
+        ArrayList<Integer> tallies = new ArrayList<Integer>();
+        Pattern intPattern = Pattern.compile("\\d+");
+
+        for (String token : appTally.split(" ")) {
+            if (intPattern.matcher(token).matches()) {
+                try {
+                    tallies.add(Integer.parseInt(token));
+                } catch (Exception e) {
+                    Log.d(LOGGING_TAG, "Exception while parsing app numbers: " + e.toString());
+                }
+            }
+        }
+
+        return tallies;
     }
 }

@@ -16,8 +16,8 @@
 
 package android.tools.common.traces.inputmethod
 
-import android.tools.common.CrossPlatform
 import android.tools.common.ITraceEntry
+import android.tools.common.Timestamps
 
 /**
  * Represents a single InputMethodManagerService trace entry.
@@ -53,7 +53,7 @@ open class InputMethodManagerServiceEntry(
     val isAccessibilityRequestingNoSoftKeyboard: Boolean,
     val elapsedTimestamp: Long
 ) : ITraceEntry {
-    override val timestamp = CrossPlatform.timestamp.from(systemUptimeNanos = elapsedTimestamp)
+    override val timestamp = Timestamps.from(systemUptimeNanos = elapsedTimestamp)
     val stableId: String
         get() = this::class.simpleName ?: error("Unable to determine class")
     val name: String

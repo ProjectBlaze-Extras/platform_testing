@@ -25,14 +25,6 @@ class ScenarioBuilder {
     private var extraConfig = mutableMapOf<String, Any?>()
     private var description = ""
 
-    fun fromScenario(other: Scenario) =
-        forClass(other.testClass)
-            .withStartRotation(other.startRotation)
-            .withEndRotation(other.endRotation)
-            .withNavBarMode(other.navBarMode)
-            .withExtraConfigs(other.extraConfig)
-            .withDescriptionOverride(other.description)
-
     fun forClass(cls: String) = apply { testClass = cls }
 
     fun withStartRotation(rotation: Rotation) = apply { startRotation = rotation }
@@ -59,22 +51,28 @@ class ScenarioBuilder {
                     append("_${navBarMode.description}")
                 }
             }
-        return Scenario(testClass, startRotation, endRotation, navBarMode, extraConfig, description)
+        return ScenarioImpl(
+            testClass,
+            startRotation,
+            endRotation,
+            navBarMode,
+            extraConfig,
+            description
+        )
     }
 
     fun createEmptyScenario(): Scenario =
-        Scenario(
+        ScenarioImpl(
             testClass = "",
             startRotation = DEFAULT_ROTATION,
             endRotation = DEFAULT_ROTATION,
             navBarMode = DEFAULT_NAVBAR_MODE,
-            _extraConfig = emptyMap(),
+            config = emptyMap(),
             description =
                 defaultDescription(DEFAULT_ROTATION, DEFAULT_ROTATION, DEFAULT_NAVBAR_MODE)
         )
 
     companion object {
-        const val FAAS_BLOCKING = "faas:blocking"
         val DEFAULT_ROTATION = Rotation.ROTATION_0
         val DEFAULT_NAVBAR_MODE = NavBar.MODE_GESTURAL
 

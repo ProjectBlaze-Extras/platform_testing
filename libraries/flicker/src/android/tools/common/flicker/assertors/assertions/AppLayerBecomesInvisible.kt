@@ -16,9 +16,9 @@
 
 package android.tools.common.flicker.assertors.assertions
 
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.ComponentTemplate
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
 
 /**
  * Checks that the app layer doesn't exist or is invisible at the start of the transition, but is
@@ -27,11 +27,11 @@ import android.tools.common.flicker.subject.layers.LayersTraceSubject
 class AppLayerBecomesInvisible(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(scenarioInstance: IScenarioInstance, layerSubject: LayersTraceSubject) {
-        layerSubject
-            .isVisible(component.build(scenarioInstance))
-            .then()
-            .isInvisible(component.build(scenarioInstance))
-            .forAllEntries()
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+        flicker.assertLayers {
+            isVisible(component.build(scenarioInstance))
+                .then()
+                .isInvisible(component.build(scenarioInstance))
+        }
     }
 }

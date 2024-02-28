@@ -16,6 +16,7 @@
 
 package android.tools.common.datatypes
 
+import android.tools.common.FloatFormatter
 import android.tools.common.withCache
 import kotlin.js.JsExport
 
@@ -25,34 +26,16 @@ import kotlin.js.JsExport
  * This class is used by flicker and Winscope
  */
 @JsExport
-class Color private constructor(r: Float, g: Float, b: Float, val a: Float) : Color3(r, g, b) {
-    override val isEmpty: Boolean
-        get() = a == 0f || r < 0 || g < 0 || b < 0
-
-    override val isNotEmpty: Boolean
-        get() = !isEmpty
-
+class Color private constructor(val r: Float, val g: Float, val b: Float, val a: Float) :
+    DataType() {
+    override val isEmpty = a == 0f || r < 0 || g < 0 || b < 0
     val isOpaque: Boolean = a == 1.0f
 
-    override fun prettyPrint(): String {
-        val parentPrint = super.prettyPrint()
-        return "$parentPrint a:$a"
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is Color) return false
-        if (!super.equals(other)) return false
-
-        if (a != other.a) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = super.hashCode()
-        result = 31 * result + a.hashCode()
-        return result
+    override fun doPrintValue() = buildString {
+        append("r:${FloatFormatter.format(r)} ")
+        append("g:${FloatFormatter.format(g)} ")
+        append("b:${FloatFormatter.format(b)} ")
+        append("a:${FloatFormatter.format(a)}")
     }
 
     companion object {

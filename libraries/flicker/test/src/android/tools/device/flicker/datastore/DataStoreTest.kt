@@ -17,17 +17,22 @@
 package android.tools.device.flicker.datastore
 
 import android.annotation.SuppressLint
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.TEST_SCENARIO
 import android.tools.assertExceptionMessage
 import android.tools.assertThrows
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
+import org.junit.Before
 import org.junit.ClassRule
-import org.junit.Rule
 import org.junit.Test
 
 @SuppressLint("VisibleForTests")
 class DataStoreTest {
+    @Before
+    fun setup() {
+        DataStore.clear()
+    }
+
     @Test
     fun addsElement() {
         DataStore.addResult(TEST_SCENARIO, Consts.TEST_RESULT)
@@ -80,6 +85,6 @@ class DataStoreTest {
     }
 
     companion object {
-        @Rule @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

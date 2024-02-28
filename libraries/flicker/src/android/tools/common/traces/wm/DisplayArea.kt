@@ -17,6 +17,7 @@
 package android.tools.common.traces.wm
 
 import android.tools.common.traces.component.IComponentMatcher
+import android.tools.common.traces.wm.Utils.collectDescendants
 import kotlin.js.JsExport
 
 /**
@@ -26,12 +27,12 @@ import kotlin.js.JsExport
  * Java/Android functionality
  */
 @JsExport
-class DisplayArea(val isTaskDisplayArea: Boolean, windowContainer: WindowContainer) :
-    WindowContainer(windowContainer) {
+class DisplayArea(val isTaskDisplayArea: Boolean, private val windowContainer: IWindowContainer) :
+    IWindowContainer by windowContainer {
     val activities: Array<Activity>
         get() =
             if (isTaskDisplayArea) {
-                this.collectDescendants()
+                collectDescendants()
             } else {
                 emptyArray()
             }
@@ -61,6 +62,7 @@ class DisplayArea(val isTaskDisplayArea: Boolean, windowContainer: WindowContain
         if (orientation != other.orientation) return false
         if (title != other.title) return false
         if (token != other.token) return false
+        if (windowContainer != other.windowContainer) return false
 
         return true
     }
@@ -68,6 +70,7 @@ class DisplayArea(val isTaskDisplayArea: Boolean, windowContainer: WindowContain
     override fun hashCode(): Int {
         var result = super.hashCode()
         result = 31 * result + isTaskDisplayArea.hashCode()
+        result = 31 * result + windowContainer.hashCode()
         return result
     }
 }

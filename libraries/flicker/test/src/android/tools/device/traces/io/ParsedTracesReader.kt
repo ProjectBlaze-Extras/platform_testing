@@ -17,7 +17,7 @@
 package android.tools.device.traces.io
 
 import android.tools.common.Timestamp
-import android.tools.common.io.IReader
+import android.tools.common.io.Reader
 import android.tools.common.io.RunStatus
 import android.tools.common.io.TraceType
 import android.tools.common.traces.events.CujTrace
@@ -37,7 +37,7 @@ class ParsedTracesReader(
     private val eventLog: EventLog? = null,
     private val layerDumps: Map<String, LayersTrace> = emptyMap(),
     private val wmDumps: Map<String, WindowManagerTrace> = emptyMap(),
-) : IReader {
+) : Reader {
     // TODO: Refactor all these values out of IReader, they don't totally make sense here
 
     override val runStatus = RunStatus.UNDEFINED

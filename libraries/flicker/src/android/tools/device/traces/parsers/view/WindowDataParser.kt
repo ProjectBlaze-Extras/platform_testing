@@ -16,8 +16,8 @@
 
 package android.tools.device.traces.parsers.view
 
-import android.tools.common.CrossPlatform
 import android.tools.common.Timestamp
+import android.tools.common.Timestamps
 import android.tools.common.parsers.AbstractTraceParser
 import android.tools.common.traces.view.ViewFrame
 import android.tools.common.traces.view.ViewTrace
@@ -36,7 +36,7 @@ class WindowDataParser(private val windowTitle: String, private val parsedTrace:
     override fun getEntries(input: WindowData): List<FrameData> = input.frameDataList
 
     override fun getTimestamp(entry: FrameData): Timestamp =
-        CrossPlatform.timestamp.from(systemUptimeNanos = entry.timestamp)
+        Timestamps.from(systemUptimeNanos = entry.timestamp)
 
     override fun doParseEntry(entry: FrameData): ViewFrame {
         return ViewFrameBuilder().forSystemUptime(entry.timestamp).fromRootNode(entry.node).build()

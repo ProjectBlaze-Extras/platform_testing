@@ -32,4 +32,17 @@ abstract class InjectedTestCase(
     override fun getName(): String = _name
 
     abstract fun execute(description: Description)
+
+    override fun toString() = _name
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is InjectedTestCase) return false
+        if (!super.equals(other)) return false
+
+        if (_name != other._name) return false
+
+        return true
+    }
+
+    override fun hashCode() = _name.hashCode()
 }

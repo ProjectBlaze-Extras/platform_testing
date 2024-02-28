@@ -17,9 +17,6 @@
 package com.android.sts.common;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeNoException;
 
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
@@ -48,71 +45,89 @@ public class MallocDebug implements AutoCloseable {
         Pattern.compile("^.*HAS INVALID TAG.*$", Pattern.MULTILINE),
     };
 
-    private ITestDevice device;
-    private String processName;
-    private AutoCloseable setMallocDebugOptionsProperty;
-    private AutoCloseable setAttachedProgramProperty;
-    private AutoCloseable killProcess;
+    private ITestDevice mDevice;
+    private String mProcessName;
+    private boolean mWasAdbRoot;
+    private AutoCloseable mSetMallocDebugOptionsProperty;
+    private AutoCloseable mSetAttachedProgramProperty;
+    private AutoCloseable mProcessKill;
 
     private MallocDebug(
             ITestDevice device, String mallocDebugOption, String processName, boolean isService)
             throws DeviceNotAvailableException, TimeoutException, ProcessUtil.KillException {
-        this.device = device;
-        this.processName = processName;
+        mDevice = device;
+        mProcessName = processName;
+        mWasAdbRoot = device.isAdbRoot();
 
-        // It's an error if this is called while something else is also doing malloc debug.
-        assertNull(
-                MALLOC_DEBUG_OPTIONS_PROP + " is already set!",
-                device.getProperty(MALLOC_DEBUG_OPTIONS_PROP));
-        CommandUtil.runAndCheck(device, "logcat -c");
+        String previousProperty = device.getProperty(MALLOC_DEBUG_OPTIONS_PROP);
+        if (previousProperty != null) {
+            // log if this is called while something else is also doing malloc debug.
+            CLog.w("%s is already set! <%s>", MALLOC_DEBUG_OPTIONS_PROP, previousProperty);
+        }
 
         try {
-            this.setMallocDebugOptionsProperty =
+            mSetMallocDebugOptionsProperty =
                     SystemUtil.withProperty(device, MALLOC_DEBUG_OPTIONS_PROP, mallocDebugOption);
-            this.setAttachedProgramProperty =
+            mSetAttachedProgramProperty =
                     SystemUtil.withProperty(device, MALLOC_DEBUG_PROGRAM_PROP, processName);
 
+            CommandUtil.runAndCheck(device, "logcat -c");
+
             // Kill and wait for the process to come back if we're attaching to a service
-            this.killProcess = null;
+            mProcessKill = null;
             if (isService) {
-                this.killProcess = ProcessUtil.withProcessKill(device, processName, null);
+                mProcessKill = ProcessUtil.withProcessKill(device, processName, null);
                 ProcessUtil.waitProcessRunning(device, processName);
             }
         } catch (Throwable e1) {
             try {
-                if (setMallocDebugOptionsProperty != null) {
-                    setMallocDebugOptionsProperty.close();
+                if (mSetMallocDebugOptionsProperty != null) {
+                    mSetMallocDebugOptionsProperty.close();
                 }
-                if (setAttachedProgramProperty != null) {
-                    setAttachedProgramProperty.close();
+                if (mSetAttachedProgramProperty != null) {
+                    mSetAttachedProgramProperty.close();
                 }
             } catch (Exception e2) {
                 CLog.e(e2);
-                fail(
+                throw new IllegalStateException(
                         "Could not enable malloc debug. Additionally, there was an"
                                 + " exception while trying to reset device state. Tests after"
-                                + " this may not work as expected!\n"
-                                + e2);
+                                + " this may not work as expected!",
+                        e2);
             }
-            assumeNoException("Could not enable malloc debug", e1);
+            throw new IllegalStateException("Could not enable malloc debug", e1);
         }
     }
 
     @Override
     public void close() throws Exception {
-        device.waitForDeviceAvailable();
-        setMallocDebugOptionsProperty.close();
-        setAttachedProgramProperty.close();
-        if (killProcess != null) {
+        mDevice.waitForDeviceAvailable();
+        boolean isAdbRoot = mDevice.isAdbRoot();
+        if (mWasAdbRoot) {
+            // regain root permissions to teardown
+            mDevice.enableAdbRoot();
+        }
+        try {
+            mSetMallocDebugOptionsProperty.close();
+            mSetAttachedProgramProperty.close();
+        } catch (Exception e) {
+            throw new IllegalStateException("Could not disable malloc debug", e);
+        }
+        if (mProcessKill != null) {
             try {
-                killProcess.close();
-                ProcessUtil.waitProcessRunning(device, processName);
+                mProcessKill.close();
+                ProcessUtil.waitProcessRunning(mDevice, mProcessName);
             } catch (TimeoutException e) {
-                assumeNoException(
-                        "Could not restart '" + processName + "' after disabling malloc debug", e);
+                throw new IllegalStateException(
+                        "Could not restart '" + mProcessName + "' after disabling malloc debug", e);
             }
         }
-        String logcat = CommandUtil.runAndCheck(device, "logcat -d *:S malloc_debug:V").getStdout();
+        String logcat =
+                CommandUtil.runAndCheck(mDevice, "logcat -d *:S malloc_debug:V").getStdout();
+        if (!isAdbRoot) {
+            // restore nonroot status if the try-with-resources body unrooted
+            mDevice.disableAdbRoot();
+        }
         assertNoMallocDebugErrors(logcat);
     }
 
@@ -129,7 +144,7 @@ public class MallocDebug implements AutoCloseable {
     public static AutoCloseable withLibcMallocDebugOnService(
             ITestDevice device, String mallocDebugOptions, String processName)
             throws DeviceNotAvailableException, IllegalArgumentException, TimeoutException,
-                ProcessUtil.KillException {
+                    ProcessUtil.KillException {
         if (processName == null || processName.isEmpty()) {
             throw new IllegalArgumentException("Service processName can't be empty");
         }
@@ -149,7 +164,7 @@ public class MallocDebug implements AutoCloseable {
     public static AutoCloseable withLibcMallocDebugOnNewProcess(
             ITestDevice device, String mallocDebugOptions, String processName)
             throws DeviceNotAvailableException, IllegalArgumentException, TimeoutException,
-                ProcessUtil.KillException {
+                    ProcessUtil.KillException {
         if (processName == null || processName.isEmpty()) {
             throw new IllegalArgumentException("processName can't be empty");
         }

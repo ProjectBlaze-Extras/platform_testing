@@ -17,13 +17,13 @@
 package android.tools.device.flicker.legacy.runner
 
 import android.app.Instrumentation
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.TEST_SCENARIO
 import android.tools.assertThrows
 import android.tools.device.flicker.legacy.AbstractFlickerTestData
-import android.tools.device.flicker.legacy.IFlickerTestData
+import android.tools.device.flicker.legacy.FlickerTestData
 import android.tools.device.traces.io.ResultWriter
 import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.rules.CleanFlickerEnvironmentRule
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth
 import org.junit.Before
@@ -39,9 +39,9 @@ class SetupTeardownRuleTest {
     private var setupExecuted = false
     private var teardownExecuted = false
 
-    private val runSetup: IFlickerTestData.() -> Unit = { setupExecuted = true }
-    private val runTeardown: IFlickerTestData.() -> Unit = { teardownExecuted = true }
-    private val throwError: IFlickerTestData.() -> Unit = { error(Consts.FAILURE) }
+    private val runSetup: FlickerTestData.() -> Unit = { setupExecuted = true }
+    private val runTeardown: FlickerTestData.() -> Unit = { teardownExecuted = true }
+    private val throwError: FlickerTestData.() -> Unit = { error(Consts.FAILURE) }
 
     @Before
     fun setup() {
@@ -83,8 +83,8 @@ class SetupTeardownRuleTest {
 
     companion object {
         private fun createRule(
-            setupCommands: List<IFlickerTestData.() -> Unit>,
-            teardownCommands: List<IFlickerTestData.() -> Unit>
+            setupCommands: List<FlickerTestData.() -> Unit>,
+            teardownCommands: List<FlickerTestData.() -> Unit>
         ): SetupTeardownRule {
             val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
             val mockedFlicker = Mockito.mock(AbstractFlickerTestData::class.java)
@@ -99,6 +99,6 @@ class SetupTeardownRuleTest {
             )
         }
 
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

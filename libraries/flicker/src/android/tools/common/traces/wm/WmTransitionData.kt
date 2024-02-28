@@ -25,6 +25,7 @@ data class WmTransitionData(
     val sendTime: Timestamp? = null,
     val abortTime: Timestamp? = null,
     val finishTime: Timestamp? = null,
+    val startingWindowRemoveTime: Timestamp? = null,
     val startTransactionId: String? = null, // strings instead of longs for JS compatibility
     val finishTransactionId: String? = null, // strings instead of longs for JS compatibility
     val type: TransitionType? = null,
@@ -44,6 +45,7 @@ data class WmTransitionData(
             wmData.sendTime ?: sendTime,
             wmData.abortTime ?: abortTime,
             wmData.finishTime ?: finishTime,
+            wmData.startingWindowRemoveTime ?: startingWindowRemoveTime,
             wmData.startTransactionId ?: startTransactionId,
             wmData.finishTransactionId ?: finishTransactionId,
             wmData.type ?: type,

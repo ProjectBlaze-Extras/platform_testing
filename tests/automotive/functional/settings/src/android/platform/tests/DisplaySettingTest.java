@@ -23,10 +23,15 @@ import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoDisplaySettingsHelper;
 import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.SettingsConstants;
+import android.platform.test.rules.ConditionalIgnore;
+import android.platform.test.rules.ConditionalIgnoreRule;
+import android.platform.test.rules.IgnoreOnPortrait;
 
+import org.junit.Rule;
 import org.junit.Test;
 
 public class DisplaySettingTest {
+    @Rule public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
 
     private final HelperAccessor<IAutoSettingHelper> mSettingHelper;
     private HelperAccessor<IAutoDisplaySettingsHelper> mDisplaySettingsHelper;
@@ -59,6 +64,7 @@ public class DisplaySettingTest {
     }
 
     @Test
+    @ConditionalIgnore(condition = IgnoreOnPortrait.class)
     public void testAdaptiveBrightnessDefaultValue() {
         mSettingHelper.get().openSetting(SettingsConstants.DISPLAY_SETTINGS);
         assertTrue(

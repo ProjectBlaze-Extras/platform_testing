@@ -18,11 +18,11 @@ package android.tools.device.flicker.legacy.runner
 
 import android.app.Instrumentation
 import android.platform.test.rule.ArtifactSaver
-import android.tools.common.CrossPlatform
-import android.tools.common.IScenario
+import android.tools.common.Logger
+import android.tools.common.Scenario
 import android.tools.common.io.TraceType
 import android.tools.device.flicker.FlickerTag
-import android.tools.device.flicker.legacy.IFlickerTestData
+import android.tools.device.flicker.legacy.FlickerTestData
 import android.tools.device.traces.getCurrentState
 import android.tools.device.traces.io.ResultWriter
 import android.tools.device.traces.monitors.NoTraceMonitor
@@ -45,11 +45,11 @@ import org.junit.runners.model.Statement
  * @param wmHelper to stabilize the UI before/after transitions
  */
 class TransitionExecutionRule(
-    private val flicker: IFlickerTestData,
+    private val flicker: FlickerTestData,
     private val resultWriter: ResultWriter,
-    private val scenario: IScenario,
+    private val scenario: Scenario,
     private val instrumentation: Instrumentation = flicker.instrumentation,
-    private val commands: List<IFlickerTestData.() -> Any> = flicker.transitions,
+    private val commands: List<FlickerTestData.() -> Any> = flicker.transitions,
     private val wmHelper: WindowManagerStateHelper = flicker.wmHelper
 ) : TestRule {
     private var tags = mutableSetOf<String>()
@@ -57,7 +57,7 @@ class TransitionExecutionRule(
     override fun apply(base: Statement?, description: Description?): Statement {
         return object : Statement() {
             override fun evaluate() {
-                CrossPlatform.log.withTracing("transition") {
+                Logger.withTracing("transition") {
                     try {
                         Utils.notifyRunnerProgress(scenario, "Running transition $description")
                         doRunBeforeTransition()
@@ -75,9 +75,9 @@ class TransitionExecutionRule(
     }
 
     private fun doRunBeforeTransition() {
-        CrossPlatform.log.withTracing("doRunBeforeTransition") {
+        Logger.withTracing("doRunBeforeTransition") {
             Utils.notifyRunnerProgress(scenario, "Running doRunBeforeTransition")
-            CrossPlatform.log.d(FLICKER_RUNNER_TAG, "doRunBeforeTransition")
+            Logger.d(FLICKER_RUNNER_TAG, "doRunBeforeTransition")
             val now = now()
             resultWriter.setTransitionStartTime(now)
             EventLog.writeEvent(
@@ -92,9 +92,9 @@ class TransitionExecutionRule(
     }
 
     private fun doRunAfterTransition() {
-        CrossPlatform.log.withTracing("doRunAfterTransition") {
+        Logger.withTracing("doRunAfterTransition") {
             Utils.notifyRunnerProgress(scenario, "Running doRunAfterTransition")
-            CrossPlatform.log.d(FLICKER_RUNNER_TAG, "doRunAfterTransition")
+            Logger.d(FLICKER_RUNNER_TAG, "doRunAfterTransition")
             Utils.doWaitForUiStabilize(wmHelper)
             val now = now()
             resultWriter.setTransitionEndTime(now)
@@ -122,7 +122,7 @@ class TransitionExecutionRule(
     }
 
     private fun doCreateTag(tag: String) {
-        CrossPlatform.log.withTracing("doRunAfterTransition") {
+        Logger.withTracing("doRunAfterTransition") {
             Utils.notifyRunnerProgress(scenario, "Creating tag $tag")
             doValidateTag(tag)
             tags.add(tag)

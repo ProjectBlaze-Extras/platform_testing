@@ -20,7 +20,7 @@ import android.tools.common.Timestamp
 import android.tools.common.flicker.assertions.Fact
 import android.tools.common.flicker.subject.FlickerSubject
 import android.tools.common.flicker.subject.region.RegionSubject
-import android.tools.common.io.IReader
+import android.tools.common.io.Reader
 import android.tools.common.traces.wm.WindowState
 
 /**
@@ -42,7 +42,7 @@ import android.tools.common.traces.wm.WindowState
  * ```
  */
 class WindowStateSubject(
-    override val reader: IReader? = null,
+    override val reader: Reader? = null,
     override val timestamp: Timestamp,
     val windowState: WindowState
 ) : FlickerSubject() {

@@ -16,7 +16,6 @@
 
 package android.tools.device.traces.monitors.events
 
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.common.io.TraceType
 import android.tools.common.traces.events.CujEvent
 import android.tools.common.traces.events.CujType
@@ -27,6 +26,7 @@ import android.tools.device.traces.io.ResultReader
 import android.tools.device.traces.monitors.TraceMonitorTest
 import android.tools.device.traces.now
 import android.tools.newTestResultWriter
+import android.tools.rules.CleanFlickerEnvironmentRule
 import android.util.EventLog
 import com.android.internal.jank.EventLogTags
 import com.google.common.truth.Truth
@@ -432,6 +432,6 @@ class EventLogMonitorTest : TraceMonitorTest<EventLogMonitor>() {
     private companion object {
         const val INPUT_FOCUS_TAG = 62001
 
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

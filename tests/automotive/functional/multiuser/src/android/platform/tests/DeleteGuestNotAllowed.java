@@ -23,11 +23,15 @@ import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.IAutoUserHelper;
 import android.platform.helpers.SettingsConstants;
 import android.platform.scenario.multiuser.MultiUserConstants;
+import android.platform.test.rules.ConditionalIgnore;
+import android.platform.test.rules.ConditionalIgnoreRule;
+import android.platform.test.rules.IgnoreOnPortrait;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -36,6 +40,7 @@ import org.junit.runner.RunWith;
  */
 @RunWith(AndroidJUnit4.class)
 public class DeleteGuestNotAllowed {
+    @Rule public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
 
     private static final String guestUser = MultiUserConstants.GUEST_NAME;
     private HelperAccessor<IAutoUserHelper> mUsersHelper;
@@ -57,6 +62,7 @@ public class DeleteGuestNotAllowed {
     }
 
     @Test
+    @ConditionalIgnore(condition = IgnoreOnPortrait.class)
     public void testDeleteGuestNotAllowed() throws Exception {
         // verify that guest user cannot be seen and deleted from list of profiles
         assertFalse(mUsersHelper.get().isUserPresent(guestUser));

@@ -17,8 +17,7 @@
 package android.tools.common.flicker.assertions
 
 /** Utility class to store assertions composed of multiple individual assertions */
-class CompoundAssertion<T>(assertion: (T) -> Unit, name: String, optional: Boolean) :
-    IAssertion<T> {
+class CompoundAssertion<T>(assertion: (T) -> Unit, name: String, optional: Boolean) : Assertion<T> {
     private val assertions = mutableListOf<NamedAssertion<T>>()
 
     init {

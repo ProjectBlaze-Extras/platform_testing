@@ -58,6 +58,7 @@ java_library {
     libs: [
         "ub-uiautomator",
         "app-helpers-core",
+        "androidx.test.uiautomator_uiautomator",
     ],
     static_libs: [
         "app-helpers-common-interfaces",

@@ -21,39 +21,36 @@ import android.device.collectors.util.SendToInstrumentation
 import android.os.Bundle
 import android.tools.common.Cache
 import android.tools.common.flicker.AssertionInvocationGroup
-import android.tools.common.flicker.IFlickerService
-import android.tools.common.flicker.assertors.IFaasAssertion
+import android.tools.common.flicker.assertions.ScenarioAssertion
 import android.tools.device.flicker.FlickerServiceResultsCollector.Companion.getKeyForAssertionResult
 import java.lang.reflect.Method
 import org.junit.Assume
 import org.junit.runner.Description
 
 class FlickerServiceCachedTestCase(
-    private val assertion: IFaasAssertion,
-    private val flickerService: IFlickerService,
+    private val assertion: ScenarioAssertion,
     method: Method,
     private val onlyBlocking: Boolean,
     private val isLast: Boolean,
     injectedBy: IFlickerJUnitDecorator,
     private val instrumentation: Instrumentation,
     paramString: String = "",
-) : InjectedTestCase(method, "FaaS_${assertion.name}$paramString", injectedBy) {
+) : InjectedTestCase(method, "FaaS_$assertion$paramString", injectedBy) {
     override fun execute(description: Description) {
         try {
-            val result = flickerService.executeAssertion(assertion)
+            val result = assertion.execute()
 
             val metricBundle = Bundle()
             metricBundle.putString(
                 getKeyForAssertionResult(result),
-                if (result.assertionError == null) "0" else "1"
+                if (result.passed) "0" else "1"
             )
             SendToInstrumentation.sendBundle(instrumentation, metricBundle)
 
             Assume.assumeTrue(
-                !onlyBlocking ||
-                    result.assertion.stabilityGroup == AssertionInvocationGroup.BLOCKING
+                !onlyBlocking || result.stabilityGroup == AssertionInvocationGroup.BLOCKING
             )
-            result.assertionError?.let { throw it }
+            result.assertionErrors.firstOrNull()?.let { throw it }
         } catch (e: Throwable) {
             throw e
         } finally {

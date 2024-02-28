@@ -17,10 +17,10 @@
 package android.tools.device.traces.monitors.surfaceflinger
 
 import android.surfaceflinger.Layerstrace
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.common.io.TraceType
 import android.tools.device.traces.monitors.TraceMonitorTest
 import android.tools.device.traces.monitors.withSFTracing
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
 import org.junit.ClassRule
 import org.junit.FixMethodOrder
@@ -57,6 +57,6 @@ class LayersTraceMonitorTest : TraceMonitorTest<LayersTraceMonitor>() {
     }
 
     companion object {
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

@@ -21,7 +21,7 @@ import android.app.Instrumentation
 import android.app.WindowConfiguration
 import android.os.SystemClock
 import android.os.Trace
-import android.tools.common.CrossPlatform
+import android.tools.common.Logger
 import android.tools.common.Rotation
 import android.tools.common.datatypes.Region
 import android.tools.common.traces.Condition
@@ -34,11 +34,12 @@ import android.tools.common.traces.component.ComponentNameMatcher.Companion.LAUN
 import android.tools.common.traces.component.ComponentNameMatcher.Companion.SNAPSHOT
 import android.tools.common.traces.component.ComponentNameMatcher.Companion.SPLASH_SCREEN
 import android.tools.common.traces.component.ComponentNameMatcher.Companion.SPLIT_DIVIDER
+import android.tools.common.traces.component.ComponentNameMatcher.Companion.TRANSITION_SNAPSHOT
 import android.tools.common.traces.component.IComponentMatcher
 import android.tools.common.traces.surfaceflinger.LayerTraceEntry
 import android.tools.common.traces.surfaceflinger.LayersTrace
 import android.tools.common.traces.wm.Activity
-import android.tools.common.traces.wm.ConfigurationContainer
+import android.tools.common.traces.wm.IConfigurationContainer
 import android.tools.common.traces.wm.WindowManagerState
 import android.tools.common.traces.wm.WindowManagerTrace
 import android.tools.common.traces.wm.WindowState
@@ -115,9 +116,9 @@ constructor(
                 .onLog { msg, isError ->
                     lastMessage = msg
                     if (isError) {
-                        CrossPlatform.log.e(LOG_TAG, msg)
+                        Logger.e(LOG_TAG, msg)
                     } else {
-                        CrossPlatform.log.d(LOG_TAG, msg)
+                        Logger.d(LOG_TAG, msg)
                     }
                 }
                 .onRetry { SystemClock.sleep(retryIntervalMs) }
@@ -311,6 +312,24 @@ constructor(
                 .add(ConditionsFactory.isLayerVisible(componentMatcher))
 
         /**
+         * Wait until least one layer matching [componentMatcher] has [expectedRegion]
+         *
+         * @param componentMatcher Components to search
+         * @param expectedRegion of the target surface
+         */
+        fun withSurfaceVisibleRegion(componentMatcher: IComponentMatcher, expectedRegion: Region) =
+            add(
+                Condition("surfaceRegion") {
+                    val layer =
+                        it.layerState.visibleLayers.firstOrNull { layer ->
+                            componentMatcher.layerMatchesAnyOf(layer)
+                        }
+
+                    layer?.visibleRegion == expectedRegion
+                }
+            )
+
+        /**
          * Waits until the IME window and layer are visible
          *
          * @param displayId of the target display
@@ -360,6 +379,10 @@ constructor(
 
         /** Waits until the [SPLASH_SCREEN] is gone */
         fun withSplashScreenGone() = add(ConditionsFactory.isLayerVisible(SPLASH_SCREEN).negate())
+
+        /** Waits until the [TRANSITION_SNAPSHOT] is gone */
+        fun withTransitionSnapshotGone() =
+            add(ConditionsFactory.isLayerVisible(TRANSITION_SNAPSHOT).negate())
 
         /** Waits until the is no top visible app window in the [WindowManagerState] */
         fun withoutTopVisibleAppWindows() =
@@ -426,16 +449,13 @@ constructor(
                 val activityWindowVisible = matchingWindowStates.isNotEmpty()
 
                 if (!activityWindowVisible) {
-                    CrossPlatform.log.i(
+                    Logger.i(
                         LOG_TAG,
                         "Activity window not visible: ${activityState.windowIdentifier}"
                     )
                     allActivityWindowsVisible = false
                 } else if (!state.wmState.isActivityVisible(activityState.activityMatcher)) {
-                    CrossPlatform.log.i(
-                        LOG_TAG,
-                        "Activity not visible: ${activityState.activityMatcher}"
-                    )
+                    Logger.i(LOG_TAG, "Activity not visible: ${activityState.activityMatcher}")
                     allActivityWindowsVisible = false
                 } else {
                     // Check if window is already the correct state requested by test.
@@ -461,7 +481,7 @@ constructor(
                         break
                     }
                     if (!windowInCorrectState) {
-                        CrossPlatform.log.i(LOG_TAG, "Window in incorrect stack: $activityState")
+                        Logger.i(LOG_TAG, "Window in incorrect stack: $activityState")
                         tasksInCorrectStacks = false
                     }
                 }
@@ -469,7 +489,7 @@ constructor(
             return !allActivityWindowsVisible || !tasksInCorrectStacks
         }
 
-        private fun ConfigurationContainer.isWindowingModeCompatible(
+        private fun IConfigurationContainer.isWindowingModeCompatible(
             requestedWindowingMode: Int
         ): Boolean {
             return when (requestedWindowingMode) {

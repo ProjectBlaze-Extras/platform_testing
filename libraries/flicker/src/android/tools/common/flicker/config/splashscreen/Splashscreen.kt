@@ -17,5 +17,5 @@
 package android.tools.common.flicker.config.splashscreen
 
 internal object Splashscreen {
-    val SCENARIOS = listOf(SplashscreenAvd(), SplashscreenExitAnimation())
+    val SCENARIOS = listOf(SplashscreenAvd, SplashscreenExitAnimation)
 }

@@ -16,8 +16,8 @@
 
 package android.tools.device.traces.monitors.events
 
-import android.tools.common.CrossPlatform
 import android.tools.common.FLICKER_TAG
+import android.tools.common.Logger
 import android.tools.common.Timestamp
 import android.tools.common.io.TraceType
 import android.tools.common.traces.events.EventLog
@@ -54,7 +54,7 @@ open class EventLogMonitor : TraceMonitor() {
             val command =
                 "logcat -b events -v threadtime -v printable -v uid -v nsec " +
                     "-v epoch -t $sinceTime >> $outputFile"
-            CrossPlatform.log.d(FLICKER_TAG, "Running '$command'")
+            Logger.d(FLICKER_TAG, "Running '$command'")
             val eventLogString = executeShellCommand(command)
             it.write(eventLogString)
         }

@@ -16,8 +16,8 @@
 
 package android.tools.common.traces.wm
 
-import android.tools.CleanFlickerEnvironmentRule
-import android.tools.common.CrossPlatform
+import android.tools.common.Timestamps
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
 import org.junit.ClassRule
 import org.junit.FixMethodOrder
@@ -39,79 +39,60 @@ class WindowManagerTraceEntryBuilderTest {
                 orientation = 0,
                 layerId = 0,
                 _isVisible = true,
-                children = emptyArray(),
-                configurationContainer = ConfigurationContainer(null, null, null),
+                _children = emptyArray(),
+                configurationContainer = ConfigurationContainer.EMPTY,
                 computedZ = 0
             )
         )
 
     @Test
     fun createsEntryWithCorrectClockTime() {
-        val builder =
-            WindowManagerTraceEntryBuilder(
-                _elapsedTimestamp = "100",
-                where = "",
-                policy = null,
-                focusedApp = "",
-                focusedDisplayId = 0,
-                focusedWindow = "",
-                inputMethodWindowAppToken = "",
-                isHomeRecentsComponent = false,
-                isDisplayFrozen = false,
-                pendingActivities = emptyArray(),
-                root = emptyRootContainer,
-                keyguardControllerState =
-                    KeyguardControllerState.from(
-                        isAodShowing = false,
-                        isKeyguardShowing = false,
-                        keyguardOccludedStates = mapOf()
-                    ),
-                realToElapsedTimeOffsetNs = "500"
-            )
-        val entry = builder.build()
-        Truth.assertThat(entry.elapsedTimestamp).isEqualTo(100)
-        Truth.assertThat(entry.clockTimestamp).isEqualTo(600)
-
-        Truth.assertThat(entry.timestamp.elapsedNanos).isEqualTo(100)
-        Truth.assertThat(entry.timestamp.systemUptimeNanos)
-            .isEqualTo(CrossPlatform.timestamp.empty().systemUptimeNanos)
-        Truth.assertThat(entry.timestamp.unixNanos).isEqualTo(600)
-    }
-
-    @Test
-    fun supportsMissingRealToElapsedTimeOffsetNs() {
-        val builder =
-            WindowManagerTraceEntryBuilder(
-                _elapsedTimestamp = "100",
-                where = "",
-                policy = null,
-                focusedApp = "",
-                focusedDisplayId = 0,
-                focusedWindow = "",
-                inputMethodWindowAppToken = "",
-                isHomeRecentsComponent = false,
-                isDisplayFrozen = false,
-                pendingActivities = emptyArray(),
-                root = emptyRootContainer,
-                keyguardControllerState =
+        val entry =
+            WindowManagerTraceEntryBuilder()
+                .setElapsedTimestamp("100")
+                .setRoot(emptyRootContainer)
+                .setKeyguardControllerState(
                     KeyguardControllerState.from(
                         isAodShowing = false,
                         isKeyguardShowing = false,
                         keyguardOccludedStates = mapOf()
                     )
-            )
-        val entry = builder.build()
+                )
+                .setRealToElapsedTimeOffsetNs("500")
+                .build()
+        Truth.assertThat(entry.elapsedTimestamp).isEqualTo(100)
+        Truth.assertThat(entry.clockTimestamp).isEqualTo(600)
+
+        Truth.assertThat(entry.timestamp.elapsedNanos).isEqualTo(100)
+        Truth.assertThat(entry.timestamp.systemUptimeNanos)
+            .isEqualTo(Timestamps.empty().systemUptimeNanos)
+        Truth.assertThat(entry.timestamp.unixNanos).isEqualTo(600)
+    }
+
+    @Test
+    fun supportsMissingRealToElapsedTimeOffsetNs() {
+        val entry =
+            WindowManagerTraceEntryBuilder()
+                .setElapsedTimestamp("100")
+                .setRoot(emptyRootContainer)
+                .setKeyguardControllerState(
+                    KeyguardControllerState.from(
+                        isAodShowing = false,
+                        isKeyguardShowing = false,
+                        keyguardOccludedStates = mapOf()
+                    )
+                )
+                .build()
         Truth.assertThat(entry.elapsedTimestamp).isEqualTo(100)
         Truth.assertThat(entry.clockTimestamp).isEqualTo(null)
 
         Truth.assertThat(entry.timestamp.elapsedNanos).isEqualTo(100)
         Truth.assertThat(entry.timestamp.systemUptimeNanos)
-            .isEqualTo(CrossPlatform.timestamp.empty().systemUptimeNanos)
-        Truth.assertThat(entry.timestamp.unixNanos)
-            .isEqualTo(CrossPlatform.timestamp.empty().unixNanos)
+            .isEqualTo(Timestamps.empty().systemUptimeNanos)
+        Truth.assertThat(entry.timestamp.unixNanos).isEqualTo(Timestamps.empty().unixNanos)
     }
 
     companion object {
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

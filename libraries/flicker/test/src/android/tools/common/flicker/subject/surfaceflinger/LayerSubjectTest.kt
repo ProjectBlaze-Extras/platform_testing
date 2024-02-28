@@ -16,12 +16,12 @@
 
 package android.tools.common.flicker.subject.surfaceflinger
 
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.common.Cache
 import android.tools.common.datatypes.Size
 import android.tools.common.flicker.subject.layers.LayerSubject
 import android.tools.common.flicker.subject.layers.LayersTraceSubject
 import android.tools.getLayerTraceReaderFromAsset
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
 import org.junit.Before
 import org.junit.ClassRule
@@ -56,6 +56,6 @@ class LayerSubjectTest {
     }
 
     companion object {
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

@@ -77,8 +77,11 @@ class ScreenRecordRule : TestRule {
 
     private fun shouldRecordScreen(description: Description): Boolean {
         return if (description.isTest) {
-            description.getAnnotation(ScreenRecord::class.java) != null ||
-                testLevelOverrideEnabled()
+            val screenRecordBinaryAvailable = File("/system/bin/screenrecord").exists()
+            log("screenRecordBinaryAvailable: $screenRecordBinaryAvailable")
+            screenRecordBinaryAvailable &&
+                (description.getAnnotation(ScreenRecord::class.java) != null ||
+                    testLevelOverrideEnabled())
         } else { // class level
             description.testClass.hasAnnotation(ScreenRecord::class.java) ||
                 classLevelOverrideEnabled()

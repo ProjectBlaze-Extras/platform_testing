@@ -17,7 +17,6 @@
 package android.platform.helpers;
 
 import android.app.Instrumentation;
-import android.platform.helpers.exceptions.UnknownUiException;
 import android.util.Log;
 
 import androidx.test.uiautomator.BySelector;
@@ -79,7 +78,8 @@ public class FacetBarHelperImpl extends AbstractStandardAppHelper implements IAu
         Log.i(LOG_TAG, String.format("facetIcon: %s", facetIcon.getFacetIcon()));
         BySelector appFacetButtonSelector = getUiElementFromConfig(facetIcon.getFacetIcon());
         UiObject2 appFacetButton = getSpectatioUiUtil().findUiObject(appFacetButtonSelector);
-        validateUiObject(appFacetButton, String.format(facetIcon.getFacetIcon()));
+        getSpectatioUiUtil()
+                .validateUiObject(appFacetButton, String.format(facetIcon.getFacetIcon()));
         getSpectatioUiUtil().clickAndWait(appFacetButton);
         getSpectatioUiUtil().wait1Second();
     }
@@ -88,12 +88,5 @@ public class FacetBarHelperImpl extends AbstractStandardAppHelper implements IAu
     public void goToHomeScreen() {
         getSpectatioUiUtil().pressHome();
         getSpectatioUiUtil().waitForIdle();
-    }
-
-    private void validateUiObject(UiObject2 uiObject, String action) {
-        if (uiObject == null) {
-            throw new UnknownUiException(
-                    String.format("Unable to find UI Element for %s.", action));
-        }
     }
 }

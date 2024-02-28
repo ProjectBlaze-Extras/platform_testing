@@ -21,17 +21,22 @@ import static junit.framework.Assert.assertTrue;
 import android.app.Instrumentation;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoFacetBarHelper;
+import android.platform.test.rules.ConditionalIgnore;
+import android.platform.test.rules.ConditionalIgnoreRule;
+import android.platform.test.rules.IgnoreOnPortrait;
 import android.support.test.uiautomator.UiDevice;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class NavigationBarTest {
+    @Rule public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
 
     private Instrumentation mInstrumentation;
     private UiDevice mDevice;
@@ -49,6 +54,7 @@ public class NavigationBarTest {
     }
 
     @Test
+    @ConditionalIgnore(condition = IgnoreOnPortrait.class)
     public void testHomeButton() {
         mFacetBarHelper.get().clickOnFacetIcon(IAutoFacetBarHelper.FACET_BAR.HOME);
         assertTrue(
@@ -57,6 +63,7 @@ public class NavigationBarTest {
     }
 
     @Test
+    @ConditionalIgnore(condition = IgnoreOnPortrait.class)
     public void testDialButton() {
         mFacetBarHelper.get().clickOnFacetIcon(IAutoFacetBarHelper.FACET_BAR.PHONE);
         assertTrue(

@@ -18,7 +18,7 @@ package android.tools.common.traces.component
 
 import android.tools.common.traces.surfaceflinger.Layer
 import android.tools.common.traces.wm.Activity
-import android.tools.common.traces.wm.WindowContainer
+import android.tools.common.traces.wm.IWindowContainer
 
 /**
  * A component matcher that matches the targeted window and layer with ids windowId and layerId
@@ -31,21 +31,21 @@ class ExactComponentIdMatcher(private val windowId: Int, private val layerId: In
     IComponentMatcher {
     /**
      * @param windows to search
-     * @return if any of the [components] matches any of [windows]
+     * @return if any of the components matches any of [windows]
      */
-    override fun windowMatchesAnyOf(windows: Array<WindowContainer>) =
+    override fun windowMatchesAnyOf(windows: Array<IWindowContainer>) =
         windows.any { it.token == windowId.toString(16) }
 
     /**
      * @param activities to search
-     * @return if any of the [components] matches any of [activities]
+     * @return if any of the components matches any of [activities]
      */
     override fun activityMatchesAnyOf(activities: Array<Activity>) =
         activities.any { it.token == windowId.toString(16) }
 
     /**
      * @param layers to search
-     * @return if any of the [components] matches any of [layers]
+     * @return if any of the components matches any of [layers]
      */
     override fun layerMatchesAnyOf(layers: Array<Layer>) = layers.any { it.id == layerId }
 

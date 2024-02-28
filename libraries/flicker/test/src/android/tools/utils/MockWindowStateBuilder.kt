@@ -63,8 +63,8 @@ class MockWindowStateBuilder() {
                         orientation = 1,
                         layerId = 1,
                         _isVisible = true,
-                        configurationContainer = ConfigurationContainer(null, null, null),
-                        children = emptyArray(),
+                        configurationContainer = ConfigurationContainer.EMPTY,
+                        _children = emptyArray(),
                         computedZ = 0
                     )
                 ),

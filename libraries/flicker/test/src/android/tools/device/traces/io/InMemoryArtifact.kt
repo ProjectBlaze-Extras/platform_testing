@@ -16,11 +16,11 @@
 
 package android.tools.device.traces.io
 
-import android.tools.common.io.IArtifact
+import android.tools.common.io.Artifact
 import android.tools.common.io.ResultArtifactDescriptor
 import android.tools.common.io.RunStatus
 
-class InMemoryArtifact(artifactIdentifier: String) : IArtifact {
+class InMemoryArtifact(artifactIdentifier: String) : Artifact {
 
     override val absolutePath = "IN_MEMORY/$artifactIdentifier"
     override val stableId = artifactIdentifier

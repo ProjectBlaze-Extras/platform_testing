@@ -16,23 +16,23 @@
 
 package android.tools.common.flicker.assertors.assertions
 
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.ComponentTemplate
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
 import android.tools.common.traces.component.ComponentNameMatcher
 
 /** Checks if the [component] layer is visible at the end of the transition */
 class AppLayerIsVisibleAtEnd(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(scenarioInstance: IScenarioInstance, layerSubject: LayersTraceSubject) {
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
         // The app launch transition can finish when the splashscreen or SnapshotStartingWindows are
         // shown before the app window and layers are actually shown. (b/284302118)
-        layerSubject
-            .last()
-            .isVisible(
+        flicker.assertLayersEnd {
+            isVisible(
                 ComponentNameMatcher.SNAPSHOT.or(ComponentNameMatcher.SPLASH_SCREEN)
                     .or(component.build(scenarioInstance))
             )
+        }
     }
 }

@@ -26,7 +26,7 @@ import android.tools.common.flicker.subject.exceptions.InvalidElementException
 import android.tools.common.flicker.subject.exceptions.InvalidPropertyException
 import android.tools.common.flicker.subject.exceptions.SubjectAssertionError
 import android.tools.common.flicker.subject.region.RegionSubject
-import android.tools.common.io.IReader
+import android.tools.common.io.Reader
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.common.traces.component.IComponentMatcher
 import android.tools.common.traces.wm.WindowManagerState
@@ -58,7 +58,7 @@ import android.tools.common.traces.wm.WindowState
  */
 class WindowManagerStateSubject(
     val wmState: WindowManagerState,
-    override val reader: IReader? = null,
+    override val reader: Reader? = null,
     val trace: WindowManagerTraceSubject? = null,
 ) : FlickerSubject(), IWindowManagerSubject<WindowManagerStateSubject, RegionSubject> {
     override val timestamp = wmState.timestamp

@@ -22,3 +22,9 @@ const val SECOND_AS_NANOSECONDS: Long = 1000000000
 const val MINUTE_AS_NANOSECONDS: Long = 60000000000
 const val HOUR_AS_NANOSECONDS: Long = 3600000000000
 const val DAY_AS_NANOSECONDS: Long = 86400000000000
+
+var Logger: ILogger = ConsoleLogger()
+    internal set
+
+var Timestamps: TimestampFactory = TimestampFactory()
+    internal set

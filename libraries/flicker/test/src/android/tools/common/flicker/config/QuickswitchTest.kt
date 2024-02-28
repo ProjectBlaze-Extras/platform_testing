@@ -26,6 +26,7 @@ import android.tools.device.apphelpers.CameraAppHelper
 import android.tools.device.flicker.Utils
 import android.tools.device.traces.getDefaultFlickerOutputDir
 import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.rules.CleanFlickerEnvironmentRule
 import android.view.Display
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.tapl.LauncherInstrumentation
@@ -52,7 +53,7 @@ class QuickswitchTest {
         browser.launchViaIntent(wmHelper)
         camera.launchViaIntent(wmHelper)
 
-        val scenario = ScenarioBuilder().forClass("Quickswitch").build()
+        val scenario = ScenarioBuilder().forClass("QuickSwitch").build()
         val reader =
             Utils.captureTrace(scenario, getDefaultFlickerOutputDir()) {
                 tapl.launchedAppState.quickSwitchToPreviousApp()
@@ -68,13 +69,14 @@ class QuickswitchTest {
         browser.exit()
         camera.exit()
 
-        val quickswitchExtractor = Quickswitch().extractor
-        val scenarioInstances = quickswitchExtractor.extract(reader)
+        val quickSwitchExtractor = Quickswitch.extractor
+        val slices = quickSwitchExtractor.extract(reader)
 
-        Truth.assertThat(scenarioInstances).hasSize(1)
+        Truth.assertThat(slices).hasSize(1)
     }
 
     companion object {
-        @ClassRule @JvmField val navigationModeRule = NavigationModeRule(NavBar.MODE_GESTURAL.value)
+        @ClassRule @JvmField val NAV_MODE_RULE = NavigationModeRule(NavBar.MODE_GESTURAL.value)
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

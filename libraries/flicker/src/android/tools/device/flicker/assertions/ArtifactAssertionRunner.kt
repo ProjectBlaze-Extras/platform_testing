@@ -16,8 +16,7 @@
 
 package android.tools.device.flicker.assertions
 
-import android.tools.common.flicker.assertions.SubjectsParser
-import android.tools.common.io.IReader
+import android.tools.common.io.Reader
 import android.tools.common.io.RunStatus
 import android.tools.device.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.device.traces.io.IResultData
@@ -28,13 +27,11 @@ import android.tools.device.traces.io.ResultReaderWithLru
  *
  * @param result flicker artifact data
  * @param resultReader helper class to read the flicker artifact
- * @param subjectsParser helper class to convert a result into flicker subjects
  */
 class ArtifactAssertionRunner(
     private val result: IResultData,
-    resultReader: IReader = ResultReaderWithLru(result, TRACE_CONFIG_REQUIRE_CHANGES),
-    subjectsParser: SubjectsParser = SubjectsParser(resultReader)
-) : BaseAssertionRunner(resultReader, subjectsParser) {
+    resultReader: Reader = ResultReaderWithLru(result, TRACE_CONFIG_REQUIRE_CHANGES)
+) : BaseAssertionRunner(resultReader) {
     override fun doUpdateStatus(newStatus: RunStatus) {
         result.updateStatus(newStatus)
     }

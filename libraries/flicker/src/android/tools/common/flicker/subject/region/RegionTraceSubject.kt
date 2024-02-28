@@ -19,14 +19,14 @@ package android.tools.common.flicker.subject.region
 import android.tools.common.datatypes.Rect
 import android.tools.common.datatypes.Region
 import android.tools.common.flicker.subject.FlickerTraceSubject
-import android.tools.common.io.IReader
+import android.tools.common.io.Reader
 import android.tools.common.traces.region.RegionTrace
 
 /**
  * Subject for [RegionTrace] objects, used to make assertions over behaviors that occur on a
  * sequence of regions.
  */
-class RegionTraceSubject(val trace: RegionTrace, override val reader: IReader? = null) :
+class RegionTraceSubject(val trace: RegionTrace, override val reader: Reader? = null) :
     FlickerTraceSubject<RegionSubject>(), IRegionSubject {
 
     override val subjects by lazy { trace.entries.map { RegionSubject(it, it.timestamp, reader) } }

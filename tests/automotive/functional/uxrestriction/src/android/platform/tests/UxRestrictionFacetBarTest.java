@@ -18,23 +18,26 @@ package android.platform.tests;
 
 import static junit.framework.Assert.assertTrue;
 
-import android.platform.helpers.AutoUtility;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoAppGridHelper;
 import android.platform.helpers.IAutoFacetBarHelper;
 import android.platform.helpers.IAutoVehicleHardKeysHelper;
 import android.platform.helpers.IAutoVehicleHardKeysHelper.DrivingState;
+import android.platform.test.rules.ConditionalIgnore;
+import android.platform.test.rules.ConditionalIgnoreRule;
+import android.platform.test.rules.IgnoreOnPortrait;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class UxRestrictionFacetBarTest {
+    @Rule public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
 
     private HelperAccessor<IAutoAppGridHelper> mAppGridHelper;
     private HelperAccessor<IAutoFacetBarHelper> mFacetBarHelper;
@@ -49,10 +52,6 @@ public class UxRestrictionFacetBarTest {
         mHardKeysHelper = new HelperAccessor<>(IAutoVehicleHardKeysHelper.class);
     }
 
-    @BeforeClass
-    public static void exitSuw() {
-        AutoUtility.exitSuw();
-    }
 
     @Before
     public void enableDrivingMode() {
@@ -69,6 +68,7 @@ public class UxRestrictionFacetBarTest {
     }
 
     @Test
+    @ConditionalIgnore(condition = IgnoreOnPortrait.class)
     public void testRestrictedHomeFacetBar() {
         mAppGridHelper.get().open();
         mFacetBarHelper.get().clickOnFacetIcon(IAutoFacetBarHelper.FACET_BAR.HOME);
@@ -78,6 +78,7 @@ public class UxRestrictionFacetBarTest {
     }
 
     @Test
+    @ConditionalIgnore(condition = IgnoreOnPortrait.class)
     public void testRestrictedPhoneFacetBar() {
         mFacetBarHelper.get().clickOnFacetIcon(IAutoFacetBarHelper.FACET_BAR.PHONE);
         assertTrue(

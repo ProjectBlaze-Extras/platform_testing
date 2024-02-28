@@ -17,5 +17,5 @@
 package android.tools.common.flicker.config.gesturenav
 
 internal object GestureNav {
-    val SCENARIOS = listOf(Quickswitch(), SwipeToRecents())
+    val SCENARIOS = listOf(Quickswitch, SwipeToRecents)
 }

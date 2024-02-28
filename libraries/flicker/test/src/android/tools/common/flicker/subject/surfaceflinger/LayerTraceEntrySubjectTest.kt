@@ -16,7 +16,6 @@
 
 package android.tools.common.flicker.subject.surfaceflinger
 
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.TestComponents
 import android.tools.assertFail
 import android.tools.assertThatErrorContainsDebugInfo
@@ -29,6 +28,7 @@ import android.tools.common.flicker.subject.layers.LayersTraceSubject
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.common.traces.component.OrComponentMatcher
 import android.tools.getLayerTraceReaderFromAsset
+import android.tools.rules.CleanFlickerEnvironmentRule
 import android.tools.utils.MockLayerBuilder
 import android.tools.utils.MockLayerTraceEntryBuilder
 import com.google.common.truth.Truth
@@ -115,7 +115,7 @@ class LayerTraceEntrySubjectTest {
         val reader = getLayerTraceReaderFromAsset("layers_trace_emptyregion.pb", legacyTrace = true)
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         val expectedVisibleRegion = Region.from(0, 0, 1, 1)
-        assertFail("SkRegion() should cover exactly SkRegion((0,0,1,1))") {
+        assertFail("[empty] should cover exactly SkRegion((0,0,1,1))") {
             LayersTraceSubject(trace, reader)
                 .getEntryBySystemUpTime(937126074082, byElapsedTimestamp = true)
                 .visibleRegion(TestComponents.DOCKER_STACK_DIVIDER)
@@ -128,7 +128,7 @@ class LayerTraceEntrySubjectTest {
         val reader = getLayerTraceReaderFromAsset("layers_trace_emptyregion.pb", legacyTrace = true)
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         val expectedVisibleRegion = Region.from(0, 0, 1, 1)
-        assertFail("SkRegion() should cover exactly SkRegion((0,0,1,1))") {
+        assertFail("[empty] should cover exactly SkRegion((0,0,1,1))") {
             LayersTraceSubject(trace, reader)
                 .getEntryBySystemUpTime(935346112030, byElapsedTimestamp = true)
                 .visibleRegion(TestComponents.SIMPLE_APP)
@@ -392,6 +392,6 @@ class LayerTraceEntrySubjectTest {
     }
 
     companion object {
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

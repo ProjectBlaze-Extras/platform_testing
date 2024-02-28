@@ -28,24 +28,7 @@ import kotlin.js.JsName
 @JsExport
 class ActiveBuffer private constructor(width: Int, height: Int, val stride: Int, val format: Int) :
     Size(width, height) {
-    override fun prettyPrint(): String = "w:$width, h:$height, stride:$stride, format:$format"
-
-    override fun equals(other: Any?): Boolean =
-        other is ActiveBuffer &&
-            other.height == height &&
-            other.width == width &&
-            other.stride == stride &&
-            other.format == format
-
-    override fun hashCode(): Int {
-        var result = height
-        result = 31 * result + width
-        result = 31 * result + stride
-        result = 31 * result + format
-        return result
-    }
-
-    override fun toString(): String = prettyPrint()
+    override fun doPrintValue() = "w:$width, h:$height, stride:$stride, format:$format"
 
     companion object {
         @JsName("EMPTY")

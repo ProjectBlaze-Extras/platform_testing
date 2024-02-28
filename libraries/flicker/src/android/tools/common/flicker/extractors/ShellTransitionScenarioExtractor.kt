@@ -16,18 +16,12 @@
 
 package android.tools.common.flicker.extractors
 
-import android.tools.common.flicker.IScenarioInstance
-import android.tools.common.flicker.ScenarioInstance
-import android.tools.common.flicker.config.FaasScenarioType
-import android.tools.common.io.IReader
+import android.tools.common.io.Reader
 
 class ShellTransitionScenarioExtractor(
-    val type: FaasScenarioType,
-    val transitionMatcher: ITransitionMatcher,
-) : IScenarioExtractor {
-    override fun extract(reader: IReader): List<IScenarioInstance> {
-        val layersTrace = reader.readLayersTrace() ?: error("Missing layers trace")
-
+    private val transitionMatcher: ITransitionMatcher,
+) : ScenarioExtractor {
+    override fun extract(reader: Reader): List<TraceSlice> {
         val transitionsTrace = reader.readTransitionsTrace() ?: error("Missing transitions trace")
         val completeTransitions = transitionsTrace.entries.filter { !it.isIncomplete }
 
@@ -37,21 +31,7 @@ class ShellTransitionScenarioExtractor(
             val startTimestamp = Utils.interpolateStartTimestampFromTransition(it, reader)
             val endTimestamp = Utils.interpolateFinishTimestampFromTransition(it, reader)
 
-            val displayAtStart =
-                Utils.getOnDisplayFor(layersTrace.getFirstEntryWithOnDisplayAfter(startTimestamp))
-            val displayAtEnd =
-                Utils.getOnDisplayFor(layersTrace.getLastEntryWithOnDisplayBefore(endTimestamp))
-
-            ScenarioInstance(
-                type,
-                startRotation = displayAtStart.transform.getRotation(),
-                endRotation = displayAtEnd.transform.getRotation(),
-                startTimestamp = startTimestamp,
-                endTimestamp = endTimestamp,
-                associatedCuj = null,
-                associatedTransition = it,
-                reader = reader.slice(startTimestamp, endTimestamp)
-            )
+            TraceSlice(startTimestamp, endTimestamp, associatedTransition = it)
         }
     }
 }

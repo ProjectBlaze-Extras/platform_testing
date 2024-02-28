@@ -19,16 +19,16 @@ package android.tools.common.flicker.config.lockscreen
 internal object Lockscreen {
     val SCENARIOS =
         listOf(
-            LockscreenAppLaunchCamera(),
-            LockscreenOcclusion(),
-            LockscreenPasswordAppear(),
-            LockscreenPasswordDisappear(),
-            LockscreenPatternAppear(),
-            LockscreenPatternDisappear(),
-            LockscreenPinAppear(),
-            LockscreenPinDisappear(),
-            LockscreenTransitionFromAod(),
-            LockscreenTransitionToAod(),
-            LockscreenUnlockAnimation()
+            LockscreenAppLaunchCamera,
+            LockscreenOcclusion,
+            LockscreenPasswordAppear,
+            LockscreenPasswordDisappear,
+            LockscreenPatternAppear,
+            LockscreenPatternDisappear,
+            LockscreenPinAppear,
+            LockscreenPinDisappear,
+            LockscreenTransitionFromAod,
+            LockscreenTransitionToAod,
+            LockscreenUnlockAnimation
         )
 }

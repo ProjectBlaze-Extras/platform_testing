@@ -16,7 +16,7 @@
 
 package android.tools.device.flicker
 
-import android.tools.common.IScenario
+import android.tools.common.Scenario
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.device.traces.io.ResultReader
@@ -91,7 +91,7 @@ object Utils {
     }
 
     fun captureTrace(
-        scenario: IScenario,
+        scenario: Scenario,
         outputDir: File = createTempDirectory().toFile(),
         monitors: List<TraceMonitor> =
             listOf(

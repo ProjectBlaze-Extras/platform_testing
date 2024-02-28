@@ -17,14 +17,12 @@
 package android.tools.device.flicker.junit
 
 import android.annotation.SuppressLint
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.TEST_SCENARIO
 import android.tools.device.flicker.datastore.DataStore
 import android.tools.device.flicker.isShellTransitionsEnabled
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
-import kotlin.reflect.KClass
 import org.junit.Before
 import org.junit.ClassRule
 import org.junit.Test
@@ -81,7 +79,7 @@ class LegacyFlickerServiceDecoratorTest {
             )
         val methods =
             decorator.getTestMethods(
-                LegacyFlickerJUnit4ClassRunnerTest.SimpleFaasTest(FlickerTest())
+                LegacyFlickerJUnit4ClassRunnerTest.SimpleFaasTest(LegacyFlickerTest())
             )
         val duplicatedMethods = methods.groupBy { it.name }.filter { it.value.size > 1 }
 
@@ -91,102 +89,7 @@ class LegacyFlickerServiceDecoratorTest {
         Truth.assertWithMessage("Unique methods").that(duplicatedMethods).isEmpty()
     }
 
-    @Test
-    fun failNoProviderMethods() {
-        assertFailProviderMethod(
-            TestUtils.DummyTestClassEmpty::class,
-            expectedExceptions =
-                listOf("One object should be annotated with @FlickerBuilderProvider")
-        )
-    }
-
-    @Test
-    fun failMultipleProviderMethods() {
-        assertFailProviderMethod(
-            TestUtils.DummyTestClassMultipleProvider::class,
-            expectedExceptions =
-                listOf("Only one object should be annotated with @FlickerBuilderProvider")
-        )
-    }
-
-    @Test
-    fun failStaticProviderMethod() {
-        assertFailProviderMethod(
-            TestUtils.DummyTestClassProviderStatic::class,
-            expectedExceptions = listOf("Method myMethod() should not be static")
-        )
-    }
-
-    @Test
-    fun failPrivateProviderMethod() {
-        assertFailProviderMethod(
-            TestUtils.DummyTestClassProviderPrivateVoid::class,
-            expectedExceptions =
-                listOf(
-                    "Method myMethod() should be public",
-                    "Method myMethod() should return a " +
-                        "${FlickerBuilder::class.java.simpleName} object"
-                )
-        )
-    }
-
-    @Test
-    fun failConstructorWithNoArguments() {
-        assertFailConstructor(emptyList())
-    }
-
-    @Test
-    fun failWithInvalidConstructorArgument() {
-        assertFailConstructor(listOf(1, 2, 3))
-    }
-
-    private fun assertFailProviderMethod(cls: KClass<*>, expectedExceptions: List<String>) {
-        val test =
-            TestWithParameters("test", TestClass(cls.java), listOf(TestUtils.VALID_ARGS_EMPTY))
-        val mockTransitionRunner = Mockito.mock(ITransitionRunner::class.java)
-        val decorator =
-            LegacyFlickerServiceDecorator(
-                test.testClass,
-                scenario = null,
-                mockTransitionRunner,
-                inner = null
-            )
-        val failures = decorator.doValidateInstanceMethods()
-        Truth.assertWithMessage("Failure count").that(failures).hasSize(expectedExceptions.count())
-        expectedExceptions.forEachIndexed { idx, expectedException ->
-            val failure = failures[idx]
-            Truth.assertWithMessage("Failure")
-                .that(failure)
-                .hasMessageThat()
-                .contains(expectedException)
-        }
-    }
-
-    private fun assertFailConstructor(args: List<Any>) {
-        val test =
-            TestWithParameters("test", TestClass(TestUtils.DummyTestClassEmpty::class.java), args)
-        val mockTransitionRunner = Mockito.mock(ITransitionRunner::class.java)
-        val decorator =
-            LegacyFlickerServiceDecorator(
-                test.testClass,
-                scenario = null,
-                mockTransitionRunner,
-                inner = null
-            )
-        val failures = decorator.doValidateConstructor()
-
-        Truth.assertWithMessage("Failure count").that(failures).hasSize(1)
-
-        val failure = failures.first()
-        Truth.assertWithMessage("Expected failure")
-            .that(failure)
-            .hasMessageThat()
-            .contains(
-                "Constructor should have a parameter of type ${FlickerTest::class.simpleName}"
-            )
-    }
-
     companion object {
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

@@ -18,13 +18,13 @@ package android.tools.common.flicker.subject
 
 import android.tools.common.Timestamp
 import android.tools.common.flicker.assertions.Fact
-import android.tools.common.io.IReader
+import android.tools.common.io.Reader
 
 /** Subject builder for flicker checks */
 data class CheckSubjectBuilder(
     private val timestamp: Timestamp,
     private val extraFacts: List<Fact>,
-    private val reader: IReader?,
+    private val reader: Reader?,
     private val lazyMessage: () -> String
 ) {
     fun <T> that(actual: T?): CheckSubject<T> {

@@ -17,28 +17,26 @@
 package android.tools.common.flicker.config.gesturenav
 
 import android.tools.common.flicker.config.AssertionTemplates
-import android.tools.common.flicker.config.FaasScenarioType
-import android.tools.common.flicker.config.IScenarioConfig
+import android.tools.common.flicker.config.FlickerConfigEntry
+import android.tools.common.flicker.config.ScenarioId
 import android.tools.common.flicker.config.TransitionFilters
 import android.tools.common.flicker.extractors.TaggedCujTransitionMatcher
-import android.tools.common.flicker.extractors.TaggedScenarioExtractor
+import android.tools.common.flicker.extractors.TaggedScenarioExtractorBuilder
 import android.tools.common.traces.events.CujType
 
-class Quickswitch : IScenarioConfig {
-    override val enabled = true
-
-    override val type = FaasScenarioType.LAUNCHER_QUICK_SWITCH
-
-    override val assertionTemplates = AssertionTemplates.LAUNCHER_QUICK_SWITCH_ASSERTIONS
-
-    override val extractor =
-        TaggedScenarioExtractor(
-            targetTag = CujType.CUJ_LAUNCHER_QUICK_SWITCH,
-            type,
-            transitionMatcher =
-                TaggedCujTransitionMatcher(
-                    TransitionFilters.QUICK_SWITCH_TRANSITION_FILTER,
-                    finalTransform = TransitionFilters.QUICK_SWITCH_TRANSITION_POST_PROCESSING
+val Quickswitch =
+    FlickerConfigEntry(
+        enabled = true,
+        scenarioId = ScenarioId("QUICKSWITCH"),
+        assertions = AssertionTemplates.LAUNCHER_QUICK_SWITCH_ASSERTIONS,
+        extractor =
+            TaggedScenarioExtractorBuilder()
+                .setTargetTag(CujType.CUJ_LAUNCHER_QUICK_SWITCH)
+                .setTransitionMatcher(
+                    TaggedCujTransitionMatcher(
+                        TransitionFilters.QUICK_SWITCH_TRANSITION_FILTER,
+                        finalTransform = TransitionFilters.QUICK_SWITCH_TRANSITION_POST_PROCESSING
+                    )
                 )
-        )
-}
+                .build()
+    )

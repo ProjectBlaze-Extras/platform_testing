@@ -17,13 +17,26 @@
 package android.security.sts.sts_test_app_package;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 public class PocActivity extends Activity {
+    private static final String TAG = PocActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.d(TAG, "poc activity started");
+
+        // Collect the artifact representing vulnerability here.
+        // Change this to whatever type best fits the vulnerable artifact; consider using a bundle
+        // if there are multiple artifacts necessary to prove the security vulnerability.
+        String artifact = "vulnerable";
+
+        Intent vulnerabilityDescriptionIntent = new Intent(DeviceTest.ACTION_BROADCAST);
+        vulnerabilityDescriptionIntent.putExtra(DeviceTest.INTENT_ARTIFACT, artifact);
+        this.sendBroadcast(vulnerabilityDescriptionIntent);
     }
 }

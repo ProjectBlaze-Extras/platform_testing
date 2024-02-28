@@ -17,23 +17,22 @@
 package android.tools.common.flicker.config.lockscreen
 
 import android.tools.common.flicker.config.AssertionTemplates
-import android.tools.common.flicker.config.FaasScenarioType
-import android.tools.common.flicker.config.IScenarioConfig
+import android.tools.common.flicker.config.FlickerConfigEntry
+import android.tools.common.flicker.config.ScenarioId
 import android.tools.common.flicker.extractors.TaggedCujTransitionMatcher
-import android.tools.common.flicker.extractors.TaggedScenarioExtractor
+import android.tools.common.flicker.extractors.TaggedScenarioExtractorBuilder
 import android.tools.common.traces.events.CujType
 
-class LockscreenTransitionFromAod : IScenarioConfig {
-    override val enabled = true
-
-    override val type = FaasScenarioType.LOCKSCREEN_TRANSITION_FROM_AOD
-
-    override val assertionTemplates = AssertionTemplates.LOCKSCREEN_TRANSITION_FROM_AOD_ASSERTIONS
-
-    override val extractor =
-        TaggedScenarioExtractor(
-            targetTag = CujType.CUJ_LOCKSCREEN_TRANSITION_FROM_AOD,
-            type,
-            transitionMatcher = TaggedCujTransitionMatcher(associatedTransitionRequired = false),
-        )
-}
+val LockscreenTransitionFromAod =
+    FlickerConfigEntry(
+        enabled = true,
+        scenarioId = ScenarioId("LOCKSCREEN_TRANSITION_FROM_AOD"),
+        assertions = AssertionTemplates.COMMON_ASSERTIONS,
+        extractor =
+            TaggedScenarioExtractorBuilder()
+                .setTargetTag(CujType.CUJ_LOCKSCREEN_TRANSITION_FROM_AOD)
+                .setTransitionMatcher(
+                    TaggedCujTransitionMatcher(associatedTransitionRequired = false)
+                )
+                .build()
+    )

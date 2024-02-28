@@ -17,14 +17,18 @@
 package android.tools.device.flicker.junit
 
 import android.annotation.SuppressLint
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.common.ScenarioBuilder
 import android.tools.device.flicker.datastore.DataStore
-import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.rules.CleanFlickerEnvironmentRule
+import android.tools.utils.KotlinMockito
 import com.google.common.truth.Truth
+import kotlin.reflect.KClass
 import org.junit.Before
 import org.junit.ClassRule
 import org.junit.Test
+import org.junit.runner.Description
 import org.junit.runners.model.FrameworkMethod
 import org.junit.runners.model.TestClass
 import org.junit.runners.parameterized.TestWithParameters
@@ -39,7 +43,7 @@ class LegacyFlickerDecoratorTest {
     }
 
     @Test
-    fun hasNoTestMethods() {
+    fun usesTestMethodsProvidedByInner() {
         val scenario =
             ScenarioBuilder().forClass(TestUtils.DummyTestClassValid::class.java.name).build()
         val test =
@@ -49,9 +53,12 @@ class LegacyFlickerDecoratorTest {
                 listOf(TestUtils.VALID_ARGS_EMPTY)
             )
         val mockTransitionRunner = Mockito.mock(ITransitionRunner::class.java)
-        val helper =
-            LegacyFlickerDecorator(test.testClass, scenario, mockTransitionRunner, inner = null)
-        Truth.assertWithMessage("Test method count").that(helper.getTestMethods(Any())).isEmpty()
+        val inner = Mockito.mock(IFlickerJUnitDecorator::class.java)
+        val helper = LegacyFlickerDecorator(test.testClass, scenario, mockTransitionRunner, inner)
+
+        val mockMethod = Mockito.mock(FrameworkMethod::class.java)
+        Mockito.`when`(inner.getTestMethods(test)).thenReturn(listOf(mockMethod))
+        Truth.assertThat(helper.getTestMethods(test)).containsExactly(mockMethod)
     }
 
     @Test
@@ -65,13 +72,21 @@ class LegacyFlickerDecoratorTest {
                 listOf(TestUtils.VALID_ARGS_EMPTY)
             )
         val mockTransitionRunner = Mockito.mock(ITransitionRunner::class.java)
+        val inner = Mockito.mock(IFlickerJUnitDecorator::class.java)
         val decorator =
-            LegacyFlickerDecorator(test.testClass, scenario, mockTransitionRunner, inner = null)
+            LegacyFlickerDecorator(test.testClass, scenario, mockTransitionRunner, inner)
         TestUtils.executionCount = 0
         val method =
             FrameworkMethod(TestUtils.DummyTestClassValid::class.java.getMethod("dummyExecute"))
+
+        Mockito.`when`(inner.getTestMethods(KotlinMockito.any(Any::class.java)))
+            .thenReturn(listOf())
+        Mockito.`when`(inner.getChildDescription(KotlinMockito.any(FrameworkMethod::class.java)))
+            .thenReturn(Mockito.mock(Description::class.java))
+
         val description = decorator.getChildDescription(method)
-        val invokerTest = TestUtils.DummyTestClassValid(FlickerTest())
+        val invokerTest = TestUtils.DummyTestClassValid(LegacyFlickerTest())
+
         decorator
             .getMethodInvoker(
                 method,
@@ -94,16 +109,22 @@ class LegacyFlickerDecoratorTest {
             )
         val transitionRunner = LegacyFlickerJUnit4ClassRunner(test, scenario).transitionRunner
 
-        val decorator =
-            LegacyFlickerDecorator(test.testClass, scenario, transitionRunner, inner = null)
+        val inner = Mockito.mock(IFlickerJUnitDecorator::class.java)
+        val decorator = LegacyFlickerDecorator(test.testClass, scenario, transitionRunner, inner)
         TestUtils.executionCount = 0
         val method =
             FrameworkMethod(TestUtils.DummyTestClassValid::class.java.getMethod("dummyExecute"))
+
+        Mockito.`when`(inner.getTestMethods(KotlinMockito.any(Any::class.java)))
+            .thenReturn(listOf(method))
+        Mockito.`when`(inner.getChildDescription(KotlinMockito.any(FrameworkMethod::class.java)))
+            .thenReturn(Mockito.mock(Description::class.java))
+
         repeat(3) {
             decorator
                 .getMethodInvoker(
                     method,
-                    test = TestUtils.DummyTestClassValid(FlickerTest()),
+                    test = TestUtils.DummyTestClassValid(LegacyFlickerTest()),
                 )
                 .evaluate()
         }
@@ -114,7 +135,102 @@ class LegacyFlickerDecoratorTest {
             .isTrue()
     }
 
+    @Test
+    fun failNoProviderMethods() {
+        assertFailProviderMethod(
+            TestUtils.DummyTestClassEmpty::class,
+            expectedExceptions =
+                listOf("One object should be annotated with @FlickerBuilderProvider")
+        )
+    }
+
+    @Test
+    fun failMultipleProviderMethods() {
+        assertFailProviderMethod(
+            TestUtils.DummyTestClassMultipleProvider::class,
+            expectedExceptions =
+                listOf("Only one object should be annotated with @FlickerBuilderProvider")
+        )
+    }
+
+    @Test
+    fun failStaticProviderMethod() {
+        assertFailProviderMethod(
+            TestUtils.DummyTestClassProviderStatic::class,
+            expectedExceptions = listOf("Method myMethod() should not be static")
+        )
+    }
+
+    @Test
+    fun failPrivateProviderMethod() {
+        assertFailProviderMethod(
+            TestUtils.DummyTestClassProviderPrivateVoid::class,
+            expectedExceptions =
+                listOf(
+                    "Method myMethod() should be public",
+                    "Method myMethod() should return a " +
+                        "${FlickerBuilder::class.java.simpleName} object"
+                )
+        )
+    }
+
+    @Test
+    fun failConstructorWithNoArguments() {
+        assertFailConstructor(emptyList())
+    }
+
+    @Test
+    fun failWithInvalidConstructorArgument() {
+        assertFailConstructor(listOf(1, 2, 3))
+    }
+
+    private fun assertFailProviderMethod(cls: KClass<*>, expectedExceptions: List<String>) {
+        val test =
+            TestWithParameters("test", TestClass(cls.java), listOf(TestUtils.VALID_ARGS_EMPTY))
+        val mockTransitionRunner = Mockito.mock(ITransitionRunner::class.java)
+        val decorator =
+            LegacyFlickerDecorator(
+                test.testClass,
+                scenario = null,
+                mockTransitionRunner,
+                inner = null
+            )
+        val failures = decorator.doValidateInstanceMethods()
+        Truth.assertWithMessage("Failure count").that(failures).hasSize(expectedExceptions.count())
+        expectedExceptions.forEachIndexed { idx, expectedException ->
+            val failure = failures[idx]
+            Truth.assertWithMessage("Failure")
+                .that(failure)
+                .hasMessageThat()
+                .contains(expectedException)
+        }
+    }
+
+    private fun assertFailConstructor(args: List<Any>) {
+        val test =
+            TestWithParameters("test", TestClass(TestUtils.DummyTestClassEmpty::class.java), args)
+        val mockTransitionRunner = Mockito.mock(ITransitionRunner::class.java)
+        val decorator =
+            LegacyFlickerDecorator(
+                test.testClass,
+                scenario = null,
+                mockTransitionRunner,
+                inner = null
+            )
+        val failures = decorator.doValidateConstructor()
+
+        Truth.assertWithMessage("Failure count").that(failures).hasSize(1)
+
+        val failure = failures.first()
+        Truth.assertWithMessage("Expected failure")
+            .that(failure)
+            .hasMessageThat()
+            .contains(
+                "Constructor should have a parameter of type ${LegacyFlickerTest::class.simpleName}"
+            )
+    }
+
     companion object {
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

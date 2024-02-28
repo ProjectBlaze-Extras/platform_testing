@@ -65,6 +65,7 @@ public class CommonUtils {
     private static final int SWIPE_STEPS = 100;
     private static final int DEFAULT_MARGIN = 5;
     private static final String LIST_ALL_USERS_COMMAND = "cmd user list -v --all";
+    private static final String GET_MAIN_USER_COMMAND = "cmd user get-main-user";
 
     private CommonUtils() {
     }
@@ -332,7 +333,7 @@ public class CommonUtils {
     }
 
     /**
-     * Returns the current user user ID. NOTE: UserID = 0 is for Owner
+     * Returns the current user user ID. NOTE: UserID = 0 is for System
      *
      * @return a current user ID
      */
@@ -365,6 +366,23 @@ public class CommonUtils {
             Log.d(TAG, line);
         }
         throw new RuntimeException("Failed to find current user ID.");
+    }
+
+    /**
+     * Returns the main user ID. Main user is the main human user on the device.
+     * Returns 0 by default, if there is no main user. Android Auto is example of HSUM without
+     * main user.
+     * 
+     * NOTE: For headless system main user it is NOT 0. Therefore Main user should be used in 
+     * test cases rather than owner or deprecated primary user.
+     */
+    public static int getMainUserId() {
+        ArrayList<String> output = executeShellCommandWithDetailedOutput(GET_MAIN_USER_COMMAND);
+        try {
+            return Integer.parseInt(output.get(0).trim());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     public static boolean isSplitShade() {

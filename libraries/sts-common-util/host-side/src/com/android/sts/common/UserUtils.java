@@ -17,6 +17,8 @@
 package com.android.sts.common;
 
 import com.android.tradefed.device.ITestDevice;
+import com.android.tradefed.util.CommandResult;
+import com.android.tradefed.util.CommandStatus;
 
 /** Util to manage secondary user */
 public class UserUtils {
@@ -32,6 +34,8 @@ public class UserUtils {
         private boolean mIsPreCreateOnly; // User type : --pre-created-only
         private boolean mIsRestricted; // User type : --restricted
         private boolean mSwitch; // Switch to newly created user
+        private boolean
+                mDisallowAppInstall; // Disallow app installation in secondary user explicitly
         private int mProfileOf; // Userid associated with managed user
         private int mTestUserId;
 
@@ -51,6 +55,7 @@ public class UserUtils {
             mName = "testUser"; /* Default username */
 
             // Set default value for all flags as false
+            mDisallowAppInstall = false;
             mIsDemo = false;
             mIsEphemeral = false;
             mIsForTesting = false;
@@ -59,6 +64,17 @@ public class UserUtils {
             mIsPreCreateOnly = false;
             mIsRestricted = false;
             mSwitch = false;
+        }
+
+        /**
+         * Disallow app installation in secondary user explicitly. This requires root UID, system
+         * UID, or MANAGE_USERS permission.
+         *
+         * @return this object for method chaining.
+         */
+        public SecondaryUser disallowAppInstallation() {
+            mDisallowAppInstall = true;
+            return this;
         }
 
         /**
@@ -185,16 +201,14 @@ public class UserUtils {
                             + mName;
 
             // Create a new user
-            final String output = mDevice.executeShellCommand(command);
-            if (output.startsWith("Success")) {
-                try {
-                    mTestUserId =
-                            Integer.parseInt(output.substring(output.lastIndexOf(" ")).trim());
-                } catch (NumberFormatException e) {
-                    throw new IllegalStateException(
-                            String.format("Failed to create user, due to : %s", output));
-                }
+            final CommandResult output = mDevice.executeShellV2Command(command);
+            if (output.getStatus() != CommandStatus.SUCCESS) {
+                throw new IllegalStateException(
+                        String.format("Failed to create user, due to : %s", output.toString()));
             }
+            final String outputStdout = output.getStdout();
+            mTestUserId =
+                    Integer.parseInt(outputStdout.substring(outputStdout.lastIndexOf(" ")).trim());
 
             AutoCloseable asSecondaryUser =
                     () -> {
@@ -219,12 +233,26 @@ public class UserUtils {
                         String.format("Failed to start the user: %s", mTestUserId));
             }
 
+            if (mDisallowAppInstall) {
+                // Enable/Disable app installation in secondary user
+                final CommandResult userRestrictionCmdOutput =
+                        mDevice.executeShellV2Command(
+                                String.format(
+                                        "pm set-user-restriction --user %d no_install_apps %d",
+                                        mTestUserId, 1));
+                if (userRestrictionCmdOutput.getStatus() != CommandStatus.SUCCESS) {
+                    asSecondaryUser.close();
+                    throw new IllegalStateException(
+                            String.format(
+                                    "Failed to set user restriction 'no_install_apps' with message:"
+                                            + " %s",
+                                    userRestrictionCmdOutput.toString()));
+                }
+            }
+
             // Switch to the user if required and the user type is neither managed nor
             // pre-created-only
-            if (mSwitch
-                    && !mIsManaged
-                    && !mIsPreCreateOnly
-                    && !mDevice.switchUser(mTestUserId)) {
+            if (mSwitch && !mIsManaged && !mIsPreCreateOnly && !mDevice.switchUser(mTestUserId)) {
                 // Stop and remove the user
                 asSecondaryUser.close();
                 throw new IllegalStateException(

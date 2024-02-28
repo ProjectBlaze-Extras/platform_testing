@@ -16,19 +16,20 @@
 
 package android.tools.common.flicker.assertors.assertions
 
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.ComponentTemplate
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
 
 class LayerReduces(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
-    override fun doEvaluate(scenarioInstance: IScenarioInstance, layersTrace: LayersTraceSubject) {
-        val pipLayerList =
-            layersTrace.layers {
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+        flicker.assertLayers {
+            val pipLayerList = layers {
                 component.build(scenarioInstance).layerMatchesAnyOf(it) && it.isVisible
             }
-        pipLayerList.zipWithNext { previous, current ->
-            current.visibleRegion.notBiggerThan(previous.visibleRegion.region)
+            pipLayerList.zipWithNext { previous, current ->
+                current.visibleRegion.notBiggerThan(previous.visibleRegion.region)
+            }
         }
     }
 }

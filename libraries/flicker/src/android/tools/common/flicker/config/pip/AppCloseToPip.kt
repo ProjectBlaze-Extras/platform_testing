@@ -17,41 +17,50 @@
 package android.tools.common.flicker.config.pip
 
 import android.tools.common.flicker.config.AssertionTemplates
-import android.tools.common.flicker.config.FaasScenarioType
-import android.tools.common.flicker.config.IScenarioConfig
+import android.tools.common.flicker.config.FlickerConfigEntry
+import android.tools.common.flicker.config.ScenarioId
 import android.tools.common.flicker.config.TransitionFilters
+import android.tools.common.flicker.extractors.CujAdjust
 import android.tools.common.flicker.extractors.TaggedCujTransitionMatcher
-import android.tools.common.flicker.extractors.TaggedScenarioExtractor
+import android.tools.common.flicker.extractors.TaggedScenarioExtractorBuilder
+import android.tools.common.io.Reader
 import android.tools.common.traces.events.Cuj
 import android.tools.common.traces.events.CujType
 
-class AppCloseToPip : IScenarioConfig {
-    override val enabled = true
+val AppCloseToPip =
+    FlickerConfigEntry(
+        enabled = false,
+        scenarioId = ScenarioId("APP_CLOSE_TO_PIP"),
+        assertions = AssertionTemplates.APP_CLOSE_TO_PIP_ASSERTIONS,
+        extractor =
+            TaggedScenarioExtractorBuilder()
+                .setTargetTag(CujType.CUJ_LAUNCHER_APP_CLOSE_TO_PIP)
+                .setTransitionMatcher(
+                    TaggedCujTransitionMatcher(TransitionFilters.APP_CLOSE_TO_PIP_TRANSITION_FILTER)
+                )
+                .setAdjustCuj(
+                    object : CujAdjust {
+                        override fun adjustCuj(cujEntry: Cuj, reader: Reader): Cuj {
+                            val cujTrace = reader.readCujTrace() ?: error("Missing CUJ trace")
+                            val closeToHomeCuj =
+                                cujTrace.entries.firstOrNull {
+                                    it.cuj == CujType.CUJ_LAUNCHER_APP_CLOSE_TO_HOME &&
+                                        it.startTimestamp <= cujEntry.startTimestamp &&
+                                        cujEntry.startTimestamp <= it.endTimestamp
+                                }
 
-    override val type = FaasScenarioType.LAUNCHER_APP_CLOSE_TO_PIP
-
-    override val assertionTemplates = AssertionTemplates.APP_CLOSE_TO_PIP_ASSERTIONS
-
-    override val extractor =
-        TaggedScenarioExtractor(
-            targetTag = CujType.CUJ_LAUNCHER_APP_CLOSE_TO_PIP,
-            type,
-            transitionMatcher =
-                TaggedCujTransitionMatcher(TransitionFilters.APP_CLOSE_TO_PIP_TRANSITION_FILTER),
-            adjustCuj = { cuj, reader ->
-                val cujs = reader.readCujTrace() ?: error("Missing CUJ trace")
-                val closeToHomeCuj =
-                    cujs.entries.firstOrNull {
-                        it.cuj == CujType.CUJ_LAUNCHER_APP_CLOSE_TO_HOME &&
-                            it.startTimestamp <= cuj.startTimestamp &&
-                            cuj.startTimestamp <= it.endTimestamp
+                            return if (closeToHomeCuj == null) {
+                                cujEntry
+                            } else {
+                                Cuj(
+                                    cujEntry.cuj,
+                                    closeToHomeCuj.startTimestamp,
+                                    cujEntry.endTimestamp,
+                                    cujEntry.canceled
+                                )
+                            }
+                        }
                     }
-
-                if (closeToHomeCuj == null) {
-                    cuj
-                } else {
-                    Cuj(cuj.cuj, closeToHomeCuj.startTimestamp, cuj.endTimestamp, cuj.canceled)
-                }
-            }
-        )
-}
+                )
+                .build()
+    )

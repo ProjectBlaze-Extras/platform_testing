@@ -31,8 +31,8 @@ class TaskFragment(
     @JsName("displayId") val displayId: Int,
     @JsName("minWidth") val minWidth: Int,
     @JsName("minHeight") val minHeight: Int,
-    windowContainer: WindowContainer
-) : WindowContainer(windowContainer) {
+    private val windowContainer: IWindowContainer
+) : IWindowContainer by windowContainer {
     @JsName("tasks")
     val tasks: Array<Task>
         get() = this.children.reversed().filterIsInstance<Task>().toTypedArray()
@@ -76,16 +76,17 @@ class TaskFragment(
         if (displayId != other.displayId) return false
         if (minWidth != other.minWidth) return false
         if (minHeight != other.minHeight) return false
+        if (windowContainer != other.windowContainer) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = super.hashCode()
-        result = 31 * result + activityType
+        var result = activityType
         result = 31 * result + displayId
         result = 31 * result + minWidth
         result = 31 * result + minHeight
+        result = 31 * result + windowContainer.hashCode()
         return result
     }
 }

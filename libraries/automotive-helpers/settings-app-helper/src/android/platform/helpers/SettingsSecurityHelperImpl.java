@@ -19,7 +19,6 @@ package android.platform.helpers;
 import android.app.Instrumentation;
 import android.platform.helpers.ScrollUtility.ScrollActions;
 import android.platform.helpers.ScrollUtility.ScrollDirection;
-import android.platform.helpers.exceptions.UnknownUiException;
 
 import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.BySelector;
@@ -97,7 +96,8 @@ public class SettingsSecurityHelperImpl extends AbstractStandardAppHelper
         BySelector titlesSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.SECURITY_SETTINGS_TITLE);
         List<UiObject2> titles = getSpectatioUiUtil().findUiObjects(titlesSelector);
-        validateUiObject(titles, AutomotiveConfigConstants.SECURITY_SETTINGS_TITLE);
+        getSpectatioUiUtil()
+                .validateUiObjects(titles, AutomotiveConfigConstants.SECURITY_SETTINGS_TITLE);
         UiObject2 title = titles.get(titles.size() - 1);
         if (title != null && title.getText().equalsIgnoreCase(CHOOSE_LOCK_TYPE)) {
             // CHOOSE_LOCK_TYPE is already open
@@ -114,8 +114,9 @@ public class SettingsSecurityHelperImpl extends AbstractStandardAppHelper
                         mScrollableElementSelector,
                         profileLockMenuSelector,
                         "Scroll to find Profile lock");
-        validateUiObject(
-                profileLockMenu, String.format("Profile Lock %s", profileLockMenuSelector));
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        profileLockMenu, String.format("Profile Lock %s", profileLockMenuSelector));
         getSpectatioUiUtil().clickAndWait(profileLockMenu);
             getSpectatioUiUtil().wait5Seconds();
     }
@@ -124,7 +125,9 @@ public class SettingsSecurityHelperImpl extends AbstractStandardAppHelper
         BySelector textEditorSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.SECURITY_SETTINGS_ENTER_PASSWORD);
         UiObject2 textEditor = getSpectatioUiUtil().findUiObject(textEditorSelector);
-        validateUiObject(textEditor, AutomotiveConfigConstants.SECURITY_SETTINGS_ENTER_PASSWORD);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        textEditor, AutomotiveConfigConstants.SECURITY_SETTINGS_ENTER_PASSWORD);
         textEditor.setText(password);
     }
 
@@ -135,23 +138,28 @@ public class SettingsSecurityHelperImpl extends AbstractStandardAppHelper
         BySelector pin_menuSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.SECURITY_SETTINGS_LOCK_TYPE_PIN);
         UiObject2 pin_menu = getSpectatioUiUtil().findUiObject(pin_menuSelector);
-        validateUiObject(pin_menu, AutomotiveConfigConstants.SECURITY_SETTINGS_LOCK_TYPE_PIN);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        pin_menu, AutomotiveConfigConstants.SECURITY_SETTINGS_LOCK_TYPE_PIN);
         getSpectatioUiUtil().clickAndWait(pin_menu);
         getSpectatioUiUtil().wait5Seconds();
         selectPinOnPinPad(pin);
         BySelector continue_buttonSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.SECURITY_SETTINGS_CONTINUE_BUTTON);
         UiObject2 continue_button = getSpectatioUiUtil().findUiObject(continue_buttonSelector);
-        validateUiObject(
-                continue_button, AutomotiveConfigConstants.SECURITY_SETTINGS_CONTINUE_BUTTON);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        continue_button,
+                        AutomotiveConfigConstants.SECURITY_SETTINGS_CONTINUE_BUTTON);
         getSpectatioUiUtil().clickAndWait(continue_button);
         getSpectatioUiUtil().wait5Seconds();
         selectPinOnPinPad(pin);
         BySelector confirm_buttonSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.SECURITY_SETTINGS_CONFIRM_BUTTON);
         UiObject2 confirm_button = getSpectatioUiUtil().findUiObject(confirm_buttonSelector);
-        validateUiObject(
-                confirm_button, AutomotiveConfigConstants.SECURITY_SETTINGS_CONFIRM_BUTTON);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        confirm_button, AutomotiveConfigConstants.SECURITY_SETTINGS_CONFIRM_BUTTON);
         getSpectatioUiUtil().clickAndWait(confirm_button);
         getSpectatioUiUtil().wait5Seconds();
     }
@@ -166,9 +174,11 @@ public class SettingsSecurityHelperImpl extends AbstractStandardAppHelper
             if (number == null) {
                 number = getSpectatioUiUtil().findUiObject(By.text(Character.toString(c)));
             }
-            validateUiObject(
-                    number,
-                    String.format("Unable to find number on pin pad: " + Character.toString(c)));
+            getSpectatioUiUtil()
+                    .validateUiObject(
+                            number,
+                            String.format(
+                                    "Unable to find number on pin pad: " + Character.toString(c)));
             getSpectatioUiUtil().clickAndWait(number);
         }
     }
@@ -179,7 +189,9 @@ public class SettingsSecurityHelperImpl extends AbstractStandardAppHelper
         BySelector textEditorSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.SECURITY_SETTINGS_ENTER_PASSWORD);
         UiObject2 textEditor = getSpectatioUiUtil().findUiObject(textEditorSelector);
-        validateUiObject(textEditor, AutomotiveConfigConstants.SECURITY_SETTINGS_ENTER_PASSWORD);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        textEditor, AutomotiveConfigConstants.SECURITY_SETTINGS_ENTER_PASSWORD);
         textEditor.setText(password);
         pressEnter();
     }
@@ -193,8 +205,9 @@ public class SettingsSecurityHelperImpl extends AbstractStandardAppHelper
                 getUiElementFromConfig(
                         AutomotiveConfigConstants.SECURITY_SETTINGS_ENTER_PIN_BUTTON);
         UiObject2 enter_button = getSpectatioUiUtil().findUiObject(enter_buttonSelector);
-        validateUiObject(
-                enter_button, AutomotiveConfigConstants.SECURITY_SETTINGS_ENTER_PIN_BUTTON);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        enter_button, AutomotiveConfigConstants.SECURITY_SETTINGS_ENTER_PIN_BUTTON);
         getSpectatioUiUtil().clickAndWait(enter_button);
         BySelector pinPadSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.SECURITY_SETTINGS_PIN_PAD);
@@ -211,13 +224,17 @@ public class SettingsSecurityHelperImpl extends AbstractStandardAppHelper
         BySelector none_menuSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.SECURITY_SETTINGS_LOCK_TYPE_NONE);
         UiObject2 none_menu = getSpectatioUiUtil().findUiObject(none_menuSelector);
-        validateUiObject(none_menu, AutomotiveConfigConstants.SECURITY_SETTINGS_LOCK_TYPE_NONE);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        none_menu, AutomotiveConfigConstants.SECURITY_SETTINGS_LOCK_TYPE_NONE);
         getSpectatioUiUtil().clickAndWait(none_menu);
         getSpectatioUiUtil().wait5Seconds();
         BySelector remove_buttonSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.SECURITY_SETTINGS_REMOVE_BUTTON);
         UiObject2 remove_button = getSpectatioUiUtil().findUiObject(remove_buttonSelector);
-        validateUiObject(remove_button, AutomotiveConfigConstants.SECURITY_SETTINGS_REMOVE_BUTTON);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        remove_button, AutomotiveConfigConstants.SECURITY_SETTINGS_REMOVE_BUTTON);
         getSpectatioUiUtil().clickAndWait(remove_button);
     }
 
@@ -234,20 +251,6 @@ public class SettingsSecurityHelperImpl extends AbstractStandardAppHelper
         UiObject2 pinPad = getSpectatioUiUtil().findUiObject(pinPadSelector);
 
         return textEditor != null || pinPad != null;
-    }
-
-    private void validateUiObject(UiObject2 uiObject, String action) {
-        if (uiObject == null) {
-            throw new UnknownUiException(
-                    String.format("Unable to find UI Element for %s.", action));
-        }
-    }
-
-    private void validateUiObject(List<UiObject2> uiObjects, String action) {
-        if (uiObjects == null) {
-            throw new UnknownUiException(
-                    String.format("Unable to find UI Element for %s.", action));
-        }
     }
 
     protected void pressEnter() {

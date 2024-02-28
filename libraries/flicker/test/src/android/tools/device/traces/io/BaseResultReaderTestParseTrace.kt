@@ -16,19 +16,19 @@
 
 package android.tools.device.traces.io
 
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.TestTraces
 import android.tools.assertExceptionMessage
 import android.tools.assertThrows
-import android.tools.common.CrossPlatform
 import android.tools.common.ITrace
 import android.tools.common.Timestamp
+import android.tools.common.Timestamps
 import android.tools.common.io.RunStatus
 import android.tools.common.io.TraceType
 import android.tools.device.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.device.traces.deleteIfExists
 import android.tools.newTestResultWriter
 import android.tools.outputFileName
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
 import java.io.File
 import org.junit.Before
@@ -109,9 +109,7 @@ abstract class BaseResultReaderTestParseTrace {
     @Test
     fun readTraceAndSliceTraceByTimestampAndFailInvalidSize() {
         val result =
-            setupWriter(newTestResultWriter())
-                .setTransitionEndTime(CrossPlatform.timestamp.min())
-                .write()
+            setupWriter(newTestResultWriter()).setTransitionEndTime(Timestamps.min()).write()
         val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
         val exception =
             assertThrows<IllegalArgumentException> {
@@ -121,6 +119,6 @@ abstract class BaseResultReaderTestParseTrace {
     }
 
     companion object {
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

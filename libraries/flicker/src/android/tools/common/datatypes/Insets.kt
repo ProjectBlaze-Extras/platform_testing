@@ -26,24 +26,12 @@ import kotlin.js.JsName
  * This class is used by flicker and Winscope
  */
 @JsExport
-class Insets private constructor(left: Int = 0, top: Int = 0, right: Int = 0, bottom: Int = 0) :
-    Rect(left, top, right, bottom) {
-    override val isEmpty: Boolean
-        get() = left == 0 && top == 0 && right == 0 && bottom == 0
+class Insets
+private constructor(val left: Int = 0, val top: Int = 0, val right: Int = 0, val bottom: Int = 0) :
+    DataType() {
+    override val isEmpty = left == 0 && top == 0 && right == 0 && bottom == 0
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is Insets) return false
-        if (!super.equals(other)) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = super.hashCode()
-        result = 31 * result + isEmpty.hashCode()
-        return result
-    }
+    override fun doPrintValue() = "($left, $top) - ($right, $bottom)"
 
     companion object {
         @JsName("EMPTY")

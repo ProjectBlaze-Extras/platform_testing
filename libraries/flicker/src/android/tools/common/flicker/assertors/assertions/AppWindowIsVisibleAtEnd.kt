@@ -16,17 +16,14 @@
 
 package android.tools.common.flicker.assertors.assertions
 
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.ComponentTemplate
-import android.tools.common.flicker.subject.wm.WindowManagerTraceSubject
 
 class AppWindowIsVisibleAtEnd(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(
-        scenarioInstance: IScenarioInstance,
-        wmSubject: WindowManagerTraceSubject
-    ) {
-        wmSubject.last().isAppWindowVisible(component.build(scenarioInstance))
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+        flicker.assertWmEnd { isAppWindowVisible(component.build(scenarioInstance)) }
     }
 }

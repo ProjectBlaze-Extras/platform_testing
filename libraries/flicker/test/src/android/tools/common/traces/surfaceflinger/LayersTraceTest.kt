@@ -16,14 +16,14 @@
 
 package android.tools.common.traces.surfaceflinger
 
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.assertThatErrorContainsDebugInfo
 import android.tools.assertThrows
 import android.tools.common.Cache
-import android.tools.common.CrossPlatform
+import android.tools.common.Timestamps
 import android.tools.common.flicker.subject.layers.LayersTraceSubject
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.getLayerTraceReaderFromAsset
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
 import org.junit.Before
 import org.junit.ClassRule
@@ -68,10 +68,7 @@ class LayersTraceTest {
     fun canTestLayerOccludedByAppLayerHasVisibleRegion() {
         val reader = getLayerTraceReaderFromAsset("layers_trace_occluded.pb", legacyTrace = true)
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
-        val entry =
-            trace.getEntryExactlyAt(
-                CrossPlatform.timestamp.from(systemUptimeNanos = 1700382131522L)
-            )
+        val entry = trace.getEntryExactlyAt(Timestamps.from(systemUptimeNanos = 1700382131522L))
         val component =
             ComponentNameMatcher("", "com.android.server.wm.flicker.testapp.SimpleActivity#0")
         val layer = entry.getLayerWithBuffer(component)
@@ -99,10 +96,7 @@ class LayersTraceTest {
         val component = ComponentNameMatcher("", layerName)
         val reader = getLayerTraceReaderFromAsset("layers_trace_occluded.pb", legacyTrace = true)
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
-        val entry =
-            trace.getEntryExactlyAt(
-                CrossPlatform.timestamp.from(systemUptimeNanos = 1700382131522L)
-            )
+        val entry = trace.getEntryExactlyAt(Timestamps.from(systemUptimeNanos = 1700382131522L))
         val layer = entry.getLayerWithBuffer(component)
         val occludedBy = layer?.occludedBy ?: emptyArray()
         val partiallyOccludedBy = layer?.partiallyOccludedBy ?: emptyArray()
@@ -135,13 +129,13 @@ class LayersTraceTest {
                 legacyTrace = false
             )
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
-        val matchingEntry = trace.getFirstEntryWithOnDisplayAfter(CrossPlatform.timestamp.min())
+        val matchingEntry = trace.getFirstEntryWithOnDisplayAfter(Timestamps.min())
 
         Truth.assertThat(matchingEntry.timestamp)
-            .isEqualTo(CrossPlatform.timestamp.from(null, 20143030557279, 1685030549975607247))
+            .isEqualTo(Timestamps.from(null, 20143030557279, 1685030549975607247))
 
         try {
-            trace.getFirstEntryWithOnDisplayAfter(CrossPlatform.timestamp.max())
+            trace.getFirstEntryWithOnDisplayAfter(Timestamps.max())
         } catch (e: Throwable) {
             Truth.assertThat(e).hasMessageThat().contains("No entry after")
         }
@@ -155,19 +149,19 @@ class LayersTraceTest {
                 legacyTrace = false
             )
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
-        val matchingEntry = trace.getLastEntryWithOnDisplayBefore(CrossPlatform.timestamp.max())
+        val matchingEntry = trace.getLastEntryWithOnDisplayBefore(Timestamps.max())
 
         Truth.assertThat(matchingEntry.timestamp)
-            .isEqualTo(CrossPlatform.timestamp.from(null, 20147964614573, 1685030554909664541))
+            .isEqualTo(Timestamps.from(null, 20147964614573, 1685030554909664541))
 
         try {
-            trace.getLastEntryWithOnDisplayBefore(CrossPlatform.timestamp.min())
+            trace.getLastEntryWithOnDisplayBefore(Timestamps.min())
         } catch (e: Throwable) {
             Truth.assertThat(e).hasMessageThat().contains("No entry before")
         }
     }
 
     companion object {
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

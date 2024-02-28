@@ -18,23 +18,23 @@ package android.tools.common.traces.component
 
 import android.tools.common.traces.surfaceflinger.Layer
 import android.tools.common.traces.wm.Activity
-import android.tools.common.traces.wm.WindowContainer
+import android.tools.common.traces.wm.IWindowContainer
 
 class OrComponentMatcher(private val componentMatchers: Array<out IComponentMatcher>) :
     IComponentMatcher {
 
     /** {@inheritDoc} */
-    override fun windowMatchesAnyOf(window: WindowContainer): Boolean {
+    override fun windowMatchesAnyOf(window: IWindowContainer): Boolean {
         return componentMatchers.any { it.windowMatchesAnyOf(window) }
     }
 
     /** {@inheritDoc} */
-    override fun windowMatchesAnyOf(windows: Collection<WindowContainer>): Boolean {
+    override fun windowMatchesAnyOf(windows: Collection<IWindowContainer>): Boolean {
         return componentMatchers.any { it.windowMatchesAnyOf(windows) }
     }
 
     /** {@inheritDoc} */
-    override fun windowMatchesAnyOf(windows: Array<WindowContainer>): Boolean {
+    override fun windowMatchesAnyOf(windows: Array<IWindowContainer>): Boolean {
         return componentMatchers.any { it.windowMatchesAnyOf(windows) }
     }
 

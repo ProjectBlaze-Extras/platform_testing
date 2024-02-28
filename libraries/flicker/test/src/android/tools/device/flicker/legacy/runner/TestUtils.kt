@@ -16,8 +16,8 @@
 
 package android.tools.device.flicker.legacy.runner
 
-import android.tools.common.CrossPlatform
 import android.tools.common.Timestamp
+import android.tools.common.Timestamps
 import android.tools.device.traces.io.IResultData
 import com.google.common.truth.Truth
 
@@ -25,16 +25,16 @@ object TestUtils {
     internal fun validateTransitionTime(result: IResultData) {
         val startTime = result.transitionTimeRange.start
         val endTime = result.transitionTimeRange.end
-        validateTimeGreaterThan(startTime, "Start time", CrossPlatform.timestamp.min())
-        validateTimeGreaterThan(endTime, "End time", CrossPlatform.timestamp.min())
-        validateTimeGreaterThan(CrossPlatform.timestamp.max(), "End time", endTime)
+        validateTimeGreaterThan(startTime, "Start time", Timestamps.min())
+        validateTimeGreaterThan(endTime, "End time", Timestamps.min())
+        validateTimeGreaterThan(Timestamps.max(), "End time", endTime)
     }
 
     internal fun validateTransitionTimeIsEmpty(result: IResultData) {
         val startTime = result.transitionTimeRange.start
         val endTime = result.transitionTimeRange.end
-        validateEqualTo(startTime, "Start time", CrossPlatform.timestamp.min())
-        validateEqualTo(endTime, "End time", CrossPlatform.timestamp.max())
+        validateEqualTo(startTime, "Start time", Timestamps.min())
+        validateEqualTo(endTime, "End time", Timestamps.max())
     }
 
     private fun validateEqualTo(time: Timestamp, name: String, expectedValue: Timestamp) {

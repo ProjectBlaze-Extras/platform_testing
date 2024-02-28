@@ -17,5 +17,5 @@
 package android.tools.common.flicker.config.appclose
 
 internal object AppClose {
-    val SCENARIOS = listOf(AppCloseToHome())
+    val SCENARIOS = listOf(APP_CLOSE_TO_HOME)
 }

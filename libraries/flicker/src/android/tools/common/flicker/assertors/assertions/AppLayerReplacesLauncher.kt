@@ -16,9 +16,9 @@
 
 package android.tools.common.flicker.assertors.assertions
 
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.ComponentTemplate
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
 import android.tools.common.traces.component.ComponentNameMatcher
 
 /**
@@ -33,11 +33,11 @@ import android.tools.common.traces.component.ComponentNameMatcher
 class AppLayerReplacesLauncher(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(scenarioInstance: IScenarioInstance, layerSubject: LayersTraceSubject) {
-        layerSubject
-            .isVisible(ComponentNameMatcher.LAUNCHER)
-            .then()
-            .isVisible(component.build(scenarioInstance))
-            .forAllEntries()
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+        flicker.assertLayers {
+            isVisible(ComponentNameMatcher.LAUNCHER)
+                .then()
+                .isVisible(component.build(scenarioInstance))
+        }
     }
 }

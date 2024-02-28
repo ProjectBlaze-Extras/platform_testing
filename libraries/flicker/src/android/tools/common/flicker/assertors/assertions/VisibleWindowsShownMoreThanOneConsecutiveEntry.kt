@@ -16,9 +16,9 @@
 
 package android.tools.common.flicker.assertors.assertions
 
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.AssertionTemplate
-import android.tools.common.flicker.subject.wm.WindowManagerTraceSubject
 
 /**
  * Checks that all windows that are visible on the trace, are visible for at least 2 consecutive
@@ -26,10 +26,7 @@ import android.tools.common.flicker.subject.wm.WindowManagerTraceSubject
  */
 class VisibleWindowsShownMoreThanOneConsecutiveEntry : AssertionTemplate() {
     /** {@inheritDoc} */
-    override fun doEvaluate(
-        scenarioInstance: IScenarioInstance,
-        wmSubject: WindowManagerTraceSubject
-    ) {
-        wmSubject.visibleWindowsShownMoreThanOneConsecutiveEntry().forAllEntries()
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+        flicker.assertWm { visibleWindowsShownMoreThanOneConsecutiveEntry() }
     }
 }

@@ -19,22 +19,22 @@ package android.tools.common.flicker.config.notification
 internal object Notification {
     val SCENARIOS =
         listOf(
-            NotificationAdd(),
-            NotificationAppLaunchFromHistory(),
-            NotificationAppLaunchFromMediaPlayer(),
-            NotificationAppLaunchFromQsTile(),
-            NotificationAppLaunchFromSettingsButton(),
-            NotificationClearAll(),
-            NotificationDialogOpen(),
-            NotificationExpandCollapse(),
-            NotificationExpandCollapseLockscreen(),
-            NotificationHeadsUpAppear(),
-            NotificationHeadsUpDisappear(),
-            NotificationQsExpandCollapse(),
-            NotificationQsScrollSwipe(),
-            NotificationRemove(),
-            NotificationRowExpand(),
-            NotificationRowSwipe(),
-            NotificationScrollFling()
+            NotificationAdd,
+            NotificationAppLaunchFromHistory,
+            NotificationAppLaunchFromMediaPlayer,
+            NotificationAppLaunchFromQsTile,
+            NotificationAppLaunchFromSettingsButton,
+            NotificationClearAll,
+            NotificationDialogOpen,
+            NotificationExpandCollapse,
+            NotificationExpandCollapseLockscreen,
+            NotificationHeadsUpAppear,
+            NotificationHeadsUpDisappear,
+            NotificationQsExpandCollapse,
+            NotificationQsScrollSwipe,
+            NotificationRemove,
+            NotificationRowExpand,
+            NotificationRowSwipe,
+            NotificationScrollFling
         )
 }

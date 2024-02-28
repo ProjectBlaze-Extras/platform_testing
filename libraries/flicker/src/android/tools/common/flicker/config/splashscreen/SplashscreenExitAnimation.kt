@@ -17,24 +17,22 @@
 package android.tools.common.flicker.config.splashscreen
 
 import android.tools.common.flicker.config.AssertionTemplates
-import android.tools.common.flicker.config.FaasScenarioType
-import android.tools.common.flicker.config.IScenarioConfig
+import android.tools.common.flicker.config.FlickerConfigEntry
+import android.tools.common.flicker.config.ScenarioId
 import android.tools.common.flicker.extractors.TaggedCujTransitionMatcher
-import android.tools.common.flicker.extractors.TaggedScenarioExtractor
+import android.tools.common.flicker.extractors.TaggedScenarioExtractorBuilder
 import android.tools.common.traces.events.CujType
 
-class SplashscreenExitAnimation : IScenarioConfig {
-    override val enabled = false
-
-    override val type = FaasScenarioType.SPLASHSCREEN_EXIT_ANIM
-
-    override val assertionTemplates =
-        AssertionTemplates.COMMON_ASSERTIONS // TODO: Add specific assertions
-
-    override val extractor =
-        TaggedScenarioExtractor(
-            targetTag = CujType.CUJ_SPLASHSCREEN_EXIT_ANIM,
-            type,
-            transitionMatcher = TaggedCujTransitionMatcher(associatedTransitionRequired = false),
-        )
-}
+val SplashscreenExitAnimation =
+    FlickerConfigEntry(
+        enabled = false,
+        scenarioId = ScenarioId("SPLASHSCREEN_EXIT_ANIMATION"),
+        assertions = AssertionTemplates.COMMON_ASSERTIONS,
+        extractor =
+            TaggedScenarioExtractorBuilder()
+                .setTargetTag(CujType.CUJ_SPLASHSCREEN_EXIT_ANIM)
+                .setTransitionMatcher(
+                    TaggedCujTransitionMatcher(associatedTransitionRequired = false)
+                )
+                .build()
+    )

@@ -17,10 +17,10 @@
 package android.tools.common.traces
 
 import android.tools.assertThrows
-import android.tools.common.CrossPlatform
 import android.tools.common.ITrace
 import android.tools.common.ITraceEntry
 import android.tools.common.Timestamp
+import android.tools.common.Timestamps
 import com.google.common.truth.Truth
 import org.junit.Test
 
@@ -28,22 +28,17 @@ import org.junit.Test
 class ITraceTest {
     @Test
     fun getEntryExactlyAtTest() {
-        val entry1 = SimpleTraceEntry(CrossPlatform.timestamp.from(1, 1, 1))
-        val entry2 = SimpleTraceEntry(CrossPlatform.timestamp.from(5, 5, 5))
-        val entry3 = SimpleTraceEntry(CrossPlatform.timestamp.from(25, 25, 25))
+        val entry1 = SimpleTraceEntry(Timestamps.from(1, 1, 1))
+        val entry2 = SimpleTraceEntry(Timestamps.from(5, 5, 5))
+        val entry3 = SimpleTraceEntry(Timestamps.from(25, 25, 25))
         val trace = SimpleTrace(arrayOf(entry1, entry2, entry3))
 
-        Truth.assertThat(trace.getEntryExactlyAt(CrossPlatform.timestamp.from(1, 1, 1)))
-            .isEqualTo(entry1)
-        Truth.assertThat(trace.getEntryExactlyAt(CrossPlatform.timestamp.from(5, 5, 5)))
-            .isEqualTo(entry2)
-        Truth.assertThat(trace.getEntryExactlyAt(CrossPlatform.timestamp.from(25, 25, 25)))
-            .isEqualTo(entry3)
+        Truth.assertThat(trace.getEntryExactlyAt(Timestamps.from(1, 1, 1))).isEqualTo(entry1)
+        Truth.assertThat(trace.getEntryExactlyAt(Timestamps.from(5, 5, 5))).isEqualTo(entry2)
+        Truth.assertThat(trace.getEntryExactlyAt(Timestamps.from(25, 25, 25))).isEqualTo(entry3)
 
         Truth.assertThat(
-                assertThrows<Throwable> {
-                    trace.getEntryExactlyAt(CrossPlatform.timestamp.from(6, 6, 6))
-                }
+                assertThrows<Throwable> { trace.getEntryExactlyAt(Timestamps.from(6, 6, 6)) }
             )
             .hasMessageThat()
             .contains("does not exist")
@@ -51,24 +46,20 @@ class ITraceTest {
 
     @Test
     fun getEntryAtTest() {
-        val entry1 = SimpleTraceEntry(CrossPlatform.timestamp.from(2, 2, 2))
-        val entry2 = SimpleTraceEntry(CrossPlatform.timestamp.from(5, 5, 5))
-        val entry3 = SimpleTraceEntry(CrossPlatform.timestamp.from(25, 25, 25))
+        val entry1 = SimpleTraceEntry(Timestamps.from(2, 2, 2))
+        val entry2 = SimpleTraceEntry(Timestamps.from(5, 5, 5))
+        val entry3 = SimpleTraceEntry(Timestamps.from(25, 25, 25))
         val trace = SimpleTrace(arrayOf(entry1, entry2, entry3))
 
-        Truth.assertThat(trace.getEntryAt(CrossPlatform.timestamp.from(2, 2, 2))).isEqualTo(entry1)
-        Truth.assertThat(trace.getEntryAt(CrossPlatform.timestamp.from(5, 5, 5))).isEqualTo(entry2)
-        Truth.assertThat(trace.getEntryAt(CrossPlatform.timestamp.from(25, 25, 25)))
-            .isEqualTo(entry3)
+        Truth.assertThat(trace.getEntryAt(Timestamps.from(2, 2, 2))).isEqualTo(entry1)
+        Truth.assertThat(trace.getEntryAt(Timestamps.from(5, 5, 5))).isEqualTo(entry2)
+        Truth.assertThat(trace.getEntryAt(Timestamps.from(25, 25, 25))).isEqualTo(entry3)
 
-        Truth.assertThat(trace.getEntryAt(CrossPlatform.timestamp.from(4, 4, 4))).isEqualTo(entry1)
-        Truth.assertThat(trace.getEntryAt(CrossPlatform.timestamp.from(6, 6, 6))).isEqualTo(entry2)
-        Truth.assertThat(trace.getEntryAt(CrossPlatform.timestamp.from(100, 100, 100)))
-            .isEqualTo(entry3)
+        Truth.assertThat(trace.getEntryAt(Timestamps.from(4, 4, 4))).isEqualTo(entry1)
+        Truth.assertThat(trace.getEntryAt(Timestamps.from(6, 6, 6))).isEqualTo(entry2)
+        Truth.assertThat(trace.getEntryAt(Timestamps.from(100, 100, 100))).isEqualTo(entry3)
 
-        Truth.assertThat(
-                assertThrows<Throwable> { trace.getEntryAt(CrossPlatform.timestamp.from(1, 1, 1)) }
-            )
+        Truth.assertThat(assertThrows<Throwable> { trace.getEntryAt(Timestamps.from(1, 1, 1)) })
             .hasMessageThat()
             .contains("No entry at or before timestamp")
     }
@@ -80,7 +71,7 @@ class ITraceTest {
             startTimestamp: Timestamp,
             endTimestamp: Timestamp
         ): ITrace<ITraceEntry> {
-            TODO("Not yet implemented")
+            error("Not yet implemented")
         }
     }
 }

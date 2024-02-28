@@ -16,7 +16,7 @@
 
 package android.tools.common.traces.wm
 
-import android.tools.common.CrossPlatform
+import android.tools.common.Timestamps
 import android.tools.common.traces.surfaceflinger.Transaction
 import android.tools.common.traces.surfaceflinger.TransactionsTrace
 import android.tools.common.traces.surfaceflinger.TransactionsTraceEntry
@@ -35,8 +35,8 @@ class TransitionTest {
                 id = 1,
                 wmData =
                     WmTransitionData(
-                        createTime = CrossPlatform.timestamp.from(10),
-                        sendTime = CrossPlatform.timestamp.from(20),
+                        createTime = Timestamps.from(10),
+                        sendTime = Timestamps.from(20),
                     ),
             )
 
@@ -45,7 +45,7 @@ class TransitionTest {
                 id = 1,
                 shellData =
                     ShellTransitionData(
-                        dispatchTime = CrossPlatform.timestamp.from(22),
+                        dispatchTime = Timestamps.from(22),
                         handler = "DefaultHandler"
                     ),
             )
@@ -55,7 +55,7 @@ class TransitionTest {
                 id = 1,
                 wmData =
                     WmTransitionData(
-                        finishTime = CrossPlatform.timestamp.from(40),
+                        finishTime = Timestamps.from(40),
                     ),
             )
 
@@ -78,10 +78,10 @@ class TransitionTest {
                 id = 1,
                 wmData =
                     WmTransitionData(
-                        createTime = CrossPlatform.timestamp.from(10),
-                        sendTime = CrossPlatform.timestamp.from(20),
-                        abortTime = CrossPlatform.timestamp.from(30),
-                        finishTime = CrossPlatform.timestamp.from(40),
+                        createTime = Timestamps.from(10),
+                        sendTime = Timestamps.from(20),
+                        abortTime = Timestamps.from(30),
+                        finishTime = Timestamps.from(40),
                         startTransactionId = "1",
                         finishTransactionId = "2",
                         type = TransitionType.CLOSE,
@@ -89,10 +89,10 @@ class TransitionTest {
                     ),
                 shellData =
                     ShellTransitionData(
-                        dispatchTime = CrossPlatform.timestamp.from(21),
-                        mergeRequestTime = CrossPlatform.timestamp.from(22),
-                        mergeTime = CrossPlatform.timestamp.from(23),
-                        abortTime = CrossPlatform.timestamp.from(24),
+                        dispatchTime = Timestamps.from(21),
+                        mergeRequestTime = Timestamps.from(22),
+                        mergeTime = Timestamps.from(23),
+                        abortTime = Timestamps.from(24),
                         handler = "Handler1",
                         mergedInto = 1,
                     )
@@ -103,10 +103,10 @@ class TransitionTest {
                 id = 1,
                 wmData =
                     WmTransitionData(
-                        createTime = CrossPlatform.timestamp.from(100),
-                        sendTime = CrossPlatform.timestamp.from(200),
-                        abortTime = CrossPlatform.timestamp.from(300),
-                        finishTime = CrossPlatform.timestamp.from(400),
+                        createTime = Timestamps.from(100),
+                        sendTime = Timestamps.from(200),
+                        abortTime = Timestamps.from(300),
+                        finishTime = Timestamps.from(400),
                         startTransactionId = "10",
                         finishTransactionId = "20",
                         type = TransitionType.OPEN,
@@ -114,10 +114,10 @@ class TransitionTest {
                     ),
                 shellData =
                     ShellTransitionData(
-                        dispatchTime = CrossPlatform.timestamp.from(210),
-                        mergeRequestTime = CrossPlatform.timestamp.from(220),
-                        mergeTime = CrossPlatform.timestamp.from(230),
-                        abortTime = CrossPlatform.timestamp.from(240),
+                        dispatchTime = Timestamps.from(210),
+                        mergeRequestTime = Timestamps.from(220),
+                        mergeTime = Timestamps.from(230),
+                        abortTime = Timestamps.from(240),
                         handler = "Handler2",
                         mergedInto = 10,
                     )
@@ -148,7 +148,7 @@ class TransitionTest {
                 id = 1,
                 wmData =
                     WmTransitionData(
-                        sendTime = CrossPlatform.timestamp.from(1),
+                        sendTime = Timestamps.from(1),
                         startTransactionId = transactionId.toString()
                     )
             )
@@ -167,7 +167,7 @@ class TransitionTest {
         val transactionsTraceEntry =
             arrayOf(
                 TransactionsTraceEntry(
-                    timestamp = CrossPlatform.timestamp.from(1),
+                    timestamp = Timestamps.from(1),
                     vSyncId = 1,
                     transactions = transactions
                 )
@@ -187,7 +187,7 @@ class TransitionTest {
                 id = 1,
                 wmData =
                     WmTransitionData(
-                        sendTime = CrossPlatform.timestamp.from(1),
+                        sendTime = Timestamps.from(1),
                         startTransactionId = transactionId.toString()
                     )
             )
@@ -206,7 +206,7 @@ class TransitionTest {
         val transactionsTraceEntry =
             arrayOf(
                 TransactionsTraceEntry(
-                    timestamp = CrossPlatform.timestamp.from(1),
+                    timestamp = Timestamps.from(1),
                     vSyncId = 1,
                     transactions = transactions
                 )
@@ -226,7 +226,7 @@ class TransitionTest {
                 id = 1,
                 wmData =
                     WmTransitionData(
-                        sendTime = CrossPlatform.timestamp.from(1),
+                        sendTime = Timestamps.from(1),
                         startTransactionId = transactionId.toString()
                     )
             )
@@ -245,7 +245,7 @@ class TransitionTest {
         val transactionsTraceEntry =
             arrayOf(
                 TransactionsTraceEntry(
-                    timestamp = CrossPlatform.timestamp.from(1),
+                    timestamp = Timestamps.from(1),
                     vSyncId = 1,
                     transactions = transactions
                 )
@@ -265,7 +265,7 @@ class TransitionTest {
                 id = 1,
                 wmData =
                     WmTransitionData(
-                        sendTime = CrossPlatform.timestamp.from(1),
+                        sendTime = Timestamps.from(1),
                         finishTransactionId = transactionId.toString()
                     )
             )
@@ -284,7 +284,7 @@ class TransitionTest {
         val transactionsTraceEntry =
             arrayOf(
                 TransactionsTraceEntry(
-                    timestamp = CrossPlatform.timestamp.from(1),
+                    timestamp = Timestamps.from(1),
                     vSyncId = 1,
                     transactions = transactions
                 )
@@ -304,7 +304,7 @@ class TransitionTest {
                 id = 1,
                 wmData =
                     WmTransitionData(
-                        sendTime = CrossPlatform.timestamp.from(1),
+                        sendTime = Timestamps.from(1),
                         finishTransactionId = transactionId.toString()
                     )
             )
@@ -323,7 +323,7 @@ class TransitionTest {
         val transactionsTraceEntry =
             arrayOf(
                 TransactionsTraceEntry(
-                    timestamp = CrossPlatform.timestamp.from(1),
+                    timestamp = Timestamps.from(1),
                     vSyncId = 1,
                     transactions = transactions
                 )
@@ -343,7 +343,7 @@ class TransitionTest {
                 id = 1,
                 wmData =
                     WmTransitionData(
-                        sendTime = CrossPlatform.timestamp.from(1),
+                        sendTime = Timestamps.from(1),
                         finishTransactionId = transactionId.toString()
                     )
             )
@@ -362,7 +362,7 @@ class TransitionTest {
         val transactionsTraceEntry =
             arrayOf(
                 TransactionsTraceEntry(
-                    timestamp = CrossPlatform.timestamp.from(1),
+                    timestamp = Timestamps.from(1),
                     vSyncId = 1,
                     transactions = transactions
                 )

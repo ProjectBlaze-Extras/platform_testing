@@ -17,5 +17,5 @@
 package android.tools.common.flicker.config.ime
 
 internal object Ime {
-    val SCENARIOS = listOf(ImeInsetsAnimation())
+    val SCENARIOS = listOf(ImeInsetsAnimation)
 }

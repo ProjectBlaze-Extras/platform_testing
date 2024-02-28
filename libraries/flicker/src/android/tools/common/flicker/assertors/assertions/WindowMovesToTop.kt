@@ -16,22 +16,19 @@
 
 package android.tools.common.flicker.assertors.assertions
 
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.ComponentTemplate
-import android.tools.common.flicker.subject.wm.WindowManagerTraceSubject
 
 /** Checks that [component] starts not on top and moves to top during the transition */
 open class WindowMovesToTop(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(
-        scenarioInstance: IScenarioInstance,
-        wmSubject: WindowManagerTraceSubject
-    ) {
-        wmSubject
-            .isAppWindowNotOnTop(component.build(scenarioInstance))
-            .then()
-            .isAppWindowOnTop(component.build(scenarioInstance))
-            .forAllEntries()
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+        flicker.assertWm {
+            isAppWindowNotOnTop(component.build(scenarioInstance))
+                .then()
+                .isAppWindowOnTop(component.build(scenarioInstance))
+        }
     }
 }

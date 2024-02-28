@@ -23,6 +23,7 @@ import com.android.internal.R
 import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.annotation.AnnotationTarget.ANNOTATION_CLASS
 import kotlin.annotation.AnnotationTarget.CLASS
+import kotlin.annotation.AnnotationTarget.FUNCTION
 import org.junit.AssumptionViolatedException
 import org.junit.rules.TestRule
 import org.junit.runner.Description
@@ -106,14 +107,14 @@ private const val LARGE_SCREEN_DP_THRESHOLD = 600
  * a large-screen device. See [isLargeScreen].
  */
 @Retention(RUNTIME)
-@Target(ANNOTATION_CLASS, CLASS)
+@Target(ANNOTATION_CLASS, CLASS, FUNCTION)
 annotation class SmallScreenOnly(val reason: String)
 
 /** The test will run only on large screens. See [isLargeScreen]. */
-@Retention(RUNTIME) @Target(ANNOTATION_CLASS, CLASS) annotation class LargeScreenOnly
+@Retention(RUNTIME) @Target(ANNOTATION_CLASS, CLASS, FUNCTION) annotation class LargeScreenOnly
 
 /** The test will run only on foldables. */
-@Retention(RUNTIME) @Target(ANNOTATION_CLASS, CLASS) annotation class FoldableOnly
+@Retention(RUNTIME) @Target(ANNOTATION_CLASS, CLASS, FUNCTION) annotation class FoldableOnly
 
 /** The test will run only on tablets. */
-@Retention(RUNTIME) @Target(ANNOTATION_CLASS, CLASS) annotation class TabletOnly
+@Retention(RUNTIME) @Target(ANNOTATION_CLASS, CLASS, FUNCTION) annotation class TabletOnly

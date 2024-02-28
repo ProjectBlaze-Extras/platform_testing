@@ -32,7 +32,7 @@ import kotlin.math.min
  * support constructor overload
  */
 @JsExport
-class Region(rects: Array<Rect> = arrayOf()) {
+class Region(rects: Array<Rect> = arrayOf()) : DataType() {
     private var fBounds = Rect.EMPTY
     private var fRunHead: RunHead? = RunHead(isEmptyHead = true)
 
@@ -58,12 +58,8 @@ class Region(rects: Array<Rect> = arrayOf()) {
         get() = bounds.height
 
     // if null we are a rect not empty
-    @JsName("isEmpty")
-    val isEmpty: Boolean
+    override val isEmpty
         get() = fRunHead?.isEmptyHead ?: false
-    @JsName("isNotEmpty")
-    val isNotEmpty: Boolean
-        get() = !isEmpty
     @JsName("bounds")
     val bounds
         get() = fBounds
@@ -146,8 +142,6 @@ class Region(rects: Array<Rect> = arrayOf()) {
         return false
     }
 
-    override fun toString(): String = prettyPrint()
-
     class Iterator(private val rgn: Region) {
         private var done: Boolean
         private var rect: Rect
@@ -228,8 +222,7 @@ class Region(rects: Array<Rect> = arrayOf()) {
         }
     }
 
-    @JsName("prettyPrint")
-    fun prettyPrint(): String {
+    override fun doPrintValue(): String {
         val iter = Iterator(this)
         val result = StringBuilder("SkRegion(")
         while (!iter.done()) {
@@ -239,23 +232,6 @@ class Region(rects: Array<Rect> = arrayOf()) {
         }
         result.append(")")
         return result.toString()
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is Region) return false
-        if (!rects.contentEquals(other.rects)) return false
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = 1
-        val iter = Iterator(this)
-        while (!iter.done()) {
-            result = 31 * result + iter.rect().hashCode()
-            iter.next()
-        }
-        return result
     }
 
     // the native values for these must match up with the enum in SkRegion.h
@@ -268,12 +244,10 @@ class Region(rects: Array<Rect> = arrayOf()) {
         REPLACE(5)
     }
 
-    @JsName("union")
     fun union(r: Rect): Boolean {
         return op(r, Op.UNION)
     }
 
-    @JsName("toRectF")
     fun toRectF(): RectF {
         return bounds.toRectF()
     }

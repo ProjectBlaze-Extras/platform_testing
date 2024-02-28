@@ -24,10 +24,14 @@ import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.IAutoUserHelper;
 import android.platform.helpers.MultiUserHelper;
 import android.platform.scenario.multiuser.MultiUserConstants;
+import android.platform.test.rules.ConditionalIgnore;
+import android.platform.test.rules.ConditionalIgnoreRule;
+import android.platform.test.rules.IgnoreOnPortrait;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -37,6 +41,7 @@ import org.junit.runner.RunWith;
  */
 @RunWith(AndroidJUnit4.class)
 public class SwitchUserQuickSettings {
+    @Rule public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
 
     private static final String guestUser = MultiUserConstants.GUEST_NAME;
     private final MultiUserHelper mMultiUserHelper = MultiUserHelper.getInstance();
@@ -54,6 +59,7 @@ public class SwitchUserQuickSettings {
     }
 
     @Test
+    @ConditionalIgnore(condition = IgnoreOnPortrait.class)
     public void testSwitchUser() throws Exception {
         UserInfo previousUser = mMultiUserHelper.getCurrentForegroundUserInfo();
         // switch to Guest

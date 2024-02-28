@@ -225,4 +225,11 @@ public interface IAutoSettingHelper extends IAppHelper, Scrollable {
      * @return The brightness value as reported by the service
      */
     int setBrightness(float targetPercentage);
+
+    /**
+     * Setup expectation: None
+     *
+     * <p>This method checks if Recently accessed apps is displayed in settings Location
+     */
+    boolean isRecentAppDisplayedInLocationSettings(String app);
 }

@@ -17,23 +17,22 @@
 package android.tools.common.flicker.config.lockscreen
 
 import android.tools.common.flicker.config.AssertionTemplates
-import android.tools.common.flicker.config.FaasScenarioType
-import android.tools.common.flicker.config.IScenarioConfig
+import android.tools.common.flicker.config.FlickerConfigEntry
+import android.tools.common.flicker.config.ScenarioId
 import android.tools.common.flicker.extractors.TaggedCujTransitionMatcher
-import android.tools.common.flicker.extractors.TaggedScenarioExtractor
+import android.tools.common.flicker.extractors.TaggedScenarioExtractorBuilder
 import android.tools.common.traces.events.CujType
 
-class LockscreenUnlockAnimation : IScenarioConfig {
-    override val enabled = true
-
-    override val type = FaasScenarioType.LOCKSCREEN_UNLOCK_ANIMATION
-
-    override val assertionTemplates = AssertionTemplates.LOCKSCREEN_UNLOCK_ANIMATION_ASSERTIONS
-
-    override val extractor =
-        TaggedScenarioExtractor(
-            targetTag = CujType.CUJ_LOCKSCREEN_UNLOCK_ANIMATION,
-            type,
-            transitionMatcher = TaggedCujTransitionMatcher(associatedTransitionRequired = false),
-        )
-}
+val LockscreenUnlockAnimation =
+    FlickerConfigEntry(
+        enabled = true,
+        scenarioId = ScenarioId("LOCKSCREEN_UNLOCK_ANIMATION"),
+        assertions = AssertionTemplates.COMMON_ASSERTIONS,
+        extractor =
+            TaggedScenarioExtractorBuilder()
+                .setTargetTag(CujType.CUJ_LOCKSCREEN_UNLOCK_ANIMATION)
+                .setTransitionMatcher(
+                    TaggedCujTransitionMatcher(associatedTransitionRequired = false)
+                )
+                .build()
+    )

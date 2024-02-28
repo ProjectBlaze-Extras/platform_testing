@@ -27,27 +27,9 @@ import kotlin.js.JsName
  * This class is used by flicker and Winscope
  */
 @JsExport
-class PointF private constructor(val x: Float, val y: Float) {
-    @JsName("prettyPrint")
-    fun prettyPrint(): String = "(${FloatFormatter.format(x)}, ${FloatFormatter.format(y)})"
-
-    override fun toString(): String = prettyPrint()
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is PointF) return false
-
-        if (x != other.x) return false
-        if (y != other.y) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = x.hashCode()
-        result = 31 * result + y.hashCode()
-        return result
-    }
+class PointF private constructor(val x: Float, val y: Float) : DataType() {
+    override val isEmpty = x == 0f && y == 0f
+    override fun doPrintValue() = "(${FloatFormatter.format(x)}, ${FloatFormatter.format(y)})"
 
     companion object {
         @JsName("EMPTY")

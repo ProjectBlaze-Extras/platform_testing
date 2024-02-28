@@ -1,0 +1,45 @@
+python_test_host {
+    name: "BluetoothBaseTest",
+    main: "bluetooth_base_test.py",
+    srcs: ["bluetooth_base_test.py"],
+    libs: [
+        "mobly",
+        "mbs_utils"
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_library_host {
+    name: "BluetoothTestLibrary",
+    pkg_path: "bluetooth_test",
+    srcs: ["bluetooth_base_test.py"],
+    libs: [
+        "mobly",
+        "mbs_utils"
+    ],
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}

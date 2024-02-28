@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,21 +18,20 @@ package android.platform.tests;
 
 import static junit.framework.Assert.assertTrue;
 
-import android.platform.helpers.AutoUtility;
+import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoAppGridHelper;
 import android.platform.helpers.IAutoHomeHelper;
 import android.platform.helpers.IAutoMediaHelper;
-import android.platform.helpers.HelperAccessor;
 import android.platform.test.option.StringOption;
+
 import androidx.test.runner.AndroidJUnit4;
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Arrays;
+import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 public class OpenAppFromMediaCenterTest {
@@ -58,10 +57,6 @@ public class OpenAppFromMediaCenterTest {
         mAutoAppGridHelper = new HelperAccessor<>(IAutoAppGridHelper.class);
     }
 
-    @BeforeClass
-    public static void exitSuw() {
-        AutoUtility.exitSuw();
-    }
 
     @Test
     public void testOpenMediaAppFromMediaWidget() {

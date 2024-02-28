@@ -30,6 +30,7 @@ android_test {
         "common-platform-scenarios",
         "common-platform-scenario-tests",
         "microbenchmark-device-lib",
+        "platform-test-junit-rules",
         "platform-test-rules",
         "platform-test-options",
         "multi-user-helper",

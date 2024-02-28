@@ -19,7 +19,6 @@ package android.platform.helpers;
 import android.app.Instrumentation;
 import android.platform.helpers.ScrollUtility.ScrollActions;
 import android.platform.helpers.ScrollUtility.ScrollDirection;
-import android.platform.helpers.exceptions.UnknownUiException;
 import android.platform.spectatio.exceptions.MissingUiElementException;
 
 import androidx.test.uiautomator.By;
@@ -123,7 +122,7 @@ public class AppGridHelperImpl extends AbstractStandardAppHelper implements IAut
                         appNameSelector,
                         String.format("Scroll on app grid to find %s", appName));
 
-        validateUiObject(app, String.format("Given app %s", appName));
+        getSpectatioUiUtil().validateUiObject(app, String.format("Given app %s", appName));
         getSpectatioUiUtil().clickAndWait(app);
         getSpectatioUiUtil().wait5Seconds();
     }
@@ -243,16 +242,18 @@ public class AppGridHelperImpl extends AbstractStandardAppHelper implements IAut
         BySelector screenBlockingSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.BLOCKING_SCREEN);
         UiObject2 screenBlocking = getSpectatioUiUtil().findUiObject(screenBlockingSelector);
-        validateUiObject(
-                screenBlocking,
-                String.format("Screen Blocking message when opening %s app", appName));
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        screenBlocking,
+                        String.format("Screen Blocking message when opening %s app", appName));
         BySelector screenBlockingMessageSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.BLOCKING_MESSAGE);
         UiObject2 screenBlockingMessage =
                 getSpectatioUiUtil().findUiObject(screenBlockingMessageSelector);
-        validateUiObject(
-                screenBlockingMessage,
-                String.format("Screen Blocking message for %s app", appName));
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        screenBlockingMessage,
+                        String.format("Screen Blocking message for %s app", appName));
         return getSpectatioUiUtil().getTextForUiElement(screenBlockingMessage);
     }
 
@@ -269,10 +270,4 @@ public class AppGridHelperImpl extends AbstractStandardAppHelper implements IAut
         getSpectatioUiUtil().wait1Second();
     }
 
-    private void validateUiObject(UiObject2 uiObject, String action) {
-        if (uiObject == null) {
-            throw new UnknownUiException(
-                    String.format("Unable to find UI Element for %s.", action));
-        }
-    }
 }

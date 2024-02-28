@@ -16,17 +16,16 @@
 
 package android.tools.device.traces.io
 
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.TEST_SCENARIO
 import android.tools.common.io.ResultArtifactDescriptor
 import android.tools.common.io.RunStatus
 import android.tools.common.io.TraceType
 import android.tools.createDefaultArtifactBuilder
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
 import java.io.File
 import kotlin.io.path.createTempDirectory
 import org.junit.ClassRule
-import org.junit.Rule
 import org.junit.Test
 
 /** Tests for [ArtifactBuilder] */
@@ -137,6 +136,6 @@ class ArtifactBuilderTest {
     }
 
     companion object {
-        @Rule @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

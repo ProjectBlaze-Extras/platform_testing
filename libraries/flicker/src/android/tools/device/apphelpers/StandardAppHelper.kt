@@ -23,7 +23,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.platform.helpers.AbstractStandardAppHelper
-import android.tools.common.CrossPlatform
+import android.tools.common.Logger
 import android.tools.common.PlatformConsts
 import android.tools.common.traces.Condition
 import android.tools.common.traces.ConditionsFactory
@@ -107,7 +107,7 @@ open class StandardAppHelper(
 
     /** {@inheritDoc} */
     override fun exit() {
-        CrossPlatform.log.withTracing("exit") {
+        Logger.withTracing("exit") {
             // Ensure all testing components end up being closed.
             activityManager?.forceStopPackage(packageName)
         }
@@ -115,7 +115,7 @@ open class StandardAppHelper(
 
     /** Exits the activity and wait for activity destroyed */
     fun exit(wmHelper: WindowManagerStateHelper) {
-        CrossPlatform.log.withTracing("${this::class.simpleName}#exitAndWait") {
+        Logger.withTracing("${this::class.simpleName}#exitAndWait") {
             exit()
             waitForActivityDestroyed(wmHelper)
         }
@@ -140,7 +140,7 @@ open class StandardAppHelper(
         action: String? = null,
         stringExtras: Map<String, String> = mapOf()
     ) {
-        CrossPlatform.log.withTracing("${this::class.simpleName}#launchAppViaIntent") {
+        Logger.withTracing("${this::class.simpleName}#launchAppViaIntent") {
             val intent = openAppIntent
             intent.action = action ?: Intent.ACTION_MAIN
             stringExtras.forEach { intent.putExtra(it.key, it.value) }
@@ -207,7 +207,7 @@ open class StandardAppHelper(
         launchedAppComponentMatcherOverride: IComponentMatcher? = null,
         waitConditions: Array<Condition<DeviceStateDump>> = emptyArray()
     ) {
-        CrossPlatform.log.withTracing("${this::class.simpleName}#doWaitShown") {
+        Logger.withTracing("${this::class.simpleName}#doWaitShown") {
             val expectedWindow = launchedAppComponentMatcherOverride ?: componentMatcher
             val builder =
                 wmHelper

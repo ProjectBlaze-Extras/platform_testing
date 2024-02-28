@@ -19,7 +19,6 @@ package android.platform.helpers;
 import android.app.Instrumentation;
 import android.app.UiAutomation;
 import android.content.Context;
-import android.platform.helpers.exceptions.UnknownUiException;
 import android.provider.Settings;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -89,8 +88,9 @@ public class SettingsDisplayHelperImpl extends AbstractStandardAppHelper
                                 "Scroll on display to find %s",
                                 adaptiveBrightnessToggle.toString()));
 
-        validateUiObject(
-                toggle, String.format("Validating UI object %s", adaptiveBrightnessToggle));
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        toggle, String.format("Validating UI object %s", adaptiveBrightnessToggle));
 
         return toggle;
     }
@@ -131,10 +131,4 @@ public class SettingsDisplayHelperImpl extends AbstractStandardAppHelper
         // Nothing to dismiss
     }
 
-    private void validateUiObject(UiObject2 uiObject, String action) {
-        if (uiObject == null) {
-            throw new UnknownUiException(
-                    String.format("Unable to find UI Element for %s.", action));
-        }
-    }
 }

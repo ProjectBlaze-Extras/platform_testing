@@ -17,5 +17,5 @@
 package android.tools.common.flicker.config.taskbar
 
 internal object Taskbar {
-    val SCENARIOS = listOf(TaskbarCollapse(), TaskbarExpand())
+    val SCENARIOS = listOf(TaskbarCollapse, TaskbarExpand)
 }

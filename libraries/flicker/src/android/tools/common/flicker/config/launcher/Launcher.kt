@@ -19,11 +19,11 @@ package android.tools.common.flicker.config.launcher
 internal object Launcher {
     val SCENARIOS =
         listOf(
-            LauncherAllAppsCloseSwipe(),
-            LauncherAllAppsCloseToHome(),
-            LauncherAllAppsOpen(),
-            LauncherAllAppsScroll(),
-            LauncherRecentsScrolling(),
-            LauncherUnlockEntranceAnimation()
+            LauncherAllAppsCloseSwipe,
+            LauncherAllAppsCloseToHome,
+            LauncherAllAppsOpen,
+            LauncherAllAppsScroll,
+            LauncherRecentsScrolling,
+            LauncherUnlockEntranceAnimation
         )
 }

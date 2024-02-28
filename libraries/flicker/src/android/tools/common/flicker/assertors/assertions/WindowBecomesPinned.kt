@@ -16,9 +16,9 @@
 
 package android.tools.common.flicker.assertors.assertions
 
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.ComponentTemplate
-import android.tools.common.flicker.subject.wm.WindowManagerTraceSubject
 
 /**
  * Checks that the app layer doesn't exist or is invisible at the start of the transition, but is
@@ -27,11 +27,8 @@ import android.tools.common.flicker.subject.wm.WindowManagerTraceSubject
 class WindowBecomesPinned(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(
-        scenarioInstance: IScenarioInstance,
-        wmSubject: WindowManagerTraceSubject
-    ) {
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
         val component = component.build(scenarioInstance)
-        wmSubject.isNotPinned(component).then().isPinned(component).forAllEntries()
+        flicker.assertWm { isNotPinned(component).then().isPinned(component) }
     }
 }

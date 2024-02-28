@@ -16,7 +16,7 @@
 
 package android.tools.device.flicker.datastore
 
-import android.tools.common.CrossPlatform
+import android.tools.common.Timestamps
 import android.tools.common.io.TransitionTimeRange
 import android.tools.device.traces.io.InMemoryArtifact
 import android.tools.device.traces.io.ResultData
@@ -27,22 +27,14 @@ object Consts {
     internal val TEST_RESULT =
         ResultData(
             _artifact = InMemoryArtifact("TEST_RESULT"),
-            _transitionTimeRange =
-                TransitionTimeRange(
-                    CrossPlatform.timestamp.empty(),
-                    CrossPlatform.timestamp.empty()
-                ),
+            _transitionTimeRange = TransitionTimeRange(Timestamps.empty(), Timestamps.empty()),
             _executionError = null
         )
 
     internal val RESULT_FAILURE =
         ResultData(
             _artifact = InMemoryArtifact("RESULT_FAILURE"),
-            _transitionTimeRange =
-                TransitionTimeRange(
-                    CrossPlatform.timestamp.empty(),
-                    CrossPlatform.timestamp.empty()
-                ),
+            _transitionTimeRange = TransitionTimeRange(Timestamps.empty(), Timestamps.empty()),
             _executionError = null
         )
 }

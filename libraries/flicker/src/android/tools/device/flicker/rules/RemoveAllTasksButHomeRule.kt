@@ -18,16 +18,16 @@ package android.tools.device.flicker.rules
 
 import android.app.ActivityTaskManager
 import android.app.WindowConfiguration
-import android.tools.common.CrossPlatform
 import android.tools.common.FLICKER_TAG
+import android.tools.common.Logger
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
 /** Test rule to ensure no tasks as running before executing the test */
 class RemoveAllTasksButHomeRule() : TestWatcher() {
     override fun starting(description: Description?) {
-        CrossPlatform.log.withTracing("RemoveAllTasksButHomeRule:finished") {
-            CrossPlatform.log.v(FLICKER_TAG, "Removing all tasks (except home)")
+        Logger.withTracing("RemoveAllTasksButHomeRule:finished") {
+            Logger.v(FLICKER_TAG, "Removing all tasks (except home)")
             removeAllTasksButHome()
         }
     }

@@ -17,12 +17,12 @@
 package android.tools.device.flicker.datastore
 
 import android.annotation.SuppressLint
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.TEST_SCENARIO
 import android.tools.TestTraces
 import android.tools.common.io.TraceType
 import android.tools.device.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.newTestResultWriter
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
 import org.junit.Before
 import org.junit.ClassRule
@@ -48,6 +48,6 @@ class CachedResultReaderTest {
     }
 
     companion object {
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

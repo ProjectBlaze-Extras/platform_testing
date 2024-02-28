@@ -11,10 +11,10 @@ import android.graphics.Rect
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.PixelCopy
 import android.view.SurfaceView
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.Window
 import androidx.annotation.RequiresApi
@@ -61,9 +61,18 @@ fun View.captureToBitmap(window: Window? = null): ListenableFuture<Bitmap> {
         bitmapFuture.addListener({ HardwareRendererCompat.setDrawingEnabled(false) }, mainExecutor)
     }
 
+    // We need to flush all the events in the UI queue before taking a screenshot.
+    // This can be guaranteed by waiting for an onSuccess callback, as implemented by toBitmap, but
+    // in robolectric mode,
+    //  we have to use this sync call as the procssing is done on the main looper and therefore we
+    // need a sync based solution.
+    if (isRobolectric) {
+        Espresso.onIdle()
+    }
+
     mainExecutor.execute {
         if (isRobolectric) {
-            generateBitmap(bitmapFuture)
+            generateBitmap(bitmapFuture, window)
         } else {
             val forceRedrawFuture = forceRedraw()
             forceRedrawFuture.addListener({ generateBitmap(bitmapFuture, window) }, mainExecutor)
@@ -158,6 +167,7 @@ private fun View.generateBitmap(
     if (bitmapFuture.isCancelled) {
         return
     }
+
     val destBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
     when {
         Build.VERSION.SDK_INT < 26 -> generateBitmapFromDraw(destBitmap, bitmapFuture)
@@ -167,11 +177,7 @@ private fun View.generateBitmap(
             if (window != null) {
                 generateBitmapFromPixelCopy(window, destBitmap, bitmapFuture)
             } else {
-                Log.i(
-                    "View.captureToImage",
-                    "Could not find window for view. Falling back to View#draw instead of PixelCopy"
-                )
-                generateBitmapFromDraw(destBitmap, bitmapFuture)
+                bitmapFuture.setException(IllegalStateException("Could not find window for view."))
             }
         }
     }
@@ -215,7 +221,17 @@ private fun View.getActivity(): Activity? {
             else -> null
         }
     }
-    return context.getActivity()
+    val activity = context.getActivity()
+    if (activity != null) {
+        return activity
+    } else if (this is ViewGroup && this.childCount > 0) {
+        // getActivity is known to fail if View is a DecorView such as specified via espresso's
+        // isRoot().
+        // Make another attempt to find the activity from its first child view
+        return getChildAt(0).getActivity()
+    } else {
+        return null
+    }
 }
 
 private fun View.generateBitmapFromPixelCopy(

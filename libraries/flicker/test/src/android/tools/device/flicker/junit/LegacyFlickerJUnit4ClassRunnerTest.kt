@@ -19,15 +19,16 @@ package android.tools.device.flicker.junit
 import android.annotation.SuppressLint
 import android.app.Instrumentation
 import android.platform.test.annotations.FlakyTest
-import android.tools.CleanFlickerEnvironmentRule
+import android.tools.common.flicker.annotation.FlickerServiceCompatible
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.device.apphelpers.BrowserAppHelper
 import android.tools.device.flicker.IS_FAAS_ENABLED
-import android.tools.device.flicker.annotation.FlickerServiceCompatible
 import android.tools.device.flicker.isShellTransitionsEnabled
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.getScenarioTraces
+import android.tools.rules.CleanFlickerEnvironmentRule
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth
 import org.junit.Assume
@@ -91,7 +92,7 @@ class LegacyFlickerJUnit4ClassRunnerTest {
     @Test
     fun runsWithValidFlickerTest() {
         val testClass = TestClass(SimpleFaasTest::class.java)
-        val parameters = FlickerTestFactory.nonRotationTests()
+        val parameters = LegacyFlickerTestFactory.nonRotationTests()
         val test = TestWithParameters("[PARAMS]", testClass, listOf(parameters[0]))
         val runner = createRunner(test)
         runner.run(RunNotifier())
@@ -100,7 +101,7 @@ class LegacyFlickerJUnit4ClassRunnerTest {
     @Test
     fun flakyTestsRunWithNoFilter() {
         val testClass = TestClass(SimpleTestWithFlakyTest::class.java)
-        val parameters = FlickerTestFactory.nonRotationTests()
+        val parameters = LegacyFlickerTestFactory.nonRotationTests()
         val test = TestWithParameters("[PARAMS]", testClass, listOf(parameters[0]))
         val runner = createRunner(test)
         flakyTestRuns = 0
@@ -112,7 +113,7 @@ class LegacyFlickerJUnit4ClassRunnerTest {
     @Test
     fun canFilterOutFlakyTests() {
         val testClass = TestClass(SimpleTestWithFlakyTest::class.java)
-        val parameters = FlickerTestFactory.nonRotationTests()
+        val parameters = LegacyFlickerTestFactory.nonRotationTests()
         val test = TestWithParameters("[PARAMS]", testClass, listOf(parameters[0]))
         val runner = createRunner(test)
         runner.filter(FLAKY_TEST_FILTER)
@@ -134,7 +135,7 @@ class LegacyFlickerJUnit4ClassRunnerTest {
         Assume.assumeTrue(IS_FAAS_ENABLED)
 
         val testClass = TestClass(SimpleFaasTest::class.java)
-        val parameters = FlickerTestFactory.nonRotationTests()
+        val parameters = LegacyFlickerTestFactory.nonRotationTests()
         val test = TestWithParameters("[PARAMS]", testClass, listOf(parameters[0]))
         val runner = createRunner(test)
         val notifier = mock(RunNotifier::class.java)
@@ -204,8 +205,8 @@ class LegacyFlickerJUnit4ClassRunnerTest {
 
     private fun checkTestRunReportsExecutionErrors(klass: Class<*>) {
         val testClass = TestClass(klass)
-        val parameters = FlickerTestFactory.nonRotationTests()
-        val flickerTest = parameters.first()
+        val parameters = LegacyFlickerTestFactory.nonRotationTests()
+        val flickerTest = parameters.first() as LegacyFlickerTest
         val test = TestWithParameters("[PARAMS]", testClass, listOf(flickerTest))
 
         val runner = createRunner(test)
@@ -249,11 +250,11 @@ class LegacyFlickerJUnit4ClassRunnerTest {
     @RunWith(Parameterized::class)
     @FlickerServiceCompatible
     @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-    open class SimpleFaasTest(flicker: FlickerTest) : SimpleTest(flicker)
+    open class SimpleFaasTest(flicker: LegacyFlickerTest) : SimpleTest(flicker)
 
     @RunWith(Parameterized::class)
     @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-    class AlwaysFailExecutionTestClass(private val flicker: FlickerTest) {
+    class AlwaysFailExecutionTestClass(private val flicker: LegacyFlickerTest) {
         val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
 
         @FlickerBuilderProvider
@@ -275,7 +276,7 @@ class LegacyFlickerJUnit4ClassRunnerTest {
 
     @RunWith(Parameterized::class)
     @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-    open class SimpleTestWithFlakyTest(flicker: FlickerTest) : SimpleTest(flicker) {
+    open class SimpleTestWithFlakyTest(flicker: LegacyFlickerTest) : SimpleTest(flicker) {
         @FlakyTest
         @Test
         fun flakyTest() {
@@ -290,12 +291,13 @@ class LegacyFlickerJUnit4ClassRunnerTest {
     @RunWith(Parameterized::class)
     @FlickerServiceCompatible
     @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-    class SimpleFaasTestWithFlakyTest(flicker: FlickerTest) : SimpleTestWithFlakyTest(flicker)
+    class SimpleFaasTestWithFlakyTest(flicker: LegacyFlickerTest) :
+        SimpleTestWithFlakyTest(flicker)
 
     @RunWith(Parameterized::class)
     @FlickerServiceCompatible
     @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-    class TransitionRunCounterWithFaasTest(flicker: FlickerTest) : SimpleFaasTest(flicker) {
+    class TransitionRunCounterWithFaasTest(flicker: LegacyFlickerTest) : SimpleFaasTest(flicker) {
         @FlickerBuilderProvider
         override fun buildFlicker(): FlickerBuilder {
             return FlickerBuilder(instrumentation).apply { transitions { transitionRunCount++ } }
@@ -304,7 +306,7 @@ class LegacyFlickerJUnit4ClassRunnerTest {
 
     companion object {
         const val TRANSITION_FAILURE_MESSAGE = "Transition execution failed"
-        private val NO_SCENARIO_MESSAGE = "Unable to extract ${FlickerTest::class.simpleName}"
+        private val NO_SCENARIO_MESSAGE = "Unable to extract ${LegacyFlickerTest::class.simpleName}"
 
         val FLAKY_TEST_FILTER =
             object : Filter() {
@@ -329,6 +331,6 @@ class LegacyFlickerJUnit4ClassRunnerTest {
             FlickerParametersRunnerFactory().createRunnerForTestWithParameters(baseTest)
                 as LegacyFlickerJUnit4ClassRunner
 
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

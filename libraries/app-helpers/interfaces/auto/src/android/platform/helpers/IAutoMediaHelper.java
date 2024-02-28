@@ -209,4 +209,11 @@ public interface IAutoMediaHelper extends IAppHelper, Scrollable {
      * <p>This method is used to maximize the play back screen.
      */
     void maximizeNowPlaying();
+
+    /**
+     * Setup expectations: Bluetooth Audio page opened.
+     *
+     * <p>This method is return is Bluetooth Audio disconnected label visible.
+     */
+    boolean isBluetoothAudioDisconnectedLabelVisible();
 }

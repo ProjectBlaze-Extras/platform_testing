@@ -107,7 +107,10 @@ class LimitDevicesRule(private val thisDevice: String = Build.PRODUCT) : TestRul
 
 enum class DeviceProduct(val product: String) {
     CF_PHONE("cf_x86_64_phone"),
-    CF_TABLET("cf_x86_64_tablet")
+    CF_TABLET("cf_x86_64_tablet"),
+    CF_FOLDABLE("cf_x86_64_foldable"),
+    TANGORPRO("tangorpro"),
+    FELIX("felix"),
 }
 
 private fun makeAssumptionViolatedStatement(errorMessage: String): Statement =

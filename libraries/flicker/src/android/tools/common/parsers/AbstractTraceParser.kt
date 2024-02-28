@@ -17,8 +17,9 @@
 package android.tools.common.parsers
 
 import android.tools.common.Cache
-import android.tools.common.CrossPlatform
+import android.tools.common.Logger
 import android.tools.common.Timestamp
+import android.tools.common.Timestamps
 
 /** Base trace parser class */
 abstract class AbstractTraceParser<
@@ -35,8 +36,8 @@ abstract class AbstractTraceParser<
     final override fun parse(bytes: ByteArray, clearCache: Boolean): OutputTypeTrace {
         return parse(
             bytes,
-            from = CrossPlatform.timestamp.min(),
-            to = CrossPlatform.timestamp.max(),
+            from = Timestamps.min(),
+            to = Timestamps.max(),
             addInitialEntry = true,
             clearCache = clearCache
         )
@@ -45,8 +46,8 @@ abstract class AbstractTraceParser<
     final override fun parse(input: InputTypeTrace, clearCache: Boolean): OutputTypeTrace {
         return parse(
             input,
-            from = CrossPlatform.timestamp.min(),
-            to = CrossPlatform.timestamp.max(),
+            from = Timestamps.min(),
+            to = Timestamps.max(),
             addInitialEntry = true,
             clearCache = clearCache
         )
@@ -55,8 +56,8 @@ abstract class AbstractTraceParser<
     final override fun doParse(input: InputTypeTrace): OutputTypeTrace {
         return doParse(
             input,
-            from = CrossPlatform.timestamp.min(),
-            to = CrossPlatform.timestamp.max(),
+            from = Timestamps.min(),
+            to = Timestamps.max(),
             addInitialEntry = true
         )
     }
@@ -86,8 +87,7 @@ abstract class AbstractTraceParser<
             if (!selectedInputTimestamps.contains(currTimestamp) || !shouldParseEntry(rawEntry)) {
                 continue
             }
-            val parsedEntry =
-                CrossPlatform.log.withTracing("doParseEntry") { doParseEntry(rawEntry) }
+            val parsedEntry = Logger.withTracing("doParseEntry") { doParseEntry(rawEntry) }
             parsedEntries.add(parsedEntry)
         }
         return createTrace(parsedEntries)
@@ -109,7 +109,7 @@ abstract class AbstractTraceParser<
         addInitialEntry: Boolean = true,
         clearCache: Boolean = true
     ): OutputTypeTrace {
-        return CrossPlatform.log.withTracing("${this::class.simpleName}#parse") {
+        return Logger.withTracing("${this::class.simpleName}#parse") {
             try {
                 doParse(input, from, to, addInitialEntry)
             } finally {

@@ -20,22 +20,138 @@ package android.platform.helpers.uinput
  * [android.platform.test.rule.InputDeviceRule].
  *
  * @param supportedKeys should be keycodes obtained from the linux event code set. See
- *   https://source.corp.google.com/kernel-upstream/include/uapi/linux/input-event-codes.h
+ *   https://cs.android.com/android/kernel/superproject/+/common-android-mainline:common/include/uapi/linux/input-event-codes.h
  */
 class UInputStylus(
-    override val vendorId: Int = ARBITRARY_VENDOR_ID,
-    override val productId: Int = ARBITRARY_PRODUCT_ID,
-    override val name: String = "Test Stylus With Buttons (BT)",
-    override val supportedKeys: Array<Int> = SUPPORTED_KEYS,
+    val inputDeviceId: Int,
+    val displayWidth: Int,
+    val displayHeight: Int,
+    override val vendorId: Int = VENDOR_ID,
+    override val productId: Int = PRODUCT_ID,
+    override val name: String = "Test capacitive stylus with buttons",
+    override val supportedKeys: Array<Int> = SUPPORTED_KEYBITS,
 ) : UInputDevice() {
-    // Based on cts/tests/input/res/raw/test_bluetooth_stylus_register.json
     override val bus = "bluetooth"
 
-    companion object {
-        // UI_SET_KEYBIT : BTN_STYLUS, BTN_STYLUS2, BTN_STYLUS3
-        val SUPPORTED_KEYS = arrayOf(331, 332, 329)
+    override fun getRegisterCommand() =
+        """{
+      "id": $inputDeviceId,
+      "type": "uinput",
+      "command": "register",
+      "name": "$name",
+      "vid": $vendorId,
+      "pid": $productId,
+      "bus": "$bus",
+      "configuration": [
+        {"type": 100, "data": ${SUPPORTED_ENVBITS.contentToString()}},  // UI_SET_EVBIT
+        {"type": 101, "data": ${SUPPORTED_KEYBITS.contentToString()}},  // UI_SET_KEYBIT
+        {"type": 103, "data": ${SUPPORTED_ABSBITS.contentToString()}},  // UI_SET_ABSBIT
+        {"type": 110, "data": [1]}  // UI_SET_PROPBIT : INPUT_PROP_DIRECT
+      ],
+      "abs_info": [
+        {"code":0x00, "info": {       // ABS_X
+          "value": 0,
+          "minimum": 0,
+          "maximum": 3199, // Display width * 2 - 1. Hardcoded with values from recording device.
+          "fuzz": 0,
+          "flat": 0,
+          "resolution": 0
+        }},
+        {"code":0x01, "info": {       // ABS_Y
+          "value": 0,
+          "minimum": 0,
+          "maximum": 5119, // Display height * 2 - 1. Hardcoded with values from recording device.
+          "fuzz": 0,
+          "flat": 0,
+          "resolution": 0
+        }},
+        {"code":0x18, "info": {       // ABS_PRESSURE
+          "value": 0,
+          "minimum": 0,
+          "maximum": 4095,
+          "fuzz": 0,
+          "flat": 0,
+          "resolution": 0
+        }},
+        {"code":0x1a, "info": {       // ABS_TILT_X
+          "value": 0,
+          "minimum": -60,
+          "maximum": 60,
+          "fuzz": 0,
+          "flat": 0,
+          "resolution": 0
+        }},
+        {"code":0x1b, "info": {       // ABS_TILT_Y
+          "value": 0,
+          "minimum": -60,
+          "maximum": 60,
+          "fuzz": 0,
+          "flat": 0,
+          "resolution": 0
+        }}
+      ]
+    }
 
-        const val ARBITRARY_VENDOR_ID = 0x18d1
-        const val ARBITRARY_PRODUCT_ID = 0xabcd
+    {
+      "id": 1,
+      "command": "delay",
+      "duration": 3000
+    }
+
+    // Sends an event which tells the device that this is a stylus device not a finger.
+    {
+      "id": $inputDeviceId,
+      "command": "inject",
+      "events": [
+        1,    // EV_KEY
+        320,  // BTN_TOOL_PEN
+        1
+      ]
+    }
+    """
+
+    /** Sends the STYLUS_BUTTON_TAIL event. */
+    fun sendTailButtonClickEvent(eventInjector: EventInjector) {
+        // KEY_JOURNAL is remapped to STYLUS_BUTTON_TAIL.
+        eventInjector.sendKeyEvent(inputDeviceId, KEY_JOURNAL)
+    }
+
+    /** Sends the events contained within the specified file. */
+    fun sendEventsFromInputFile(eventInjector: EventInjector, assetsFilePath: String) {
+        eventInjector.sendEventsFromInputFile(inputDeviceId, assetsFilePath)
+    }
+
+    private companion object {
+        // EV_KEY
+        val SUPPORTED_ENVBITS =
+            arrayOf(
+                /* EV_KEY */ 1,
+                /* EV_ABS */ 3,
+            )
+        // UI_SET_ABSBIT
+        val SUPPORTED_ABSBITS =
+            arrayOf(
+                /* ABS_X */ 0,
+                /* ABS_Y */ 1,
+                /* ABS_PRESSURE */ 24,
+                /* ABS_TILT_X */ 26,
+                /* ABS_TILT_Y */ 27,
+            )
+        const val KEY_JOURNAL = 578
+        // UI_SET_KEYBIT
+        val SUPPORTED_KEYBITS =
+            arrayOf(
+                /* BTN_TOOL_PEN */ 320,
+                /* BTN_TOUCH */ 330,
+                /* BTN_STYLUS */ 331,
+                /* BTN_STYLUS2 */ 332,
+                KEY_JOURNAL,
+            )
+        // Using the below combination of product and vendor ID allows us to remap KEY_JOURNAL to
+        // STYLUS_BUTTON_TAIL. This is because STYLUS_BUTTON_TAIL is not a proper Linux input event
+        // code yet and we remap the buttons for generic android stylus which is represented by the
+        // below combination of IDs.
+        const val VENDOR_ID = 0x18d1
+        const val PRODUCT_ID = 0x4f80
     }
 }

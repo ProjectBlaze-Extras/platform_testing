@@ -29,6 +29,7 @@ java_test {
         enabled: false
     },
     srcs: [
+        "src/android/tools/device/AndroidLogger.kt",
         "src/android/tools/device/flicker/**/*.kt",
         "src/android/tools/device/flicker/**/*.eventlog"
     ],

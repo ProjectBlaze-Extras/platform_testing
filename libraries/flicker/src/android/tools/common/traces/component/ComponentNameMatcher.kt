@@ -18,7 +18,7 @@ package android.tools.common.traces.component
 
 import android.tools.common.traces.surfaceflinger.Layer
 import android.tools.common.traces.wm.Activity
-import android.tools.common.traces.wm.WindowContainer
+import android.tools.common.traces.wm.IWindowContainer
 
 /** ComponentMatcher based on name */
 class ComponentNameMatcher(var component: ComponentName) : IComponentNameMatcher {
@@ -45,7 +45,7 @@ class ComponentNameMatcher(var component: ComponentName) : IComponentNameMatcher
     }
 
     /** {@inheritDoc} */
-    override fun windowMatchesAnyOf(windows: Array<WindowContainer>): Boolean =
+    override fun windowMatchesAnyOf(windows: Array<IWindowContainer>): Boolean =
         windows.any { windowNameFilter.invoke(it.title) }
 
     /** {@inheritDoc} */

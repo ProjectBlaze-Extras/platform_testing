@@ -17,24 +17,22 @@
 package android.tools.common.flicker.config.launcher
 
 import android.tools.common.flicker.config.AssertionTemplates
-import android.tools.common.flicker.config.FaasScenarioType
-import android.tools.common.flicker.config.IScenarioConfig
+import android.tools.common.flicker.config.FlickerConfigEntry
+import android.tools.common.flicker.config.ScenarioId
 import android.tools.common.flicker.extractors.TaggedCujTransitionMatcher
-import android.tools.common.flicker.extractors.TaggedScenarioExtractor
+import android.tools.common.flicker.extractors.TaggedScenarioExtractorBuilder
 import android.tools.common.traces.events.CujType
 
-class LauncherUnlockEntranceAnimation : IScenarioConfig {
-    override val enabled = false
-
-    override val type = FaasScenarioType.LAUNCHER_UNLOCK_ENTRANCE_ANIMATION
-
-    override val assertionTemplates =
-        AssertionTemplates.COMMON_ASSERTIONS // TODO: Add specific assertions
-
-    override val extractor =
-        TaggedScenarioExtractor(
-            targetTag = CujType.CUJ_LAUNCHER_UNLOCK_ENTRANCE_ANIMATION,
-            type,
-            transitionMatcher = TaggedCujTransitionMatcher(associatedTransitionRequired = false),
-        )
-}
+val LauncherUnlockEntranceAnimation =
+    FlickerConfigEntry(
+        enabled = false,
+        scenarioId = ScenarioId("LAUNCHER_UNLOCK_ENTRANCE_ANIMATION"),
+        assertions = AssertionTemplates.COMMON_ASSERTIONS,
+        extractor =
+            TaggedScenarioExtractorBuilder()
+                .setTargetTag(CujType.CUJ_LAUNCHER_UNLOCK_ENTRANCE_ANIMATION)
+                .setTransitionMatcher(
+                    TaggedCujTransitionMatcher(associatedTransitionRequired = false)
+                )
+                .build()
+    )

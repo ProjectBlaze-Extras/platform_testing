@@ -16,8 +16,8 @@
 
 package android.tools.common.traces.events
 
-import android.tools.CleanFlickerEnvironmentRule
-import android.tools.common.CrossPlatform
+import android.tools.common.Timestamps
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
 import org.junit.ClassRule
 import org.junit.Test
@@ -153,7 +153,7 @@ class CujTraceTest {
         tag: String? = null
     ): CujEvent {
         return CujEvent(
-            CrossPlatform.timestamp.from(unixNanos = timestamp),
+            Timestamps.from(unixNanos = timestamp),
             cuj,
             0,
             "root",
@@ -164,6 +164,6 @@ class CujTraceTest {
     }
 
     companion object {
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

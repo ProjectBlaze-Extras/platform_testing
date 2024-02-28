@@ -17,7 +17,6 @@
 package android.platform.helpers;
 
 import android.app.Instrumentation;
-import android.platform.helpers.exceptions.UnknownUiException;
 
 import androidx.test.uiautomator.BySelector;
 import androidx.test.uiautomator.UiObject2;
@@ -89,7 +88,8 @@ public class TestMediaAppHelperImpl extends AbstractStandardAppHelper
                 getUiElementFromConfig(AutomotiveConfigConstants.MEDIA_SONGS_LIST);
 
         List<UiObject2> songList = getSpectatioUiUtil().findUiObjects(songListSelector);
-        validateUiObject(songList, AutomotiveConfigConstants.MEDIA_SONGS_LIST);
+        getSpectatioUiUtil()
+                .validateUiObjects(songList, AutomotiveConfigConstants.MEDIA_SONGS_LIST);
         getSpectatioUiUtil().clickAndWait(songList.get(1));
         getSpectatioUiUtil().wait1Second();
 
@@ -97,7 +97,9 @@ public class TestMediaAppHelperImpl extends AbstractStandardAppHelper
         BySelector goBackToSongsListSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.MEDIA_APP_NAVIGATION_ICON);
         UiObject2 goBackToSongsList = getSpectatioUiUtil().findUiObject(goBackToSongsListSelector);
-        validateUiObject(goBackToSongsList, AutomotiveConfigConstants.MEDIA_APP_NAVIGATION_ICON);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        goBackToSongsList, AutomotiveConfigConstants.MEDIA_APP_NAVIGATION_ICON);
         getSpectatioUiUtil().wait1Second();
     }
 
@@ -105,22 +107,11 @@ public class TestMediaAppHelperImpl extends AbstractStandardAppHelper
         BySelector mediaTestAppFieldSelector = getUiElementFromConfig(autoConfigConstants);
         UiObject2 mediaTestAppField = getSpectatioUiUtil().findUiObject(mediaTestAppFieldSelector);
 
-        validateUiObject(mediaTestAppField, String.format("Test Media App field: %s " + fieldName));
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        mediaTestAppField, String.format("Test Media App field: %s " + fieldName));
         getSpectatioUiUtil().clickAndWait(mediaTestAppField);
         getSpectatioUiUtil().wait1Second();
     }
 
-    private void validateUiObject(UiObject2 uiObject, String action) {
-        if (uiObject == null) {
-            throw new UnknownUiException(
-                    String.format("Unable to find UI Element for %s.", action));
-        }
-    }
-
-    private void validateUiObject(List<UiObject2> uiObjects, String action) {
-        if (uiObjects == null) {
-            throw new UnknownUiException(
-                    String.format("Unable to find UI Element for %s.", action));
-        }
-    }
 }

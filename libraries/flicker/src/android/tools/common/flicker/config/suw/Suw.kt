@@ -19,9 +19,9 @@ package android.tools.common.flicker.config.suw
 internal object Suw {
     val SCENARIOS =
         listOf(
-            SuwLoadingScreenForStatus(),
-            SuwLoadingToNextFlow(),
-            SuwLoadingToShowInfoWithActions(),
-            SuwShowFunctionScreenWithActions()
+            SuwLoadingScreenForStatus,
+            SuwLoadingToNextFlow,
+            SuwLoadingToShowInfoWithActions,
+            SuwShowFunctionScreenWithActions
         )
 }

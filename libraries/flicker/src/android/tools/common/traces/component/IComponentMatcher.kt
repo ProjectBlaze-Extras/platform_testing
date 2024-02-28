@@ -18,7 +18,7 @@ package android.tools.common.traces.component
 
 import android.tools.common.traces.surfaceflinger.Layer
 import android.tools.common.traces.wm.Activity
-import android.tools.common.traces.wm.WindowContainer
+import android.tools.common.traces.wm.IWindowContainer
 
 interface IComponentMatcher {
     fun or(other: IComponentMatcher): IComponentMatcher {
@@ -27,51 +27,51 @@ interface IComponentMatcher {
 
     /**
      * @param window to search
-     * @return if any of the [components] matches [window]
+     * @return if any of the components matches [window]
      */
-    fun windowMatchesAnyOf(window: WindowContainer): Boolean = windowMatchesAnyOf(arrayOf(window))
+    fun windowMatchesAnyOf(window: IWindowContainer): Boolean = windowMatchesAnyOf(arrayOf(window))
 
     /**
      * @param windows to search
-     * @return if any of the [components] matches any of [windows]
+     * @return if any of the components matches any of [windows]
      */
-    fun windowMatchesAnyOf(windows: Collection<WindowContainer>): Boolean =
+    fun windowMatchesAnyOf(windows: Collection<IWindowContainer>): Boolean =
         windowMatchesAnyOf(windows.toTypedArray())
 
     /**
      * @param windows to search
      * @return if any of the [windows] fit the matching conditions of the matcher
      */
-    fun windowMatchesAnyOf(windows: Array<WindowContainer>): Boolean
+    fun windowMatchesAnyOf(windows: Array<IWindowContainer>): Boolean
 
     /**
      * @param activity to search
-     * @return if any of the [components] matches [activity]
+     * @return if any of the components matches [activity]
      */
     fun activityMatchesAnyOf(activity: Activity): Boolean = activityMatchesAnyOf(arrayOf(activity))
 
     /**
      * @param activities to search
-     * @return if any of the [components] matches any of [activities]
+     * @return if any of the components matches any of [activities]
      */
     fun activityMatchesAnyOf(activities: Collection<Activity>): Boolean =
         activityMatchesAnyOf(activities.toTypedArray())
 
     /**
      * @param activities to search
-     * @return if any of the [components] matches any of [activities]
+     * @return if any of the components matches any of [activities]
      */
     fun activityMatchesAnyOf(activities: Array<Activity>): Boolean
 
     /**
      * @param layer to search
-     * @return if any of the [components] matches [layer]
+     * @return if any of the components matches [layer]
      */
     fun layerMatchesAnyOf(layer: Layer): Boolean = layerMatchesAnyOf(arrayOf(layer))
 
     /**
      * @param layers to search
-     * @return if any of the [components] matches any of [layers]
+     * @return if any of the components matches any of [layers]
      */
     fun layerMatchesAnyOf(layers: Collection<Layer>): Boolean =
         layerMatchesAnyOf(layers.toTypedArray())
@@ -125,6 +125,6 @@ interface IComponentMatcher {
     fun filterLayers(layers: Collection<Layer>): Collection<Layer> =
         layers.filter { layerMatchesAnyOf(it) }
 
-    fun filterWindows(windows: Collection<WindowContainer>): Collection<WindowContainer> =
+    fun filterWindows(windows: Collection<IWindowContainer>): Collection<IWindowContainer> =
         windows.filter { windowMatchesAnyOf(it) }
 }

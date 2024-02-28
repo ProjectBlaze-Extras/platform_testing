@@ -16,9 +16,9 @@
 
 package android.tools.common.flicker.assertors.assertions
 
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.ComponentTemplate
-import android.tools.common.flicker.subject.wm.WindowManagerTraceSubject
 
 /**
  * Checks that [component] window remains inside the display bounds throughout the whole animation
@@ -26,18 +26,14 @@ import android.tools.common.flicker.subject.wm.WindowManagerTraceSubject
 class AppWindowRemainInsideDisplayBounds(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(
-        scenarioInstance: IScenarioInstance,
-        wmSubject: WindowManagerTraceSubject
-    ) {
-        wmSubject
-            .containsAtLeastOneDisplay()
-            .invoke("appWindowRemainInsideDisplayBounds") { entry ->
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+        flicker.assertWm {
+            containsAtLeastOneDisplay().invoke("appWindowRemainInsideDisplayBounds") { entry ->
                 val display = entry.wmState.displays.minByOrNull { it.id }!!
                 entry
                     .visibleRegion(component.build(scenarioInstance))
                     .coversAtMost(display.displayRect)
             }
-            .forAllEntries()
+        }
     }
 }

@@ -76,9 +76,8 @@ object TransitionFilters {
                 ts.filter { t ->
                     t.changes.size == 2 &&
                         t.changes.any {
-                            it.transitMode == TransitionType.TO_BACK &&
-                                isLauncherTopLevelTaskLayer(it.layerId, layersTrace)
-                        } && // LAUNCHER
+                            it.transitMode == TransitionType.TO_BACK
+                        } && // closing app
                         t.changes.any {
                             it.transitMode == TransitionType.TO_FRONT
                         } && // opening app
@@ -138,6 +137,7 @@ object TransitionFilters {
                     sendTime = transition.wmData.sendTime,
                     abortTime = transition.wmData.abortTime,
                     finishTime = transition.wmData.finishTime,
+                    startingWindowRemoveTime = transition.wmData.startingWindowRemoveTime,
                     startTransactionId = transition.wmData.startTransactionId,
                     finishTransactionId = transition.wmData.finishTransactionId,
                     type = transition.wmData.type,

@@ -28,7 +28,6 @@ java_library {
         "automotive-config-lib",
         "android.car-system-stubs",
         "automotive-utility-helper",
-        "automotive-standard-app-helper",
     ],
     srcs: ["src/**/*.java"],
     sdk_version: "test_current",

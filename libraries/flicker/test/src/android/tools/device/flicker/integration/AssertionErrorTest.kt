@@ -16,12 +16,12 @@
 
 package android.tools.device.flicker.integration
 
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.TEST_SCENARIO
 import android.tools.common.io.RunStatus
 import android.tools.device.flicker.datastore.CachedResultReader
-import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.traces.TRACE_CONFIG_REQUIRE_CHANGES
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
 import java.io.File
 import org.junit.Before
@@ -36,7 +36,7 @@ import org.junit.Test
  */
 class AssertionErrorTest {
     private var assertionExecuted = false
-    private val testParam = FlickerTest().also { it.initialize(TEST_SCENARIO.testClass) }
+    private val testParam = LegacyFlickerTest().also { it.initialize(TEST_SCENARIO.testClass) }
 
     @Before
     fun setup() {
@@ -83,6 +83,6 @@ class AssertionErrorTest {
         @JvmStatic
         fun runTransition() = Utils.runTransition { transitionExecuted = true }
 
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

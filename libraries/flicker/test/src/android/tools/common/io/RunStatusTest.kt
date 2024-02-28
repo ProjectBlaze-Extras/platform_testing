@@ -16,13 +16,12 @@
 
 package android.tools.common.io
 
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.TEST_SCENARIO
 import android.tools.device.traces.io.ArtifactBuilder
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
 import kotlin.io.path.createTempDirectory
 import org.junit.ClassRule
-import org.junit.Rule
 import org.junit.Test
 
 class RunStatusTest {
@@ -43,6 +42,6 @@ class RunStatusTest {
     }
 
     companion object {
-        @Rule @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

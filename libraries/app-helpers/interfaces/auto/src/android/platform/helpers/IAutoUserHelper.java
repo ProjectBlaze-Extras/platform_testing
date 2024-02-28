@@ -66,4 +66,11 @@ public interface IAutoUserHelper extends IAppHelper {
      * <p>This method is to make an existing user admin.
      */
     void makeUserAdmin(String user);
+
+    /**
+     * Setup expectation: Profiles and Accounts setting is open.
+     *
+     * <p>This method is to check if the new user created is admin.
+     */
+    boolean isNewUserAnAdmin(String user);
 }

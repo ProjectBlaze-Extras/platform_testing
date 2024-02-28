@@ -16,8 +16,8 @@
 
 package android.tools.device.traces.io
 
-import android.tools.common.CrossPlatform
-import android.tools.common.IScenario
+import android.tools.common.Logger
+import android.tools.common.Scenario
 import android.tools.common.io.BUFFER_SIZE
 import android.tools.common.io.FLICKER_IO_TAG
 import android.tools.common.io.ResultArtifactDescriptor
@@ -38,12 +38,12 @@ import java.util.zip.ZipOutputStream
  */
 class ArtifactBuilder {
     private var runStatus: RunStatus? = null
-    private var scenario: IScenario? = null
+    private var scenario: Scenario? = null
     private var outputDir: File? = null
     private var files: Map<ResultArtifactDescriptor, File> = emptyMap()
     private var counter = 0
 
-    fun withScenario(value: IScenario): ArtifactBuilder = apply { scenario = value }
+    fun withScenario(value: Scenario): ArtifactBuilder = apply { scenario = value }
 
     fun withOutputDir(value: File): ArtifactBuilder = apply { outputDir = value }
 
@@ -54,11 +54,11 @@ class ArtifactBuilder {
     }
 
     fun build(): Artifact {
-        return CrossPlatform.log.withTracing("ArtifactBuilder#build") {
+        return Logger.withTracing("ArtifactBuilder#build") {
             val scenario = scenario ?: error("Missing scenario")
             require(!scenario.isEmpty) { "Scenario shouldn't be empty" }
             val artifactFile = createArtifactFile()
-            CrossPlatform.log.d(FLICKER_IO_TAG, "Creating artifact archive at $artifactFile")
+            Logger.d(FLICKER_IO_TAG, "Creating artifact archive at $artifactFile")
 
             writeToZip(artifactFile, files)
 
@@ -99,14 +99,14 @@ class ArtifactBuilder {
         return runStatus.generateArchiveNameFor(scenario, counter)
     }
 
-    private fun existsArchiveFor(outputDir: File, scenario: IScenario, counter: Int): Boolean {
+    private fun existsArchiveFor(outputDir: File, scenario: Scenario, counter: Int): Boolean {
         return RunStatus.values().any {
             outputDir.resolve(it.generateArchiveNameFor(scenario, counter)).exists()
         }
     }
 
     private fun addFile(zipOutputStream: ZipOutputStream, artifact: File, nameInArchive: String) {
-        CrossPlatform.log.v(FLICKER_IO_TAG, "Adding $artifact with name $nameInArchive to zip")
+        Logger.v(FLICKER_IO_TAG, "Adding $artifact with name $nameInArchive to zip")
         val fi = FileInputStream(artifact)
         val inputStream = BufferedInputStream(fi, BUFFER_SIZE)
         inputStream.use {

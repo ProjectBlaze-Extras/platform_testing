@@ -19,7 +19,10 @@ object UnfoldAnimationTestingUtils {
      * [currentProvider] returned icons are compared with [initialIcons]. As soon as any moved, the
      * new set is returned.
      */
-    fun getIconPositionsAfterAnyIconMove(initialIcons: Set<Icon>, currentProvider: () -> Set<Icon>): Set<Icon> {
+    fun getIconPositionsAfterAnyIconMove(
+        initialIcons: Set<Icon>,
+        currentProvider: () -> Set<Icon>
+    ): Set<Icon> {
         return waitFor("Icons moving", Duration.ofSeconds(20)) {
             val newIcons = currentProvider()
             val moved =
@@ -69,22 +72,29 @@ object UnfoldAnimationTestingUtils {
         return find { it.name == iconName } ?: error("Icon with name $iconName not found in $this")
     }
 
-
-    /** Asserts [coordinate] (x or y)coordinate of [new] icon has moved towards the center compared to [old]. */
-    fun assertIconMovedTowardsTheCenter(old: Icon, new: Icon, expect: Expect, coordinate: String) {
+    /**
+     * Asserts [coordinate] (x or y)coordinate of [new] icon has moved towards the center compared
+     * to [old].
+     */
+    fun assertIconMovedTowardsTheCenter(old: Icon, new: Icon, expect: Expect, axis: Axis) {
         assertWithMessage("Comparing icons with different names").that(old.name).isEqualTo(new.name)
-        val oldPosition = if(coordinate == "x") old.position.x else old.position.y
-        val newPosition = if(coordinate == "x") new.position.x else new.position.y
+        val oldPosition = if (axis == Axis.X) old.position.x else old.position.y
+        val newPosition = if (axis == Axis.X) new.position.x else new.position.y
         val expectThatOld =
-                expect
-                        .withMessage("Icon: ${old.name} didn't move towards the center")
-                        .that(oldPosition)
+            expect.withMessage("Icon: ${old.name} didn't move towards the center").that(oldPosition)
         if (oldPosition < uiDevice.displayWidth / 2) {
             expectThatOld.isLessThan(newPosition)
         } else {
             expectThatOld.isGreaterThan(newPosition)
         }
     }
+
+    /** Describes axis (x or y) of a View */
+    enum class Axis {
+        X,
+        Y
+    }
+
     /**
      * Represent a UI element with a position, used in [UnfoldAnimationTestingUtils] for foldable
      * animation testing.

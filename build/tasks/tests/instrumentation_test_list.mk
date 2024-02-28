@@ -29,6 +29,7 @@ instrumentation_tests := \
     FrameworksMockingServicesTests \
     WmTests \
     WmPerfTests \
+    DisplayServiceTests \
     JobTestApp \
     SuspendTestApp \
     FrameworksUtilTests \
@@ -73,9 +74,17 @@ instrumentation_tests := \
     ExtServicesUnitTests \
     FrameworksNetSmokeTests \
     FlickerLibTest \
-    FlickerTests \
+    FlickerTestsOther \
+    FlickerTestsAppClose \
+    FlickerTestsIme \
+    FlickerTestsAppLaunch \
+    FlickerTestsQuickswitch \
+    FlickerTestsRotation \
     FlickerTestApp \
-    WMShellFlickerTests \
+    WMShellFlickerTestsOther \
+    WMShellFlickerTestsBubbles \
+    WMShellFlickerTestsPip \
+    WMShellFlickerTestsSplitScreen \
     WMShellUnitTests \
     trace_config_detailed.textproto \
     perfetto_trace_processor_shell \

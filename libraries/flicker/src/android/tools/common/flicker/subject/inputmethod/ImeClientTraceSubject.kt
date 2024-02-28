@@ -17,7 +17,7 @@
 package android.tools.common.flicker.subject.inputmethod
 
 import android.tools.common.flicker.subject.FlickerTraceSubject
-import android.tools.common.io.IReader
+import android.tools.common.io.Reader
 import android.tools.common.traces.inputmethod.ImeClientEntry
 import android.tools.common.traces.inputmethod.ImeClientTrace
 
@@ -35,7 +35,7 @@ import android.tools.common.traces.inputmethod.ImeClientTrace
  *  ```
  */
 class ImeClientTraceSubject
-private constructor(val trace: ImeClientTrace, override val reader: IReader? = null) :
+private constructor(val trace: ImeClientTrace, override val reader: Reader? = null) :
     FlickerTraceSubject<ImeClientEntrySubject>(), IImeClientSubject<ImeClientTraceSubject> {
 
     override val subjects by lazy { trace.entries.map { ImeClientEntrySubject(it, trace, reader) } }

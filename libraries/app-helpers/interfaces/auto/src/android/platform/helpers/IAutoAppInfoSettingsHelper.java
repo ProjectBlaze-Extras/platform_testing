@@ -16,6 +16,8 @@
 
 package android.platform.helpers;
 
+import java.util.List;
+
 /**
  * Helper class for functional tests of App Info settings
  */
@@ -94,11 +96,23 @@ public interface IAutoAppInfoSettingsHelper extends IAppHelper {
     boolean isApplicationDisabled(String packageName);
 
     /**
-     * Setup expectation: To Verify if UI element is present
+     * Setup expectation: Settings screen is open.
      *
-     * <p>This method is to check if UI element is present
-     *
-     * @param target - UI element text
+     * <p>Opens the 'Permission manager' submenu from the Apps menu.
      */
-    boolean hasUIElement(String target);
+    void openPermissionManager();
+
+    /**
+     * Setup expectation: The Permission manager page is currently open (listing each permission
+     * with a summary of the number of apps that have that permission.
+     *
+     * <p>Verifies that for a given permission, the number of apps displayed as being 'allowed'
+     * matches the actual number of apps that have that permission.
+     *
+     * @param permissionName - Name of the permission to validate, as it appears on the permission
+     *     UI element.
+     * @return - True if the number of allowed and total apps listed in the permission summary
+     *     matches the number listed when the permission is clicked on.
+     */
+    List<Integer> validateAppsPermissionManager(String permissionName);
 }

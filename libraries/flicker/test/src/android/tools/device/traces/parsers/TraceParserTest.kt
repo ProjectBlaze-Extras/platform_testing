@@ -16,10 +16,10 @@
 
 package android.tools.device.traces.parsers
 
-import android.tools.CleanFlickerEnvironmentRule
-import android.tools.common.CrossPlatform
 import android.tools.common.Timestamp
+import android.tools.common.Timestamps
 import android.tools.common.parsers.AbstractTraceParser
+import android.tools.rules.CleanFlickerEnvironmentRule
 import android.tools.utils.MockWindowManagerTraceBuilder
 import android.tools.utils.MockWindowStateBuilder
 import com.google.common.truth.Truth
@@ -31,7 +31,7 @@ class TraceParserTest {
     @Test
     fun canSliceWithAllBefore() {
         testSliceUsingElapsedTimestamp(
-            CrossPlatform.timestamp.min().elapsedNanos,
+            Timestamps.min().elapsedNanos,
             mockTraceForSliceTests.entries.first().timestamp.elapsedNanos - 1,
             listOf<Long>()
         )
@@ -45,8 +45,8 @@ class TraceParserTest {
             MockTraceParser(mockTraceForSliceTests)
                 .parse(
                     mockTraceForSliceTests,
-                    CrossPlatform.timestamp.from(elapsedNanos = from),
-                    CrossPlatform.timestamp.from(elapsedNanos = to),
+                    Timestamps.from(elapsedNanos = from),
+                    Timestamps.from(elapsedNanos = to),
                     addInitialEntry = false
                 )
         Truth.assertThat(splitLayersTraceWithoutInitialEntry.entries).isEmpty()
@@ -55,8 +55,8 @@ class TraceParserTest {
             MockTraceParser(mockTraceForSliceTests)
                 .parse(
                     mockTraceForSliceTests,
-                    CrossPlatform.timestamp.from(elapsedNanos = from),
-                    CrossPlatform.timestamp.from(elapsedNanos = to),
+                    Timestamps.from(elapsedNanos = from),
+                    Timestamps.from(elapsedNanos = to),
                     addInitialEntry = true
                 )
         Truth.assertThat(splitLayersTraceWithInitialEntry.entries).asList().hasSize(1)
@@ -247,8 +247,8 @@ class TraceParserTest {
             MockTraceParser(mockTraceForSliceTests)
                 .parse(
                     mockTraceForSliceTests,
-                    CrossPlatform.timestamp.from(elapsedNanos = from),
-                    CrossPlatform.timestamp.from(elapsedNanos = to),
+                    Timestamps.from(elapsedNanos = from),
+                    Timestamps.from(elapsedNanos = to),
                     addInitialEntry = false
                 )
         Truth.assertThat(splitLayersTrace.entries.map { it.timestamp.elapsedNanos })
@@ -260,8 +260,8 @@ class TraceParserTest {
             MockTraceParser(mockTraceForSliceTests)
                 .parse(
                     mockTraceForSliceTests,
-                    CrossPlatform.timestamp.from(elapsedNanos = from),
-                    CrossPlatform.timestamp.from(elapsedNanos = to),
+                    Timestamps.from(elapsedNanos = from),
+                    Timestamps.from(elapsedNanos = to),
                     addInitialEntry = true
                 )
         Truth.assertThat(splitLayersTraceWithStartEntry.entries.map { it.timestamp.elapsedNanos })
@@ -284,6 +284,6 @@ class TraceParserTest {
                 )
                 .build()
 
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

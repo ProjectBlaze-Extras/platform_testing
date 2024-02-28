@@ -25,10 +25,14 @@ import android.platform.helpers.IAutoUserHelper;
 import android.platform.helpers.MultiUserHelper;
 import android.platform.helpers.SettingsConstants;
 import android.platform.scenario.multiuser.MultiUserConstants;
+import android.platform.test.rules.ConditionalIgnore;
+import android.platform.test.rules.ConditionalIgnoreRule;
+import android.platform.test.rules.IgnoreOnPortrait;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -37,6 +41,7 @@ import org.junit.runner.RunWith;
  */
 @RunWith(AndroidJUnit4.class)
 public class DeleteAdminUser {
+    @Rule public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
 
     private static final String userName = MultiUserConstants.SECONDARY_USER_NAME;
     private static final int WAIT_TIME = 10000;
@@ -56,6 +61,7 @@ public class DeleteAdminUser {
     }
 
     @Test
+    @ConditionalIgnore(condition = IgnoreOnPortrait.class)
     public void testRemoveUser() throws Exception {
         // create new user
         mTargetUserId = mMultiUserHelper.createUser(userName, false);

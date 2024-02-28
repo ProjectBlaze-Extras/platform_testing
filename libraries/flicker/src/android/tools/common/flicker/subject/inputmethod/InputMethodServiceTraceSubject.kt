@@ -17,7 +17,7 @@
 package android.tools.common.flicker.subject.inputmethod
 
 import android.tools.common.flicker.subject.FlickerTraceSubject
-import android.tools.common.io.IReader
+import android.tools.common.io.Reader
 import android.tools.common.traces.inputmethod.InputMethodServiceEntry
 import android.tools.common.traces.inputmethod.InputMethodServiceTrace
 
@@ -32,7 +32,7 @@ import android.tools.common.traces.inputmethod.InputMethodServiceTrace
  * myCustomAssertion(this) } }
  */
 class InputMethodServiceTraceSubject
-private constructor(val trace: InputMethodServiceTrace, override val reader: IReader? = null) :
+private constructor(val trace: InputMethodServiceTrace, override val reader: Reader? = null) :
     FlickerTraceSubject<InputMethodServiceEntrySubject>(),
     IInputMethodServiceSubject<InputMethodServiceTraceSubject> {
 

@@ -16,11 +16,12 @@
 
 package android.tools.device.traces.io
 
-import android.tools.common.CrossPlatform
-import android.tools.common.IScenario
+import android.tools.common.Logger
+import android.tools.common.Scenario
 import android.tools.common.ScenarioBuilder
 import android.tools.common.Tag
 import android.tools.common.Timestamp
+import android.tools.common.Timestamps
 import android.tools.common.io.FLICKER_IO_TAG
 import android.tools.common.io.ResultArtifactDescriptor
 import android.tools.common.io.RunStatus
@@ -30,16 +31,16 @@ import java.io.File
 
 /** Helper class to create run result artifact files */
 open class ResultWriter {
-    protected var scenario: IScenario = ScenarioBuilder().createEmptyScenario()
+    protected var scenario: Scenario = ScenarioBuilder().createEmptyScenario()
     private var runStatus: RunStatus = RunStatus.UNDEFINED
     private val files = mutableMapOf<ResultArtifactDescriptor, File>()
-    private var transitionStartTime = CrossPlatform.timestamp.min()
-    private var transitionEndTime = CrossPlatform.timestamp.max()
+    private var transitionStartTime = Timestamps.min()
+    private var transitionEndTime = Timestamps.max()
     private var executionError: Throwable? = null
     private var outputDir: File? = null
 
     /** Sets the artifact scenario to [_scenario] */
-    fun forScenario(_scenario: IScenario) = apply { scenario = _scenario }
+    fun forScenario(_scenario: Scenario) = apply { scenario = _scenario }
 
     /** Sets the artifact transition start time to [time] */
     fun setTransitionStartTime(time: Timestamp) = apply { transitionStartTime = time }
@@ -70,7 +71,7 @@ open class ResultWriter {
      * @param tag used when adding [artifact] to the result artifact
      */
     fun addTraceResult(traceType: TraceType, artifact: File, tag: String = Tag.ALL) = apply {
-        CrossPlatform.log.d(
+        Logger.d(
             FLICKER_IO_TAG,
             "Add trace result file=$artifact type=$traceType tag=$tag scenario=$scenario"
         )
@@ -80,13 +81,13 @@ open class ResultWriter {
 
     /** @return writes the result artifact to disk and returns it */
     open fun write(): IResultData {
-        return CrossPlatform.log.withTracing("write") {
+        return Logger.withTracing("write") {
             val outputDir = outputDir
             requireNotNull(outputDir) { "Output dir not configured" }
             require(!scenario.isEmpty) { "Scenario shouldn't be empty" }
 
             if (runStatus == RunStatus.UNDEFINED) {
-                CrossPlatform.log.w(FLICKER_IO_TAG, "Writing result with $runStatus run status")
+                Logger.w(FLICKER_IO_TAG, "Writing result with $runStatus run status")
             }
 
             val artifact =

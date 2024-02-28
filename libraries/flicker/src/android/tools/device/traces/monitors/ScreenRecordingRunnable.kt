@@ -23,8 +23,8 @@ import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.media.MediaMuxer
 import android.os.SystemClock
-import android.tools.common.CrossPlatform
 import android.tools.common.FLICKER_TAG
+import android.tools.common.Logger
 import android.tools.device.traces.deleteIfExists
 import android.util.DisplayMetrics
 import android.view.WindowManager
@@ -76,7 +76,7 @@ class ScreenRecordingRunnable(
     }
 
     override fun run() {
-        CrossPlatform.log.d(FLICKER_TAG, "Starting screen recording to file $outputFile")
+        Logger.d(FLICKER_TAG, "Starting screen recording to file $outputFile")
 
         val timestampsMonotonicUs = mutableListOf<Long>()
         try {
@@ -158,11 +158,11 @@ class ScreenRecordingRunnable(
      */
     private fun writeMetadata(timestampsMonotonicUs: List<Long>) {
         if (timestampsMonotonicUs.isEmpty()) {
-            CrossPlatform.log.v(FLICKER_TAG, "Not writing winscope metadata (no frames/timestamps)")
+            Logger.v(FLICKER_TAG, "Not writing winscope metadata (no frames/timestamps)")
             return
         }
 
-        CrossPlatform.log.v(
+        Logger.v(
             FLICKER_TAG,
             "Writing winscope metadata (size=${timestampsMonotonicUs.size} " +
                 ", monotonic timestamps range [us] = " +

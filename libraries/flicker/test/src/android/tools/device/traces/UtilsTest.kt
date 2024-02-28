@@ -16,9 +16,9 @@
 
 package android.tools.device.traces
 
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.common.io.TraceType
 import android.tools.common.traces.NullableDeviceStateDump
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
 import org.junit.ClassRule
 import org.junit.FixMethodOrder
@@ -79,6 +79,6 @@ class UtilsTest {
     }
 
     companion object {
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

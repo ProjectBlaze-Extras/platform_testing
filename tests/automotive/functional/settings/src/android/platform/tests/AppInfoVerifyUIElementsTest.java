@@ -22,6 +22,7 @@ import android.platform.helpers.AutomotiveConfigConstants;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoAppInfoSettingsHelper;
 import android.platform.helpers.IAutoSettingHelper;
+import android.platform.helpers.IAutoUISettingsHelper;
 import android.platform.helpers.SettingsConstants;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -35,11 +36,13 @@ import org.junit.runner.RunWith;
 public class AppInfoVerifyUIElementsTest {
     private HelperAccessor<IAutoAppInfoSettingsHelper> mAppInfoSettingsHelper;
     private HelperAccessor<IAutoSettingHelper> mSettingHelper;
+    private HelperAccessor<IAutoUISettingsHelper> mSettingsUIHelper;
 
     private static final String CALENDAR_APP = "Calendar";
 
     public AppInfoVerifyUIElementsTest() throws Exception {
         mAppInfoSettingsHelper = new HelperAccessor<>(IAutoAppInfoSettingsHelper.class);
+        mSettingsUIHelper = new HelperAccessor<>(IAutoUISettingsHelper.class);
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
     }
 
@@ -55,63 +58,64 @@ public class AppInfoVerifyUIElementsTest {
     }
 
     @Test
-    public void testVerifyAppsPermissionUIElemets() {
+    public void testVerifyAppsPermissionUIElements() {
         assertTrue(
                 "Apps setting did not open.",
-                mAppInfoSettingsHelper
+                mSettingsUIHelper
                         .get()
                         .hasUIElement(AutomotiveConfigConstants.RECENTLY_OPENED_UI_ELEMENT));
         mAppInfoSettingsHelper.get().showAllApps();
         mAppInfoSettingsHelper.get().selectApp(CALENDAR_APP);
         assertTrue(
                 "Stop app Button is not displayed",
-                mAppInfoSettingsHelper
+                mSettingsUIHelper
                         .get()
                         .hasUIElement(AutomotiveConfigConstants.STOP_APP_UI_ELEMENT));
         assertTrue(
                 "Notification Option is not displayed",
-                mAppInfoSettingsHelper
+                mSettingsUIHelper
                         .get()
                         .hasUIElement(AutomotiveConfigConstants.NOTIFICATIONS_UI_ELEMENT));
         assertTrue(
                 "Permissions Option is not displayed",
-                mAppInfoSettingsHelper
+                mSettingsUIHelper
                         .get()
                         .hasUIElement(AutomotiveConfigConstants.PERMISSIONS_UI_ELEMENT));
         assertTrue(
                 "Storage and Cache Option is not displayed",
-                mAppInfoSettingsHelper
+                mSettingsUIHelper
                         .get()
                         .hasUIElement(AutomotiveConfigConstants.STORAGE_CACHE_UI_ELEMENT));
     }
 
     @Test
-    public void testVerifyAppsInfoUIElemets() {
+    public void testVerifyAppsInfoUIElements() {
         assertTrue(
                 "Permission manager Option is not displayed",
-                mAppInfoSettingsHelper
+                mSettingsUIHelper
                         .get()
                         .hasUIElement(AutomotiveConfigConstants.PERMISSION_MANAGER_UI_ELEMENT));
         assertTrue(
                 "Default apps Option is not displayed",
-                mAppInfoSettingsHelper
+                mSettingsUIHelper
                         .get()
                         .hasUIElement(AutomotiveConfigConstants.DEFAULT_APPS_UI_ELEMENT));
         assertTrue(
                 "Unused apps Option is not displayed",
-                mAppInfoSettingsHelper
+                mSettingsUIHelper
                         .get()
                         .hasUIElement(AutomotiveConfigConstants.UNUSED_APPS_UI_ELEMENT));
         assertTrue(
                 "Performance-impacting apps Option is not displayed",
-                mAppInfoSettingsHelper
+                mSettingsUIHelper
                         .get()
                         .hasUIElement(
                                 AutomotiveConfigConstants.PERFORMANCE_IMPACTING_APPS_UI_ELEMENT));
         assertTrue(
                 "Special app access Option is not displayed",
-                mAppInfoSettingsHelper
+                mSettingsUIHelper
                         .get()
                         .hasUIElement(AutomotiveConfigConstants.SPECIAL_APPS_UI_ELEMENT));
     }
 }
+

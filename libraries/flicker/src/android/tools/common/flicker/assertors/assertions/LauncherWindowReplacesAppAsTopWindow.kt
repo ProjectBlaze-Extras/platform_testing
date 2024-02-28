@@ -16,10 +16,9 @@
 
 package android.tools.common.flicker.assertors.assertions
 
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.ComponentTemplate
-import android.tools.common.flicker.assertors.Components
-import android.tools.common.flicker.subject.wm.WindowManagerTraceSubject
 import android.tools.common.traces.component.ComponentNameMatcher
 
 /**
@@ -28,14 +27,11 @@ import android.tools.common.traces.component.ComponentNameMatcher
  */
 class LauncherWindowReplacesAppAsTopWindow(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
-    override fun doEvaluate(
-        scenarioInstance: IScenarioInstance,
-        wmSubject: WindowManagerTraceSubject
-    ) {
-        wmSubject
-            .isAppWindowOnTop(component.build(scenarioInstance))
-            .then()
-            .isAppWindowOnTop(ComponentNameMatcher.LAUNCHER)
-            .forAllEntries()
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+        flicker.assertWm {
+            isAppWindowOnTop(component.build(scenarioInstance))
+                .then()
+                .isAppWindowOnTop(ComponentNameMatcher.LAUNCHER)
+        }
     }
 }

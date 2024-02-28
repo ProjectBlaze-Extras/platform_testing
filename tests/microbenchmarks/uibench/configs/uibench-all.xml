@@ -25,6 +25,11 @@
         <option name="test-file-name" value="UiBench.apk" />
     </target_preparer>
 
+    <target_preparer class="com.android.tradefed.targetprep.DeviceSetup">
+        <!-- restart launcher to activate TAPL -->
+        <option name="run-command" value="setprop ro.test_harness 1 ; am force-stop com.google.android.apps.nexuslauncher"/>
+    </target_preparer>
+
     <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
         <option name="pull-pattern-keys" value="perfetto_file_path" />
     </metrics_collector>

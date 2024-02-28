@@ -18,10 +18,12 @@ package android.tools
 
 import android.app.Instrumentation
 import android.content.Context
-import android.tools.common.CrossPlatform
-import android.tools.common.IScenario
+import android.tools.common.Scenario
 import android.tools.common.ScenarioBuilder
-import android.tools.common.io.IReader
+import android.tools.common.ScenarioImpl
+import android.tools.common.Timestamp
+import android.tools.common.Timestamps
+import android.tools.common.io.Reader
 import android.tools.common.io.ResultArtifactDescriptor
 import android.tools.common.io.RunStatus
 import android.tools.common.io.WINSCOPE_EXT
@@ -29,7 +31,7 @@ import android.tools.common.parsers.events.EventLogParser
 import android.tools.device.flicker.datastore.CachedResultWriter
 import android.tools.device.flicker.legacy.AbstractFlickerTestData
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.IFlickerTestData
+import android.tools.device.flicker.legacy.FlickerTestData
 import android.tools.device.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.device.traces.io.ArtifactBuilder
 import android.tools.device.traces.io.InMemoryArtifact
@@ -59,22 +61,26 @@ import java.io.FileInputStream
 import java.io.IOException
 import java.util.zip.ZipInputStream
 import kotlin.io.path.createTempDirectory
+import kotlin.io.path.createTempFile
+import kotlin.io.path.name
 import org.mockito.Mockito
 
-internal val TEST_SCENARIO = ScenarioBuilder().forClass("test").build()
+internal val TEST_SCENARIO = ScenarioBuilder().forClass("test").build() as ScenarioImpl
 
 internal fun outputFileName(status: RunStatus) =
     File("/sdcard/flicker/${status.prefix}__test_ROTATION_0_GESTURAL_NAV.zip")
 
-internal fun newTestResultWriter() =
+internal fun newTestResultWriter(
+    scenario: Scenario = ScenarioBuilder().forClass(createTempFile().name).build()
+) =
     ResultWriter()
-        .forScenario(TEST_SCENARIO)
+        .forScenario(scenario)
         .withOutputDir(createTempDirectory().toFile())
         .setRunComplete()
 
-internal fun newTestCachedResultWriter() =
+internal fun newTestCachedResultWriter(scenario: Scenario = TEST_SCENARIO) =
     CachedResultWriter()
-        .forScenario(TEST_SCENARIO)
+        .forScenario(scenario)
         .withOutputDir(createTempDirectory().toFile())
         .setRunComplete()
 
@@ -84,22 +90,22 @@ internal fun getWmTraceReaderFromAsset(
     to: Long = Long.MAX_VALUE,
     addInitialEntry: Boolean = true,
     legacyTrace: Boolean = false,
-): IReader {
+): Reader {
     return ParsedTracesReader(
         artifact = InMemoryArtifact(relativePath),
         wmTrace =
             WindowManagerTraceParser(legacyTrace)
                 .parse(
                     readAsset(relativePath),
-                    CrossPlatform.timestamp.from(elapsedNanos = from),
-                    CrossPlatform.timestamp.from(elapsedNanos = to),
+                    Timestamps.from(elapsedNanos = from),
+                    Timestamps.from(elapsedNanos = to),
                     addInitialEntry,
                     clearCache = false
                 )
     )
 }
 
-internal fun getWmDumpReaderFromAsset(relativePath: String): IReader {
+internal fun getWmDumpReaderFromAsset(relativePath: String): Reader {
     return ParsedTracesReader(
         artifact = InMemoryArtifact(relativePath),
         wmTrace = WindowManagerDumpParser().parse(readAsset(relativePath), clearCache = false)
@@ -110,7 +116,9 @@ internal fun getLayerTraceReaderFromAsset(
     relativePath: String,
     ignoreOrphanLayers: Boolean = true,
     legacyTrace: Boolean = false,
-): IReader {
+    from: Timestamp = Timestamps.min(),
+    to: Timestamp = Timestamps.max()
+): Reader {
     return ParsedTracesReader(
         artifact = InMemoryArtifact(relativePath),
         layersTrace =
@@ -121,11 +129,11 @@ internal fun getLayerTraceReaderFromAsset(
                 ) {
                     ignoreOrphanLayers
                 }
-                .parse(readAsset(relativePath))
+                .parse(readAsset(relativePath), from, to)
     )
 }
 
-internal fun getTraceReaderFromScenario(scenario: String): IReader {
+internal fun getTraceReaderFromScenario(scenario: String): Reader {
     val scenarioTraces = getScenarioTraces("AppLaunch")
 
     return ParsedTracesReader(
@@ -255,11 +263,11 @@ fun assertExceptionMessage(error: Throwable?, expectedValue: String) {
 }
 
 fun createMockedFlicker(
-    setup: List<IFlickerTestData.() -> Unit> = emptyList(),
-    teardown: List<IFlickerTestData.() -> Unit> = emptyList(),
-    transitions: List<IFlickerTestData.() -> Unit> = emptyList(),
+    setup: List<FlickerTestData.() -> Unit> = emptyList(),
+    teardown: List<FlickerTestData.() -> Unit> = emptyList(),
+    transitions: List<FlickerTestData.() -> Unit> = emptyList(),
     extraMonitor: ITransitionMonitor? = null
-): IFlickerTestData {
+): FlickerTestData {
     val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     val uiDevice: UiDevice = UiDevice.getInstance(instrumentation)
     val mockedFlicker = Mockito.mock(AbstractFlickerTestData::class.java)
@@ -276,7 +284,7 @@ fun createMockedFlicker(
     return mockedFlicker
 }
 
-fun captureTrace(scenario: IScenario, actions: () -> Unit): ResultReader {
+fun captureTrace(scenario: Scenario, actions: () -> Unit): ResultReader {
     if (scenario.isEmpty) {
         ScenarioBuilder().forClass("UNNAMED_CAPTURE").build()
     }

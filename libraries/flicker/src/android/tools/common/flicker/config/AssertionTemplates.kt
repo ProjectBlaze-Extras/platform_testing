@@ -16,7 +16,7 @@
 
 package android.tools.common.flicker.config
 
-import android.tools.common.flicker.assertors.Components
+import android.tools.common.flicker.AssertionInvocationGroup
 import android.tools.common.flicker.assertors.assertions.AppLayerBecomesInvisible
 import android.tools.common.flicker.assertors.assertions.AppLayerBecomesVisible
 import android.tools.common.flicker.assertors.assertions.AppLayerCoversFullScreenAtEnd
@@ -29,8 +29,6 @@ import android.tools.common.flicker.assertors.assertions.AppLayerIsVisibleAtStar
 import android.tools.common.flicker.assertors.assertions.AppWindowBecomesInvisible
 import android.tools.common.flicker.assertors.assertions.AppWindowBecomesTopWindow
 import android.tools.common.flicker.assertors.assertions.AppWindowBecomesVisible
-import android.tools.common.flicker.assertors.assertions.AppWindowCoversFullScreenAtEnd
-import android.tools.common.flicker.assertors.assertions.AppWindowCoversFullScreenAtStart
 import android.tools.common.flicker.assertors.assertions.AppWindowIsInvisibleAtEnd
 import android.tools.common.flicker.assertors.assertions.AppWindowIsInvisibleAtStart
 import android.tools.common.flicker.assertors.assertions.AppWindowIsTopWindowAtStart
@@ -44,204 +42,164 @@ import android.tools.common.flicker.assertors.assertions.FocusChanges
 import android.tools.common.flicker.assertors.assertions.HasAtMostOneWindowMatching
 import android.tools.common.flicker.assertors.assertions.LayerBecomesInvisible
 import android.tools.common.flicker.assertors.assertions.LayerBecomesVisible
-import android.tools.common.flicker.assertors.assertions.LayerIsVisibleAtEnd
-import android.tools.common.flicker.assertors.assertions.LayerIsVisibleAtStart
 import android.tools.common.flicker.assertors.assertions.LayerReduces
-import android.tools.common.flicker.assertors.assertions.NonAppWindowIsVisibleAlways
 import android.tools.common.flicker.assertors.assertions.ScreenLockedAtStart
 import android.tools.common.flicker.assertors.assertions.SplitAppLayerBoundsBecomesVisible
 import android.tools.common.flicker.assertors.assertions.VisibleLayersShownMoreThanOneConsecutiveEntry
 import android.tools.common.flicker.assertors.assertions.VisibleWindowsShownMoreThanOneConsecutiveEntry
 import android.tools.common.flicker.assertors.assertions.WindowBecomesPinned
 import android.tools.common.flicker.assertors.assertions.WindowRemainInsideVisibleBounds
+import android.tools.common.flicker.config.appclose.Components.CLOSING_APP
+import android.tools.common.flicker.config.applaunch.Components.OPENING_APP
+import android.tools.common.flicker.config.common.Components.LAUNCHER
+import android.tools.common.flicker.config.pip.Components.PIP_APP
+import android.tools.common.flicker.config.pip.Components.PIP_DISMISS_OVERLAY
+import android.tools.common.flicker.config.splitscreen.Components.SPLIT_SCREEN_DIVIDER
+import android.tools.common.flicker.config.splitscreen.Components.SPLIT_SCREEN_PRIMARY_APP
+import android.tools.common.flicker.config.splitscreen.Components.SPLIT_SCREEN_SECONDARY_APP
 import android.tools.common.traces.component.ComponentNameMatcher
 
 object AssertionTemplates {
     val ENTIRE_TRACE_ASSERTIONS =
         listOf(
-            EntireScreenCoveredAlways(),
-            VisibleWindowsShownMoreThanOneConsecutiveEntry(),
-            // Temporarily ignore these layers which might be visible for a single entry
-            // and contain only view level changes during that entry (b/286054008)
-            VisibleLayersShownMoreThanOneConsecutiveEntry(
-                ignore =
-                    listOf(
-                        ComponentNameMatcher.NOTIFICATION_SHADE,
-                        ComponentNameMatcher.VOLUME_DIALOG,
-                    )
-            ),
-        )
+                EntireScreenCoveredAlways(),
+                VisibleWindowsShownMoreThanOneConsecutiveEntry(),
+                // Temporarily ignore these layers which might be visible for a single entry
+                // and contain only view level changes during that entry (b/286054008)
+                VisibleLayersShownMoreThanOneConsecutiveEntry(
+                    ignore =
+                        listOf(
+                            ComponentNameMatcher.NOTIFICATION_SHADE,
+                            ComponentNameMatcher.VOLUME_DIALOG,
+                        )
+                ),
+            )
+            .associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
 
     val COMMON_ASSERTIONS =
         listOf(
-            EntireScreenCoveredAlways(),
-            VisibleWindowsShownMoreThanOneConsecutiveEntry(),
-            VisibleLayersShownMoreThanOneConsecutiveEntry(),
-        )
-
-    val NAV_BAR_ASSERTIONS =
-        listOf(
-            LayerIsVisibleAtStart(Components.NAV_BAR),
-            LayerIsVisibleAtEnd(Components.NAV_BAR),
-            NonAppWindowIsVisibleAlways(Components.NAV_BAR),
-        )
-
-    val STATUS_BAR_ASSERTIONS =
-        listOf(
-            NonAppWindowIsVisibleAlways(Components.STATUS_BAR),
-            LayerIsVisibleAtStart(Components.STATUS_BAR),
-            LayerIsVisibleAtEnd(Components.STATUS_BAR),
-        )
+                EntireScreenCoveredAlways(),
+                VisibleWindowsShownMoreThanOneConsecutiveEntry(),
+                VisibleLayersShownMoreThanOneConsecutiveEntry(),
+            )
+            .associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
 
     val APP_LAUNCH_ASSERTIONS =
         COMMON_ASSERTIONS +
             listOf(
-                AppLayerIsInvisibleAtStart(Components.OPENING_APP),
-                AppLayerIsVisibleAtEnd(Components.OPENING_APP),
-                AppLayerBecomesVisible(Components.OPENING_APP),
-                AppWindowBecomesVisible(Components.OPENING_APP),
-                AppWindowBecomesTopWindow(Components.OPENING_APP),
-            )
+                    AppLayerIsInvisibleAtStart(OPENING_APP),
+                    AppLayerIsVisibleAtEnd(OPENING_APP),
+                    AppLayerBecomesVisible(OPENING_APP),
+                    AppWindowBecomesVisible(OPENING_APP),
+                    AppWindowBecomesTopWindow(OPENING_APP),
+                )
+                .associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
 
     val APP_CLOSE_ASSERTIONS =
         COMMON_ASSERTIONS +
             listOf(
-                AppLayerIsVisibleAtStart(Components.CLOSING_APP),
-                AppLayerIsInvisibleAtEnd(Components.CLOSING_APP),
-                AppWindowIsVisibleAtStart(Components.CLOSING_APP),
-                AppWindowIsInvisibleAtEnd(Components.CLOSING_APP),
-                AppLayerBecomesInvisible(Components.CLOSING_APP),
-                AppWindowBecomesInvisible(Components.CLOSING_APP),
-                AppWindowIsTopWindowAtStart(Components.CLOSING_APP),
-            )
+                    AppLayerIsVisibleAtStart(CLOSING_APP),
+                    AppLayerIsInvisibleAtEnd(CLOSING_APP),
+                    AppWindowIsVisibleAtStart(CLOSING_APP),
+                    AppWindowIsInvisibleAtEnd(CLOSING_APP),
+                    AppLayerBecomesInvisible(CLOSING_APP),
+                    AppWindowBecomesInvisible(CLOSING_APP),
+                    AppWindowIsTopWindowAtStart(CLOSING_APP),
+                )
+                .associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
 
     val APP_LAUNCH_FROM_HOME_ASSERTIONS =
         APP_LAUNCH_ASSERTIONS +
             listOf(
-                AppLayerIsVisibleAtStart(Components.LAUNCHER),
-                AppLayerIsInvisibleAtEnd(Components.LAUNCHER),
-            )
+                    AppLayerIsVisibleAtStart(LAUNCHER),
+                    AppLayerIsInvisibleAtEnd(LAUNCHER),
+                )
+                .associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
 
     val APP_LAUNCH_FROM_LOCK_ASSERTIONS =
         APP_LAUNCH_ASSERTIONS +
-            listOf(FocusChanges(toComponent = Components.OPENING_APP), ScreenLockedAtStart())
+            listOf(FocusChanges(toComponent = OPENING_APP), ScreenLockedAtStart())
+                .associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
 
     val APP_CLOSE_TO_HOME_ASSERTIONS =
         APP_CLOSE_ASSERTIONS +
             listOf(
-                AppLayerIsInvisibleAtStart(Components.LAUNCHER),
-                AppLayerIsVisibleAtEnd(Components.LAUNCHER),
-                AppWindowIsInvisibleAtStart(Components.LAUNCHER),
-                AppWindowIsVisibleAtEnd(Components.LAUNCHER),
-                AppWindowBecomesTopWindow(Components.LAUNCHER),
-            )
-
-    val APP_LAUNCH_FROM_NOTIFICATION_ASSERTIONS =
-        COMMON_ASSERTIONS +
-            APP_LAUNCH_ASSERTIONS +
-            listOf(
-                // None specific to opening from notification yet
+                    AppLayerIsInvisibleAtStart(LAUNCHER),
+                    AppLayerIsVisibleAtEnd(LAUNCHER),
+                    AppWindowIsInvisibleAtStart(LAUNCHER),
+                    AppWindowIsVisibleAtEnd(LAUNCHER),
+                    AppWindowBecomesTopWindow(LAUNCHER),
                 )
+                .associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
+
+    val APP_LAUNCH_FROM_NOTIFICATION_ASSERTIONS = COMMON_ASSERTIONS + APP_LAUNCH_ASSERTIONS
 
     val LAUNCHER_QUICK_SWITCH_ASSERTIONS =
         COMMON_ASSERTIONS +
             APP_LAUNCH_ASSERTIONS +
             APP_CLOSE_ASSERTIONS +
             listOf(
-                AppWindowCoversFullScreenAtStart(Components.CLOSING_APP),
-                AppLayerCoversFullScreenAtStart(Components.CLOSING_APP),
-                AppWindowCoversFullScreenAtEnd(Components.OPENING_APP),
-                AppLayerCoversFullScreenAtEnd(Components.OPENING_APP),
-                AppWindowOnTopAtStart(Components.CLOSING_APP),
-                AppWindowOnTopAtEnd(Components.OPENING_APP),
-                AppWindowBecomesInvisible(Components.CLOSING_APP),
-                AppLayerBecomesInvisible(Components.CLOSING_APP),
-                AppWindowBecomesVisible(Components.OPENING_APP),
-                AppLayerBecomesVisible(Components.OPENING_APP),
-            )
+                    AppLayerCoversFullScreenAtStart(CLOSING_APP),
+                    AppLayerCoversFullScreenAtEnd(OPENING_APP),
+                    AppWindowOnTopAtStart(CLOSING_APP),
+                    AppWindowOnTopAtEnd(OPENING_APP),
+                    AppWindowBecomesInvisible(CLOSING_APP),
+                    AppLayerBecomesInvisible(CLOSING_APP),
+                    AppWindowBecomesVisible(OPENING_APP),
+                    AppLayerBecomesVisible(OPENING_APP),
+                )
+                .associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
 
     val APP_CLOSE_TO_PIP_ASSERTIONS =
         COMMON_ASSERTIONS +
             listOf(
-                LayerReduces(Components.PIP_APP),
-                // LayerMovesTowardsRightBottomCorner(Components.PIP_APP), // TODO: Correct in
-                // general case?
-                FocusChanges(),
-                AppWindowIsVisibleAlways(Components.PIP_APP),
-                //                AppLayerIsVisibleAlways(Components.PIP_APP) `or`
-                // LayerIsVisibleAlways(Components.PIP_CONTENT_OVERLAY),
-                WindowRemainInsideVisibleBounds(Components.PIP_APP),
-                //                LayerRemainInsideVisibleBounds(Components.PIP_APP) `or`
-                // LayerRemainInsideVisibleBounds(Components.PIP_CONTENT_OVERLAY),
-                WindowBecomesPinned(Components.PIP_APP),
-                LayerBecomesVisible(Components.LAUNCHER),
-                HasAtMostOneWindowMatching(Components.PIP_DISMISS_OVERLAY)
-            )
+                    LayerReduces(PIP_APP),
+                    FocusChanges(),
+                    AppWindowIsVisibleAlways(PIP_APP),
+                    WindowRemainInsideVisibleBounds(PIP_APP),
+                    WindowBecomesPinned(PIP_APP),
+                    LayerBecomesVisible(LAUNCHER),
+                    HasAtMostOneWindowMatching(PIP_DISMISS_OVERLAY)
+                )
+                .associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
 
     val ENTER_SPLITSCREEN_ASSERTIONS =
         COMMON_ASSERTIONS +
             listOf(
-                LayerBecomesVisible(Components.SPLIT_SCREEN_DIVIDER),
-                AppLayerIsVisibleAtEnd(Components.SPLIT_SCREEN_PRIMARY_APP),
-                AppLayerBecomesVisible(Components.SPLIT_SCREEN_SECONDARY_APP),
-                SplitAppLayerBoundsBecomesVisible(
-                    Components.SPLIT_SCREEN_PRIMARY_APP,
-                    isPrimaryApp = true
-                ),
-                SplitAppLayerBoundsBecomesVisible(
-                    Components.SPLIT_SCREEN_SECONDARY_APP,
-                    isPrimaryApp = false
-                ),
-                AppWindowBecomesVisible(Components.SPLIT_SCREEN_PRIMARY_APP),
-                AppWindowBecomesVisible(Components.SPLIT_SCREEN_SECONDARY_APP),
-            )
+                    LayerBecomesVisible(SPLIT_SCREEN_DIVIDER),
+                    AppLayerIsVisibleAtEnd(SPLIT_SCREEN_PRIMARY_APP),
+                    AppLayerBecomesVisible(SPLIT_SCREEN_SECONDARY_APP),
+                    SplitAppLayerBoundsBecomesVisible(
+                        SPLIT_SCREEN_PRIMARY_APP,
+                        isPrimaryApp = true
+                    ),
+                    SplitAppLayerBoundsBecomesVisible(
+                        SPLIT_SCREEN_SECONDARY_APP,
+                        isPrimaryApp = false
+                    ),
+                    AppWindowBecomesVisible(SPLIT_SCREEN_PRIMARY_APP),
+                    AppWindowBecomesVisible(SPLIT_SCREEN_SECONDARY_APP),
+                )
+                .associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
 
     val EXIT_SPLITSCREEN_ASSERTIONS =
         COMMON_ASSERTIONS +
             listOf(
-                LayerBecomesInvisible(Components.SPLIT_SCREEN_DIVIDER),
-                AppLayerBecomesInvisible(Components.SPLIT_SCREEN_PRIMARY_APP),
-                AppLayerIsVisibleAlways(Components.SPLIT_SCREEN_SECONDARY_APP),
-                AppWindowBecomesInvisible(Components.SPLIT_SCREEN_PRIMARY_APP),
-                AppWindowIsVisibleAlways(Components.SPLIT_SCREEN_SECONDARY_APP),
-                //                AppBoundsBecomesInvisible(Components.SPLIT_SCREEN_PRIMARY_APP),
-                //                AppBoundsFullscreenAtEnd(Components.SPLIT_SCREEN_SECONDARY_APP),
-            )
+                    LayerBecomesInvisible(SPLIT_SCREEN_DIVIDER),
+                    AppLayerBecomesInvisible(SPLIT_SCREEN_PRIMARY_APP),
+                    AppLayerIsVisibleAlways(SPLIT_SCREEN_SECONDARY_APP),
+                    AppWindowBecomesInvisible(SPLIT_SCREEN_PRIMARY_APP),
+                    AppWindowIsVisibleAlways(SPLIT_SCREEN_SECONDARY_APP),
+                )
+                .associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
 
     val RESIZE_SPLITSCREEN_ASSERTIONS =
         COMMON_ASSERTIONS +
             listOf(
-                AppLayerIsVisibleAlways(Components.SPLIT_SCREEN_PRIMARY_APP),
-                AppLayerIsVisibleAlways(Components.SPLIT_SCREEN_SECONDARY_APP),
-                AppWindowIsVisibleAlways(Components.SPLIT_SCREEN_PRIMARY_APP),
-                AppWindowIsVisibleAlways(Components.SPLIT_SCREEN_SECONDARY_APP),
-                //                AppBoundsChange(omponents.SPLIT_SCREEN_PRIMARY_APP),
-                //                AppBoundsChange(omponents.SPLIT_SCREEN_SECONDARY_APP),
-            )
-
-    val APP_SWIPE_TO_RECENTS_ASSERTIONS =
-        COMMON_ASSERTIONS +
-            APP_CLOSE_TO_HOME_ASSERTIONS +
-            listOf(
-                // No other assertions yet
+                    AppLayerIsVisibleAlways(SPLIT_SCREEN_PRIMARY_APP),
+                    AppLayerIsVisibleAlways(SPLIT_SCREEN_SECONDARY_APP),
+                    AppWindowIsVisibleAlways(SPLIT_SCREEN_PRIMARY_APP),
+                    AppWindowIsVisibleAlways(SPLIT_SCREEN_SECONDARY_APP),
                 )
-
-    val LOCKSCREEN_TRANSITION_FROM_AOD_ASSERTIONS =
-        COMMON_ASSERTIONS +
-            listOf(
-                // TODO
-                )
-
-    val LOCKSCREEN_TRANSITION_TO_AOD_ASSERTIONS =
-        COMMON_ASSERTIONS +
-            listOf(
-                // TODO
-                )
-
-    val LOCKSCREEN_UNLOCK_ANIMATION_ASSERTIONS =
-        COMMON_ASSERTIONS +
-            listOf(
-                // DisplayIsOffAtStart(),
-                // AppLayerIsVisibleAtEnd(Components.LAUNCHER)
-                )
+                .associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
 }

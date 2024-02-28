@@ -16,22 +16,21 @@
 
 package android.tools.common.flicker.assertors.assertions
 
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.ComponentTemplate
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
+import android.tools.common.traces.component.ComponentNameMatcher
 
 class AppLayerCoversFullScreenAtEnd(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(scenarioInstance: IScenarioInstance, layerSubject: LayersTraceSubject) {
-        val layersTrace = scenarioInstance.reader.readLayersTrace() ?: error("Missing layers trace")
-        val startDisplayBounds =
-            layersTrace.entries.last().physicalDisplayBounds
-                ?: error("Missing physical display bounds")
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+        flicker.assertLayersEnd {
+            val displayBounds =
+                entry.physicalDisplayBounds ?: error("Missing physical display bounds")
 
-        layerSubject
-            .last()
-            .visibleRegion(component.build(scenarioInstance))
-            .coversExactly(startDisplayBounds)
+            visibleRegion(component.build(scenarioInstance).or(ComponentNameMatcher.LETTERBOX))
+                .coversExactly(displayBounds)
+        }
     }
 }

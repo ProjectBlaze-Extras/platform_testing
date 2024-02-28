@@ -17,77 +17,81 @@
 package android.tools.common.flicker.assertors.assertions
 
 import android.tools.common.datatypes.Region
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.ComponentTemplate
-import android.tools.common.flicker.assertors.Components.SPLIT_SCREEN_DIVIDER
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
-import android.tools.common.flicker.subject.wm.WindowManagerTraceSubject
+import android.tools.common.flicker.config.splitscreen.Components.SPLIT_SCREEN_DIVIDER
+import android.tools.common.flicker.subject.layers.LayerTraceEntrySubject
+import android.tools.common.traces.wm.WindowManagerTrace
 
 class SplitAppLayerBoundsSnapToDivider(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(
-        scenarioInstance: IScenarioInstance,
-        wmSubject: WindowManagerTraceSubject,
-        layerSubject: LayersTraceSubject
-    ) {
-        // TODO: Replace with always on tracing available data
-        val landscapePosLeft = !wmSubject.trace.isTablet
-        val portraitPosTop = true // TODO: Figure out how to know if we are top or bottom app
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+        val wmTrace = scenarioInstance.reader.readWmTrace() ?: return
 
-        val splitscreenDivider = SPLIT_SCREEN_DIVIDER.build(scenarioInstance)
-
-        layerSubject
-            .invoke("splitAppLayerBoundsSnapToDivider") {
-                val displaySize =
-                    it.entry.displays
-                        .first()
-                        .size // TODO: Better way of getting correct display instead of just first
-                val dividerRegion =
-                    it.layer(splitscreenDivider)?.visibleRegion?.region
-                        ?: error("Missing splitscreen divider")
-
-                require(dividerRegion.isNotEmpty) {
-                    "Splitscreen divider region should not be empty"
-                }
-
+        flicker.assertLayers {
+            invoke("splitAppLayerBoundsSnapToDivider") {
                 it.visibleRegion(component.build(scenarioInstance))
-                    .coversAtMost(
-                        if (displaySize.width > displaySize.height) {
-                            if (landscapePosLeft) {
-                                Region.from(
-                                    0,
-                                    0,
-                                    (dividerRegion.bounds.left + dividerRegion.bounds.right) / 2,
-                                    displaySize.height
-                                )
-                            } else {
-                                Region.from(
-                                    (dividerRegion.bounds.left + dividerRegion.bounds.right) / 2,
-                                    0,
-                                    displaySize.width,
-                                    displaySize.height
-                                )
-                            }
-                        } else {
-                            if (portraitPosTop) {
-                                Region.from(
-                                    0,
-                                    0,
-                                    displaySize.width,
-                                    (dividerRegion.bounds.top + dividerRegion.bounds.bottom) / 2
-                                )
-                            } else {
-                                Region.from(
-                                    0,
-                                    (dividerRegion.bounds.top + dividerRegion.bounds.bottom) / 2,
-                                    displaySize.width,
-                                    displaySize.height
-                                )
-                            }
-                        }
-                    )
+                    .coversAtMost(it.calculateExpectedDisplaySize(scenarioInstance, wmTrace))
             }
-            .forAllEntries()
+        }
+    }
+
+    companion object {
+        private fun LayerTraceEntrySubject.calculateExpectedDisplaySize(
+            scenarioInstance: ScenarioInstance,
+            wmTrace: WindowManagerTrace
+        ): Region {
+            // TODO: Replace with always on tracing available data
+            val landscapePosLeft = !wmTrace.isTablet
+            val portraitPosTop = true // TODO: Figure out how to know if we are top or bottom app
+
+            val splitScreenDivider = SPLIT_SCREEN_DIVIDER.build(scenarioInstance)
+
+            val displaySize =
+                entry.displays
+                    .first()
+                    .size // TODO: Better way of getting correct display instead of just first
+            val dividerRegion =
+                layer(splitScreenDivider)?.visibleRegion?.region
+                    ?: error("Missing splitscreen divider")
+
+            require(dividerRegion.isNotEmpty) { "Splitscreen divider region should not be empty" }
+
+            return if (displaySize.width > displaySize.height) {
+                if (landscapePosLeft) {
+                    Region.from(
+                        0,
+                        0,
+                        (dividerRegion.bounds.left + dividerRegion.bounds.right) / 2,
+                        displaySize.height
+                    )
+                } else {
+                    Region.from(
+                        (dividerRegion.bounds.left + dividerRegion.bounds.right) / 2,
+                        0,
+                        displaySize.width,
+                        displaySize.height
+                    )
+                }
+            } else {
+                if (portraitPosTop) {
+                    Region.from(
+                        0,
+                        0,
+                        displaySize.width,
+                        (dividerRegion.bounds.top + dividerRegion.bounds.bottom) / 2
+                    )
+                } else {
+                    Region.from(
+                        0,
+                        (dividerRegion.bounds.top + dividerRegion.bounds.bottom) / 2,
+                        displaySize.width,
+                        displaySize.height
+                    )
+                }
+            }
+        }
     }
 }

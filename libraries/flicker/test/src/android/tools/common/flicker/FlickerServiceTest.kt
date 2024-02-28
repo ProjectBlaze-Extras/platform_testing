@@ -16,88 +16,73 @@
 
 package android.tools.common.flicker
 
-import android.app.Instrumentation
-import android.tools.CleanFlickerEnvironmentRule
-import android.tools.common.flicker.assertors.IFaasAssertion
-import android.tools.common.flicker.assertors.factories.IAssertionFactory
-import android.tools.common.flicker.assertors.runners.IAssertionRunner
-import android.tools.common.flicker.extractors.IScenarioExtractor
-import android.tools.common.io.IReader
-import android.tools.device.flicker.FlickerService
-import android.tools.device.traces.parsers.WindowManagerStateHelper
-import androidx.test.platform.app.InstrumentationRegistry
+import android.tools.common.Timestamps
+import android.tools.common.flicker.config.FlickerConfig
+import android.tools.common.flicker.config.FlickerConfigEntry
+import android.tools.common.flicker.config.ScenarioId
+import android.tools.common.flicker.extractors.ScenarioExtractor
+import android.tools.common.flicker.extractors.TraceSlice
+import android.tools.getTraceReaderFromScenario
+import android.tools.rules.CleanFlickerEnvironmentRule
 import org.junit.ClassRule
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runners.MethodSorters
-import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
 
 /** Contains [FlickerService] tests. To run this test: `atest FlickerLibTest:FlickerServiceTest` */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class FlickerServiceTest {
-    private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-    private val wmHelper = WindowManagerStateHelper(instrumentation, clearCacheAfterParsing = false)
 
     @Test
     fun generatesAssertionsFromExtractedScenarios() {
-        val mockReader = Mockito.mock(IReader::class.java)
-        val mockScenarioExtractor = Mockito.mock(IScenarioExtractor::class.java)
-        val mockAssertionFactory = Mockito.mock(IAssertionFactory::class.java)
-        val mockAssertionRunner = Mockito.mock(IAssertionRunner::class.java)
-
-        val scenarioInstance = Mockito.mock(IScenarioInstance::class.java)
-        val assertions = listOf(Mockito.mock(IFaasAssertion::class.java))
-
-        Mockito.`when`(mockScenarioExtractor.extract(mockReader))
-            .thenReturn(listOf(scenarioInstance))
-        Mockito.`when`(mockAssertionFactory.generateAssertionsFor(scenarioInstance))
-            .thenReturn(assertions)
-
-        val service =
-            FlickerService(
-                scenarioExtractor = mockScenarioExtractor,
-                assertionFactory = mockAssertionFactory,
-                assertionRunner = mockAssertionRunner
+        val reader = getTraceReaderFromScenario("AppLaunch")
+        val mockFlickerConfig = Mockito.mock(FlickerConfig::class.java)
+        val mockScenarioExtractor = Mockito.mock(ScenarioExtractor::class.java)
+        val mockConfigEntry =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("TEST_SCENARIO"),
+                extractor = mockScenarioExtractor,
+                assertions = emptyMap()
             )
-        service.process(mockReader)
 
-        Mockito.verify(mockScenarioExtractor).extract(mockReader)
-        Mockito.verify(mockAssertionFactory).generateAssertionsFor(scenarioInstance)
+        val traceSlice =
+            TraceSlice(startTimestamp = Timestamps.min(), endTimestamp = Timestamps.max())
+
+        Mockito.`when`(mockFlickerConfig.getEntries()).thenReturn(listOf(mockConfigEntry))
+        Mockito.`when`(mockScenarioExtractor.extract(reader)).thenReturn(listOf(traceSlice))
+
+        val service = FlickerService(mockFlickerConfig)
+        service.detectScenarios(reader)
+
+        Mockito.verify(mockScenarioExtractor).extract(reader)
     }
 
     @Test
     fun executesAssertionsReturnedByAssertionFactories() {
-        val mockReader = Mockito.mock(IReader::class.java)
-        val mockScenarioExtractor = Mockito.mock(IScenarioExtractor::class.java)
-        val mockAssertionFactory = Mockito.mock(IAssertionFactory::class.java)
-        val mockAssertionRunner = Mockito.mock(IAssertionRunner::class.java)
-
-        val scenarioInstance = Mockito.mock(IScenarioInstance::class.java)
-        val assertions = listOf(Mockito.mock(IFaasAssertion::class.java))
-
-        Mockito.`when`(mockScenarioExtractor.extract(mockReader))
-            .thenReturn(listOf(scenarioInstance))
-        Mockito.`when`(mockAssertionFactory.generateAssertionsFor(scenarioInstance))
-            .thenReturn(assertions)
-
-        val service =
-            FlickerService(
-                scenarioExtractor = mockScenarioExtractor,
-                assertionFactory = mockAssertionFactory,
-                assertionRunner = mockAssertionRunner
+        val reader = getTraceReaderFromScenario("AppLaunch")
+        val mockFlickerConfig = Mockito.mock(FlickerConfig::class.java)
+        val mockScenarioExtractor = Mockito.mock(ScenarioExtractor::class.java)
+        val mockConfigEntry =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("TEST_SCENARIO"),
+                extractor = mockScenarioExtractor,
+                assertions = emptyMap()
             )
-        service.process(mockReader)
 
-        Mockito.verify(mockScenarioExtractor).extract(mockReader)
-        Mockito.verify(mockAssertionRunner).execute(assertions)
+        val traceSlice =
+            TraceSlice(startTimestamp = Timestamps.min(), endTimestamp = Timestamps.max())
+
+        Mockito.`when`(mockFlickerConfig.getEntries()).thenReturn(listOf(mockConfigEntry))
+        Mockito.`when`(mockScenarioExtractor.extract(reader)).thenReturn(listOf(traceSlice))
+
+        val service = FlickerService(mockFlickerConfig)
+        service.detectScenarios(reader)
+
+        Mockito.verify(mockScenarioExtractor).extract(reader)
     }
 
-    fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
-
-    inline fun <reified T : Any> argumentCaptor() = ArgumentCaptor.forClass(T::class.java)
-
     companion object {
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

@@ -17,5 +17,5 @@
 package android.tools.common.flicker.config.pip
 
 internal object Pip {
-    val SCENARIOS = listOf(AppCloseToPip(), PipTransition())
+    val SCENARIOS = listOf(AppCloseToPip, PipTransition)
 }

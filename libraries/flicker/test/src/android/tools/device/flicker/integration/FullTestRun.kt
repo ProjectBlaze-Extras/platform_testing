@@ -17,174 +17,204 @@
 package android.tools.device.flicker.integration
 
 import android.app.Instrumentation
-import android.platform.test.annotations.Presubmit
-import android.tools.common.Scenario
+import android.tools.common.Timestamps
 import android.tools.common.datatypes.Region
-import android.tools.common.flicker.config.FaasScenarioType
+import android.tools.common.flicker.AssertionInvocationGroup
+import android.tools.common.flicker.FlickerConfig
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.annotation.ExpectedScenarios
+import android.tools.common.flicker.annotation.FlickerConfigProvider
+import android.tools.common.flicker.assertions.FlickerTest
+import android.tools.common.flicker.assertors.AssertionTemplate
+import android.tools.common.flicker.config.FlickerConfig
+import android.tools.common.flicker.config.FlickerConfigEntry
+import android.tools.common.flicker.config.FlickerServiceConfig
+import android.tools.common.flicker.config.ScenarioId
+import android.tools.common.flicker.extractors.ScenarioExtractor
+import android.tools.common.flicker.extractors.TraceSlice
 import android.tools.common.flicker.subject.FlickerSubject
 import android.tools.common.flicker.subject.layers.LayersTraceSubject
 import android.tools.common.flicker.subject.region.RegionSubject
 import android.tools.common.flicker.subject.wm.WindowManagerTraceSubject
-import android.tools.common.io.RunStatus
+import android.tools.common.io.Reader
 import android.tools.device.apphelpers.BrowserAppHelper
-import android.tools.device.flicker.annotation.FlickerServiceCompatible
-import android.tools.device.flicker.junit.FlickerBuilderProvider
-import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.junit.FlickerServiceJUnit4ClassRunner
 import android.tools.device.traces.parsers.WindowManagerStateHelper
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.launcher3.tapl.LauncherInstrumentation
 import com.google.common.truth.Truth
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
-@FlickerServiceCompatible(expectedCujs = [FaasScenarioType.COMMON])
-@RunWith(Parameterized::class)
-@Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-class FullTestRun(private val flicker: FlickerTest) {
+@RunWith(FlickerServiceJUnit4ClassRunner::class)
+class FullTestRun {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+    private val wmHelper = WindowManagerStateHelper(instrumentation)
     private val testApp = BrowserAppHelper(instrumentation)
-    private val tapl: LauncherInstrumentation = LauncherInstrumentation()
 
-    init {
-        flicker.scenario.setIsTablet(
-            WindowManagerStateHelper(instrumentation, clearCacheAfterParsing = false)
-                .currentState
-                .wmState
-                .isTablet
-        )
-        tapl.setExpectedRotationCheckEnabled(true)
+    @Before
+    fun setup() {
+        // Nothing to do
     }
 
-    /**
-     * Entry point for the test runner. It will use this method to initialize and cache flicker
-     * executions
-     */
-    @FlickerBuilderProvider
-    fun buildFlicker(): FlickerBuilder {
-        return FlickerBuilder(instrumentation).apply {
-            setup { flicker.scenario.setIsTablet(wmHelper.currentState.wmState.isTablet) }
-            teardown { testApp.exit(wmHelper) }
-            transitions { testApp.launchViaIntent(wmHelper) }
-        }
-    }
-
-    /**
-     * This is a shel test from the flicker infra to ensure the WM tracing pipeline executed
-     * entirely executed correctly
-     */
-    @Presubmit
+    @ExpectedScenarios(["ENTIRE_TRACE"])
     @Test
-    fun internalWmCheck() {
-        var trace: WindowManagerTraceSubject? = null
-        var executionCount = 0
-        flicker.assertWm {
-            executionCount++
-            trace = this
-            this.isNotEmpty()
-        }
-        flicker.assertWm {
-            executionCount++
-            val failure: Result<Any> = runCatching { this.isEmpty() }
-            if (failure.isSuccess) {
-                error("Should have thrown failure")
-            }
-        }
-        flicker.assertWmStart {
-            executionCount++
-            validateState(this, trace?.first())
-            validateVisibleRegion(this.visibleRegion(), trace?.first()?.visibleRegion())
-        }
-        flicker.assertWmEnd {
-            executionCount++
-            validateState(this, trace?.last())
-            validateVisibleRegion(this.visibleRegion(), trace?.last()?.visibleRegion())
-        }
-        Truth.assertWithMessage("Execution count").that(executionCount).isEqualTo(4)
+    fun openApp() {
+        testApp.launchViaIntent(wmHelper)
     }
 
-    /**
-     * This is a shel test from the flicker infra to ensure the Layers tracing pipeline executed
-     * entirely executed correctly
-     */
-    @Presubmit
-    @Test
-    fun internalLayersCheck() {
-        var trace: LayersTraceSubject? = null
-        var executionCount = 0
-        flicker.assertLayers {
-            executionCount++
-            trace = this
-            this.isNotEmpty()
-        }
-        flicker.assertLayers {
-            executionCount++
-            val failure: Result<Any> = runCatching { this.isEmpty() }
-            if (failure.isSuccess) {
-                error("Should have thrown failure")
-            }
-        }
-        flicker.assertLayersStart {
-            executionCount++
-            validateState(this, trace?.first())
-            validateVisibleRegion(this.visibleRegion(), trace?.first()?.visibleRegion())
-        }
-        flicker.assertLayersEnd {
-            executionCount++
-            validateState(this, trace?.last())
-            validateVisibleRegion(this.visibleRegion(), trace?.last()?.visibleRegion())
-        }
-        Truth.assertWithMessage("Execution count").that(executionCount).isEqualTo(4)
-    }
-
-    @Presubmit
-    @Test
-    fun exceptionMessageCheck() {
-        val failure: Result<Any> = runCatching { flicker.assertLayers { this.isEmpty() } }
-        val exception = failure.exceptionOrNull() ?: error("Should have thrown failure")
-        Truth.assertWithMessage("Artifact path on exception")
-            .that(exception)
-            .hasMessageThat()
-            .contains(RunStatus.ASSERTION_FAILED.prefix)
-    }
-
-    private fun validateState(actual: FlickerSubject?, expected: FlickerSubject?) {
-        Truth.assertWithMessage("Actual state").that(actual).isNotNull()
-        Truth.assertWithMessage("Expected state").that(expected).isNotNull()
-    }
-
-    private fun validateVisibleRegion(
-        actual: RegionSubject?,
-        expected: RegionSubject?,
-    ) {
-        Truth.assertWithMessage("Actual visible region").that(actual).isNotNull()
-        Truth.assertWithMessage("Expected visible region").that(expected).isNotNull()
-        actual?.coversExactly(expected?.region ?: Region.EMPTY)
-
-        val failure: Result<Any?> = runCatching {
-            actual?.isHigher(expected?.region ?: Region.EMPTY)
-        }
-        if (failure.isSuccess) {
-            error("Should have thrown failure")
-        }
+    @After
+    fun teardown() {
+        testApp.exit(wmHelper)
     }
 
     companion object {
-        /**
-         * Creates the test configurations.
-         *
-         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
-         * navigation modes.
-         */
-        @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests(
-                extraArgs = mapOf(Scenario.FAAS_BLOCKING to true)
+        @FlickerConfigProvider
+        fun flickerConfigProvider(): FlickerConfig =
+            FlickerConfig().use(FlickerServiceConfig.DEFAULT).use(CUSTOM_CONFIG)
+
+        val CUSTOM_CONFIG =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("MY_CUSTOM_SCENARIO"),
+                extractor =
+                    object : ScenarioExtractor {
+                        override fun extract(reader: Reader): List<TraceSlice> {
+                            return listOf(TraceSlice(Timestamps.min(), Timestamps.max()))
+                        }
+                    },
+                assertions =
+                    mapOf(
+                        object : AssertionTemplate("internalWmCheck") {
+                            override fun doEvaluate(
+                                scenarioInstance: ScenarioInstance,
+                                flicker: FlickerTest
+                            ) {
+                                var trace: WindowManagerTraceSubject? = null
+                                var executionCount = 0
+                                flicker.assertWm {
+                                    executionCount++
+                                    trace = this
+                                    this.isNotEmpty()
+
+                                    Truth.assertWithMessage("Execution count")
+                                        .that(executionCount)
+                                        .isEqualTo(1)
+                                }
+                                flicker.assertWm {
+                                    executionCount++
+                                    val failure: Result<Any> = runCatching { this.isEmpty() }
+                                    if (failure.isSuccess) {
+                                        error("Should have thrown failure")
+                                    }
+
+                                    Truth.assertWithMessage("Execution count")
+                                        .that(executionCount)
+                                        .isEqualTo(2)
+                                }
+                                flicker.assertWmStart {
+                                    executionCount++
+                                    validateState(this, trace?.first())
+                                    validateVisibleRegion(
+                                        this.visibleRegion(),
+                                        trace?.first()?.visibleRegion()
+                                    )
+
+                                    Truth.assertWithMessage("Execution count")
+                                        .that(executionCount)
+                                        .isEqualTo(3)
+                                }
+                                flicker.assertWmEnd {
+                                    executionCount++
+                                    validateState(this, trace?.last())
+                                    validateVisibleRegion(
+                                        this.visibleRegion(),
+                                        trace?.last()?.visibleRegion()
+                                    )
+
+                                    Truth.assertWithMessage("Execution count")
+                                        .that(executionCount)
+                                        .isEqualTo(4)
+                                }
+                            }
+                        } to AssertionInvocationGroup.BLOCKING,
+                        object : AssertionTemplate("internalLayersCheck") {
+                            override fun doEvaluate(
+                                scenarioInstance: ScenarioInstance,
+                                flicker: FlickerTest
+                            ) {
+                                var trace: LayersTraceSubject? = null
+                                var executionCount = 0
+                                flicker.assertLayers {
+                                    executionCount++
+                                    trace = this
+                                    this.isNotEmpty()
+
+                                    Truth.assertWithMessage("Execution count")
+                                        .that(executionCount)
+                                        .isEqualTo(1)
+                                }
+                                flicker.assertLayers {
+                                    executionCount++
+                                    val failure: Result<Any> = runCatching { this.isEmpty() }
+                                    if (failure.isSuccess) {
+                                        error("Should have thrown failure")
+                                    }
+
+                                    Truth.assertWithMessage("Execution count")
+                                        .that(executionCount)
+                                        .isEqualTo(2)
+                                }
+                                flicker.assertLayersStart {
+                                    executionCount++
+                                    validateState(this, trace?.first())
+                                    validateVisibleRegion(
+                                        this.visibleRegion(),
+                                        trace?.first()?.visibleRegion()
+                                    )
+
+                                    Truth.assertWithMessage("Execution count")
+                                        .that(executionCount)
+                                        .isEqualTo(3)
+                                }
+                                flicker.assertLayersEnd {
+                                    executionCount++
+                                    validateState(this, trace?.last())
+                                    validateVisibleRegion(
+                                        this.visibleRegion(),
+                                        trace?.last()?.visibleRegion()
+                                    )
+
+                                    Truth.assertWithMessage("Execution count")
+                                        .that(executionCount)
+                                        .isEqualTo(4)
+                                }
+                            }
+                        } to AssertionInvocationGroup.BLOCKING
+                    ),
+                enabled = true
             )
+
+        private fun validateState(actual: FlickerSubject?, expected: FlickerSubject?) {
+            Truth.assertWithMessage("Actual state").that(actual).isNotNull()
+            Truth.assertWithMessage("Expected state").that(expected).isNotNull()
+        }
+
+        private fun validateVisibleRegion(
+            actual: RegionSubject?,
+            expected: RegionSubject?,
+        ) {
+            Truth.assertWithMessage("Actual visible region").that(actual).isNotNull()
+            Truth.assertWithMessage("Expected visible region").that(expected).isNotNull()
+            actual?.coversExactly(expected?.region ?: Region.EMPTY)
+
+            val failure: Result<Any?> = runCatching {
+                actual?.isHigher(expected?.region ?: Region.EMPTY)
+            }
+            if (failure.isSuccess) {
+                error("Should have thrown failure")
+            }
         }
     }
 }

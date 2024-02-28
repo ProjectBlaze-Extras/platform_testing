@@ -41,6 +41,6 @@ android_test {
     ],
     srcs: ["src/**/*.java"],
     certificate: "platform",
-    test_suites: ["catbox"],
+    test_suites: ["catbox", "ats"],
     privileged: true,
 }

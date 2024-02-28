@@ -21,7 +21,7 @@ import android.tools.common.flicker.subject.exceptions.ExceptionMessageBuilder
 import android.tools.common.flicker.subject.exceptions.InvalidElementException
 import android.tools.common.flicker.subject.exceptions.InvalidPropertyException
 import android.tools.common.flicker.subject.region.RegionTraceSubject
-import android.tools.common.io.IReader
+import android.tools.common.io.Reader
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.common.traces.component.EdgeExtensionComponentMatcher
 import android.tools.common.traces.component.IComponentMatcher
@@ -55,7 +55,7 @@ import android.tools.common.traces.surfaceflinger.LayersTrace
  *    }
  * ```
  */
-class LayersTraceSubject(val trace: LayersTrace, override val reader: IReader? = null) :
+class LayersTraceSubject(val trace: LayersTrace, override val reader: Reader? = null) :
     FlickerTraceSubject<LayerTraceEntrySubject>(),
     ILayerSubject<LayersTraceSubject, RegionTraceSubject> {
 

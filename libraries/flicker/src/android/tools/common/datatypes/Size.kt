@@ -27,27 +27,11 @@ import kotlin.js.JsName
  */
 @JsExport
 open class Size
-protected constructor(@JsName("width") val width: Int, @JsName("height") val height: Int) {
-    @JsName("isEmpty")
-    val isEmpty: Boolean
-        get() = height == 0 || width == 0
+protected constructor(@JsName("width") val width: Int, @JsName("height") val height: Int) :
+    DataType() {
+    override val isEmpty = height == 0 || width == 0
 
-    @JsName("isNotEmpty")
-    val isNotEmpty: Boolean
-        get() = !isEmpty
-
-    open fun prettyPrint(): String = "$width x $height"
-
-    override fun toString(): String = if (isEmpty) "[empty]" else prettyPrint()
-
-    override fun equals(other: Any?): Boolean =
-        other is Size && other.height == height && other.width == width
-
-    override fun hashCode(): Int {
-        var result = width
-        result = 31 * result + height
-        return result
-    }
+    override fun doPrintValue() = "$width x $height"
 
     companion object {
         @JsName("EMPTY")

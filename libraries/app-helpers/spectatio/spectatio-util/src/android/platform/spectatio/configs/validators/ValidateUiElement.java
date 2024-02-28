@@ -30,6 +30,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * {@link ValidateUiElement} is a deserializer that validates Ui Elements in Spectatio JSON Config
@@ -88,7 +89,7 @@ public class ValidateUiElement implements JsonDeserializer<UiElement> {
             List<UiElement> specifiers =
                     specifiersJson.asList().stream()
                             .map(element -> context.<UiElement>deserialize(element, typeOfT))
-                            .toList();
+                            .collect(Collectors.toList());
 
             int ancestorSpecifiers = 0;
             for (UiElement specifier : specifiers) {
@@ -130,19 +131,10 @@ public class ValidateUiElement implements JsonDeserializer<UiElement> {
                 validateAndGetValue(JsonConfigConstants.VALUE, jsonObject, /*isOptional*/ false);
 
         // Package is not required for SCROLLABLE, CLICKABLE, TEXT, TEXT_CONTAINS and DESCRIPTION
-        String pkg = null;
 
-        // Package is optional for CLASS
-        if (JsonConfigConstants.CLASS.equals(type)) {
-            pkg = validateAndGetValue(JsonConfigConstants.PACKAGE, jsonObject, /*isOptional*/ true);
-        }
-
-        // Package is required for RESOURCE_ID
-        if (JsonConfigConstants.RESOURCE_ID.equals(type)) {
-            pkg =
-                    validateAndGetValue(
-                            JsonConfigConstants.PACKAGE, jsonObject, /*isOptional*/ false);
-        }
+        // Package is optional for CLASS and RESOURCE_ID
+        String pkg =
+                validateAndGetValue(JsonConfigConstants.PACKAGE, jsonObject, /*isOptional*/ true);
 
         return new UiElement(type, value, pkg);
     }
@@ -267,7 +259,7 @@ public class ValidateUiElement implements JsonDeserializer<UiElement> {
                         .map(Entry::getKey)
                         .map(String::trim)
                         .filter(key -> !mSupportedProperties.contains(key))
-                        .toList();
+                        .collect(Collectors.toList());
         if (!unknownProperties.isEmpty()) {
             throw new RuntimeException(
                     String.format(

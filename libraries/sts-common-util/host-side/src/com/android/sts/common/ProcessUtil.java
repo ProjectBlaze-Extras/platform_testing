@@ -429,18 +429,21 @@ public final class ProcessUtil {
      *
      * @param device device to be run on
      * @param process pgrep pattern of process to look for
-     * @param filenameSubstr part of file name/path loaded by the process
+     * @param filenamePattern the filename pattern to find
      * @return an Opotional of IFileEntry of the path of the file on the device if exists.
      */
     public static Optional<IFileEntry> findFileLoadedByProcess(
-            ITestDevice device, String process, String filenameSubstr)
+            ITestDevice device, String process, Pattern filenamePattern)
             throws DeviceNotAvailableException {
         Optional<Integer> pid = ProcessUtil.pidOf(device, process);
         if (pid.isPresent()) {
-            String cmd = "lsof -p " + pid.get().toString() + " | awk '{print $NF}'";
+            String cmd = "lsof -p " + pid.get().toString() + " | grep -o '/.*'";
             String[] openFiles = CommandUtil.runAndCheck(device, cmd).getStdout().split("\n");
             for (String f : openFiles) {
-                if (f.contains(filenameSubstr)) {
+                if (f.contains("Permission denied")) {
+                    throw new IllegalStateException("no permission to read open files for process");
+                }
+                if (filenamePattern.matcher(f).find()) {
                     return Optional.of(device.getFileEntry(f.trim()));
                 }
             }

@@ -28,7 +28,6 @@ import android.car.media.CarAudioManager;
 import android.content.Context;
 import android.platform.helpers.ScrollUtility.ScrollActions;
 import android.platform.helpers.ScrollUtility.ScrollDirection;
-import android.platform.helpers.exceptions.UnknownUiException;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.uiautomator.By;
@@ -180,7 +179,7 @@ public class SettingsSoundsHelperImpl extends AbstractStandardAppHelper
                         typeSelector,
                         String.format("Scroll on sound to find %s", type));
         String currentSound = getSound(soundType);
-        validateUiObject(object, String.format("sound type %s", type));
+        getSpectatioUiUtil().validateUiObject(object, String.format("sound type %s", type));
         getSpectatioUiUtil().clickAndWait(object);
         getSpectatioUiUtil().wait1Second();
         BySelector soundSelector = By.text(sound);
@@ -193,14 +192,14 @@ public class SettingsSoundsHelperImpl extends AbstractStandardAppHelper
                         mScrollableElementSelector,
                         soundSelector,
                         String.format("Scroll on sound list to find %s", sound));
-        validateUiObject(soundObject, String.format("sound %s", sound));
+        getSpectatioUiUtil().validateUiObject(soundObject, String.format("sound %s", sound));
         getSpectatioUiUtil().clickAndWait(soundObject);
         UiObject2 saveButton =
                 getSpectatioUiUtil()
                         .findUiObject(
                                 getUiElementFromConfig(
                                         AutomotiveConfigConstants.SOUND_SETTINGS_SAVE_BUTTON));
-        validateUiObject(saveButton, "save button");
+        getSpectatioUiUtil().validateUiObject(saveButton, "save button");
         getSpectatioUiUtil().clickAndWait(saveButton);
     }
 
@@ -230,7 +229,7 @@ public class SettingsSoundsHelperImpl extends AbstractStandardAppHelper
                         mScrollableElementSelector,
                         typeSelector,
                         String.format("Scroll on sound to find %s", type));
-        validateUiObject(object, String.format("sound type %s", type));
+        getSpectatioUiUtil().validateUiObject(object, String.format("sound type %s", type));
         List<UiObject2> list = object.getParent().getChildren();
         if (list.size() < 2) {
             mScrollUtility.scrollForward(
@@ -239,17 +238,11 @@ public class SettingsSoundsHelperImpl extends AbstractStandardAppHelper
                     mForwardButtonSelector,
                     mScrollableElementSelector,
                     String.format("Scroll on sound to find %s", type));
-            validateUiObject(object, String.format("sound type %s", type));
+            getSpectatioUiUtil().validateUiObject(object, String.format("sound type %s", type));
             list = object.getParent().getChildren();
         }
         UiObject2 summary = list.get(1);
         return summary.getText();
     }
 
-    private void validateUiObject(UiObject2 uiObject, String action) {
-        if (uiObject == null) {
-            throw new UnknownUiException(
-                    String.format("Unable to find UI Element for %s.", action));
-        }
-    }
 }

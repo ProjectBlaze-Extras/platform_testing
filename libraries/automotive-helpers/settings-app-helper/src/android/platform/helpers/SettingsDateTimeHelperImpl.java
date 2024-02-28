@@ -22,7 +22,6 @@ import android.app.Instrumentation;
 import android.content.ContentResolver;
 import android.platform.helpers.ScrollUtility.ScrollActions;
 import android.platform.helpers.ScrollUtility.ScrollDirection;
-import android.platform.helpers.exceptions.UnknownUiException;
 import android.text.format.DateFormat;
 
 import androidx.test.uiautomator.By;
@@ -457,7 +456,8 @@ public class SettingsDateTimeHelperImpl extends AbstractStandardAppHelper
                         scrollElementSelector,
                         selector,
                         String.format("Scroll on date & time to find %s", timezone));
-        validateUiObject(object, String.format("Unable to find timezone %s", timezone));
+        getSpectatioUiUtil()
+                .validateUiObject(object, String.format("Unable to find timezone %s", timezone));
         getSpectatioUiUtil().clickAndWait(object);
     }
 
@@ -597,10 +597,4 @@ public class SettingsDateTimeHelperImpl extends AbstractStandardAppHelper
         return status == 1 ? true : false;
     }
 
-    private void validateUiObject(UiObject2 uiObject, String action) {
-        if (uiObject == null) {
-            throw new UnknownUiException(
-                    String.format("Unable to find UI Element for %s.", action));
-        }
-    }
 }

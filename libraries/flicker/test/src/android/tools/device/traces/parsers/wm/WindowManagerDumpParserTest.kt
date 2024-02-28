@@ -16,11 +16,11 @@
 
 package android.tools.device.traces.parsers.wm
 
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.common.Cache
 import android.tools.common.io.TraceType
 import android.tools.device.traces.getCurrentState
 import android.tools.readAsset
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
 import org.junit.Before
 import org.junit.ClassRule
@@ -47,6 +47,6 @@ class WindowManagerDumpParserTest {
     }
 
     companion object {
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

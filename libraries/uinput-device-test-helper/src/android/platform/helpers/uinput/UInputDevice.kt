@@ -29,7 +29,7 @@ abstract class UInputDevice {
     abstract val supportedKeys: Array<Int>
 
     // Based on cts/tests/input/res/raw/test_bluetooth_stylus_register.json
-    fun getRegisterCommand(): String {
+    open fun getRegisterCommand(): String {
         return """{
             "id": 1,
             "type": "uinput",
@@ -51,4 +51,10 @@ abstract class UInputDevice {
         this.name == inputDevice.name &&
             this.vendorId == inputDevice.vendorId &&
             this.productId == inputDevice.productId
+
+    /** An interface to inject events for an [UInputDevice]. */
+    interface EventInjector {
+        fun sendKeyEvent(deviceId: Int, keycode: Int)
+        fun sendEventsFromInputFile(deviceId: Int, inputFile: String)
+    }
 }

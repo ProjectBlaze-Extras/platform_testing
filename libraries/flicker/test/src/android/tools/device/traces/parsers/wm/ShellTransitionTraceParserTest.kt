@@ -17,11 +17,11 @@
 package android.tools.device.traces.parsers.wm
 
 import android.app.Instrumentation
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.common.Cache
 import android.tools.device.apphelpers.BrowserAppHelper
 import android.tools.device.traces.monitors.wm.ShellTransitionTraceMonitor
 import android.tools.readAsset
+import android.tools.rules.CleanFlickerEnvironmentRule
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.google.common.truth.Truth
@@ -62,6 +62,6 @@ class ShellTransitionTraceParserTest {
     }
 
     companion object {
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

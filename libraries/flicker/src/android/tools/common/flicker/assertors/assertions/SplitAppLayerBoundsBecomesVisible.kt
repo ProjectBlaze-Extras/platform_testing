@@ -17,24 +17,20 @@
 package android.tools.common.flicker.assertors.assertions
 
 import android.tools.common.datatypes.Region
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.ComponentTemplate
-import android.tools.common.flicker.assertors.Components
+import android.tools.common.flicker.config.splitscreen.Components.SPLIT_SCREEN_DIVIDER
 import android.tools.common.flicker.subject.layers.LayerTraceEntrySubject
 import android.tools.common.flicker.subject.layers.LayersTraceSubject
-import android.tools.common.flicker.subject.wm.WindowManagerTraceSubject
 import android.tools.common.traces.component.IComponentMatcher
 
 class SplitAppLayerBoundsBecomesVisible(
     private val component: ComponentTemplate,
     val isPrimaryApp: Boolean
 ) : AssertionTemplateWithComponent(component) {
-    override fun doEvaluate(
-        scenarioInstance: IScenarioInstance,
-        wmSubject: WindowManagerTraceSubject,
-        layerSubject: LayersTraceSubject
-    ) {
-        val splitscreenDivider = Components.SPLIT_SCREEN_DIVIDER.build(scenarioInstance)
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+        val splitScreenDivider = SPLIT_SCREEN_DIVIDER.build(scenarioInstance)
         val app = component.build(scenarioInstance)
 
         val landscapePosLeft: Boolean
@@ -48,86 +44,88 @@ class SplitAppLayerBoundsBecomesVisible(
             portraitPosTop = true
         }
 
-        layerSubject
-            .notContains(splitscreenDivider.or(app), isOptional = true)
-            .then()
-            .isInvisible(splitscreenDivider.or(app))
-            .then()
-            .splitAppLayerBoundsSnapToDivider(
-                app,
-                splitscreenDivider,
-                landscapePosLeft,
-                portraitPosTop
-            )
-            .forAllEntries()
+        flicker.assertLayers {
+            notContains(splitScreenDivider.or(app), isOptional = true)
+                .then()
+                .isInvisible(splitScreenDivider.or(app))
+                .then()
+                .splitAppLayerBoundsSnapToDivider(
+                    app,
+                    splitScreenDivider,
+                    landscapePosLeft,
+                    portraitPosTop
+                )
+        }
     }
-}
 
-fun LayersTraceSubject.splitAppLayerBoundsSnapToDivider(
-    component: IComponentMatcher,
-    splitscreenDivider: IComponentMatcher,
-    landscapePosLeft: Boolean,
-    portraitPosTop: Boolean
-): LayersTraceSubject {
-    return invoke("splitAppLayerBoundsSnapToDivider") {
-        it.splitAppLayerBoundsSnapToDivider(
-            component,
-            splitscreenDivider,
-            landscapePosLeft,
-            portraitPosTop
-        )
-    }
-}
+    companion object {
+        fun LayersTraceSubject.splitAppLayerBoundsSnapToDivider(
+            component: IComponentMatcher,
+            splitScreenDivider: IComponentMatcher,
+            landscapePosLeft: Boolean,
+            portraitPosTop: Boolean
+        ): LayersTraceSubject {
+            return invoke("splitAppLayerBoundsSnapToDivider") {
+                it.splitAppLayerBoundsSnapToDivider(
+                    component,
+                    splitScreenDivider,
+                    landscapePosLeft,
+                    portraitPosTop
+                )
+            }
+        }
 
-fun LayerTraceEntrySubject.splitAppLayerBoundsSnapToDivider(
-    component: IComponentMatcher,
-    splitscreenDivider: IComponentMatcher,
-    landscapePosLeft: Boolean,
-    portraitPosTop: Boolean
-): LayerTraceEntrySubject {
-    val activeDisplay =
-        this.entry.displays.firstOrNull { it.isOn && !it.isVirtual }
-            ?: error("No non-virtual and on display found")
+        private fun LayerTraceEntrySubject.splitAppLayerBoundsSnapToDivider(
+            component: IComponentMatcher,
+            splitScreenDivider: IComponentMatcher,
+            landscapePosLeft: Boolean,
+            portraitPosTop: Boolean
+        ): LayerTraceEntrySubject {
+            val activeDisplay =
+                this.entry.displays.firstOrNull { it.isOn && !it.isVirtual }
+                    ?: error("No non-virtual and on display found")
 
-    return invoke {
-        val dividerRegion =
-            layer(splitscreenDivider)?.visibleRegion?.region
-                ?: error("$splitscreenDivider component not found")
-        visibleRegion(component)
-            .coversAtMost(
-                if (activeDisplay.bounds.width > activeDisplay.bounds.height) {
-                    if (landscapePosLeft) {
-                        Region.from(
-                            0,
-                            0,
-                            (dividerRegion.bounds.left + dividerRegion.bounds.right) / 2,
-                            activeDisplay.bounds.bottom
-                        )
-                    } else {
-                        Region.from(
-                            (dividerRegion.bounds.left + dividerRegion.bounds.right) / 2,
-                            0,
-                            activeDisplay.bounds.right,
-                            activeDisplay.bounds.bottom
-                        )
-                    }
-                } else {
-                    if (portraitPosTop) {
-                        Region.from(
-                            0,
-                            0,
-                            activeDisplay.bounds.right,
-                            (dividerRegion.bounds.top + dividerRegion.bounds.bottom) / 2
-                        )
-                    } else {
-                        Region.from(
-                            0,
-                            (dividerRegion.bounds.top + dividerRegion.bounds.bottom) / 2,
-                            activeDisplay.bounds.right,
-                            activeDisplay.bounds.bottom
-                        )
-                    }
-                }
-            )
+            return invoke {
+                val dividerRegion =
+                    layer(splitScreenDivider)?.visibleRegion?.region
+                        ?: error("$splitScreenDivider component not found")
+                visibleRegion(component)
+                    .coversAtMost(
+                        if (activeDisplay.bounds.width > activeDisplay.bounds.height) {
+                            if (landscapePosLeft) {
+                                Region.from(
+                                    0,
+                                    0,
+                                    (dividerRegion.bounds.left + dividerRegion.bounds.right) / 2,
+                                    activeDisplay.bounds.bottom
+                                )
+                            } else {
+                                Region.from(
+                                    (dividerRegion.bounds.left + dividerRegion.bounds.right) / 2,
+                                    0,
+                                    activeDisplay.bounds.right,
+                                    activeDisplay.bounds.bottom
+                                )
+                            }
+                        } else {
+                            if (portraitPosTop) {
+                                Region.from(
+                                    0,
+                                    0,
+                                    activeDisplay.bounds.right,
+                                    (dividerRegion.bounds.top + dividerRegion.bounds.bottom) / 2
+                                )
+                            } else {
+                                Region.from(
+                                    0,
+                                    (dividerRegion.bounds.top + dividerRegion.bounds.bottom) / 2,
+                                    activeDisplay.bounds.right,
+                                    activeDisplay.bounds.bottom
+                                )
+                            }
+                        }
+                    )
+            }
+        }
     }
 }

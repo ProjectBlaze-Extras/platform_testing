@@ -16,9 +16,9 @@
 
 package android.tools.common.flicker.assertors.assertions
 
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.ComponentTemplate
-import android.tools.common.flicker.subject.wm.WindowManagerTraceSubject
 
 /**
  * Checks that [component] window is pinned and visible at the start and then becomes unpinned and
@@ -27,21 +27,17 @@ import android.tools.common.flicker.subject.wm.WindowManagerTraceSubject
 class PipWindowBecomesInvisible(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(
-        scenarioInstance: IScenarioInstance,
-        wmSubject: WindowManagerTraceSubject
-    ) {
-        val appComponent = component
-        wmSubject
-            .invoke("hasPipWindow") {
-                it.isPinned(appComponent.build(scenarioInstance))
-                    .isAppWindowVisible(appComponent.build(scenarioInstance))
-            }
-            .then()
-            .invoke("!hasPipWindow") {
-                it.isNotPinned(appComponent.build(scenarioInstance))
-                    .isAppWindowInvisible(appComponent.build(scenarioInstance))
-            }
-            .forAllEntries()
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+        flicker.assertWm {
+            invoke("hasPipWindow") {
+                    it.isPinned(component.build(scenarioInstance))
+                        .isAppWindowVisible(component.build(scenarioInstance))
+                }
+                .then()
+                .invoke("!hasPipWindow") {
+                    it.isNotPinned(component.build(scenarioInstance))
+                        .isAppWindowInvisible(component.build(scenarioInstance))
+                }
+        }
     }
 }

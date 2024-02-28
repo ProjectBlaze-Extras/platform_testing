@@ -23,7 +23,7 @@ import android.tools.common.flicker.subject.layers.LayerTraceEntrySubject
 import android.tools.common.flicker.subject.layers.LayersTraceSubject
 import android.tools.common.flicker.subject.wm.WindowManagerStateSubject
 import android.tools.common.flicker.subject.wm.WindowManagerTraceSubject
-import android.tools.common.io.IReader
+import android.tools.common.io.Reader
 import android.tools.common.traces.events.FocusEvent
 import android.tools.common.traces.surfaceflinger.LayerTraceEntry
 import android.tools.common.traces.surfaceflinger.LayersTrace
@@ -36,7 +36,7 @@ import kotlin.reflect.KClass
  *
  * @param resultReader to read the result artifacts
  */
-open class SubjectsParser(private val resultReader: IReader) {
+open class SubjectsParser(private val resultReader: Reader) {
     fun getSubjectOfType(
         tag: String,
         expectedSubjectClass: KClass<out FlickerSubject>

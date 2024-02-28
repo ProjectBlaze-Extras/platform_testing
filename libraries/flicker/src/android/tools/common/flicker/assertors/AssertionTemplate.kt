@@ -16,102 +16,44 @@
 
 package android.tools.common.flicker.assertors
 
-import android.tools.common.flicker.AssertionInvocationGroup
-import android.tools.common.flicker.AssertionInvocationGroup.NON_BLOCKING
-import android.tools.common.flicker.IScenarioInstance
-import android.tools.common.flicker.subject.events.EventLogSubject
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
-import android.tools.common.flicker.subject.wm.WindowManagerTraceSubject
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.AssertionData
+import android.tools.common.flicker.assertions.FlickerTest
+import android.tools.common.flicker.assertions.ServiceFlickerTest
+import android.tools.common.flicker.assertions.SubjectsParser
 
 /** Base class for a FaaS assertion */
-abstract class AssertionTemplate : IAssertionTemplate {
-    override val assertionName = "${this@AssertionTemplate::class.simpleName}"
-    private var stabilityGroup: AssertionInvocationGroup = NON_BLOCKING
+abstract class AssertionTemplate(name: String? = null) {
+    protected open val name =
+        this::class.simpleName
+            ?: name ?: error("Must provide a name to assertions when using anonymous classes.")
+    val id
+        get() = AssertionId(name)
 
-    override fun createAssertion(scenarioInstance: IScenarioInstance): IFaasAssertion {
-        return object : IFaasAssertion {
-            override val name = "${scenarioInstance.type}::${this@AssertionTemplate.assertionName}"
+    fun qualifiedAssertionName(scenarioInstance: ScenarioInstance): String =
+        "${scenarioInstance.type}::$name"
 
-            override val stabilityGroup
-                get() = this@AssertionTemplate.stabilityGroup
+    /** Evaluates assertions */
+    abstract fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest)
 
-            override fun evaluate(): AssertionResult {
-                val wmTraceSubject =
-                    scenarioInstance.reader.readWmTrace()?.let {
-                        WindowManagerTraceSubject(it, scenarioInstance.reader)
-                    }
-                val layersTraceSubject =
-                    scenarioInstance.reader.readLayersTrace()?.let {
-                        LayersTraceSubject(it, scenarioInstance.reader)
-                    }
-                val eventLogSubject =
-                    scenarioInstance.reader.readEventLogTrace()?.let {
-                        EventLogSubject(it, scenarioInstance.reader)
-                    }
+    fun createAssertions(scenarioInstance: ScenarioInstance): Collection<AssertionData> {
+        val flicker = ServiceFlickerTest()
 
-                var assertionError: Throwable? = null
-                try {
-                    if (wmTraceSubject !== null) {
-                        doEvaluate(scenarioInstance, wmTraceSubject)
+        val mainBlockAssertions = mutableListOf<AssertionData>()
+        try {
+            doEvaluate(scenarioInstance, flicker)
+        } catch (e: Throwable) {
+            // Any failure that occurred outside of the Flicker assertion blocks
+            mainBlockAssertions.add(
+                object : AssertionData {
+                    override fun checkAssertion(run: SubjectsParser) {
+                        throw e
                     }
-                    if (layersTraceSubject !== null) {
-                        doEvaluate(scenarioInstance, layersTraceSubject)
-                    }
-                    if (wmTraceSubject !== null && layersTraceSubject !== null) {
-                        doEvaluate(scenarioInstance, wmTraceSubject, layersTraceSubject)
-                    }
-                    if (eventLogSubject != null) {
-                        doEvaluate(scenarioInstance, eventLogSubject)
-                    }
-                } catch (e: Throwable) {
-                    assertionError = e
                 }
-
-                return AssertionResult(this, assertionError)
-            }
+            )
         }
-    }
 
-    /**
-     * Evaluates assertions that require only WM traces. NOTE: Will not run if WM trace is not
-     * available.
-     */
-    protected open fun doEvaluate(
-        scenarioInstance: IScenarioInstance,
-        wmSubject: WindowManagerTraceSubject
-    ) {
-        // Does nothing, unless overridden
-    }
-
-    /**
-     * Evaluates assertions that require only SF traces. NOTE: Will not run if layers trace is not
-     * available.
-     */
-    protected open fun doEvaluate(
-        scenarioInstance: IScenarioInstance,
-        layerSubject: LayersTraceSubject
-    ) {
-        // Does nothing, unless overridden
-    }
-
-    /**
-     * Evaluates assertions that require both SF and WM traces. NOTE: Will not run if any of the
-     * traces are not available.
-     */
-    protected open fun doEvaluate(
-        scenarioInstance: IScenarioInstance,
-        wmSubject: WindowManagerTraceSubject,
-        layerSubject: LayersTraceSubject
-    ) {
-        // Does nothing, unless overridden
-    }
-
-    /**
-     * Evaluates assertions that require the vent log. NOTE: Will not run if the event log traces is
-     * not available.
-     */
-    protected open fun doEvaluate(scenarioInstance: IScenarioInstance, eventLog: EventLogSubject) {
-        // Does nothing, unless overridden
+        return flicker.assertions + mainBlockAssertions
     }
 
     override fun equals(other: Any?): Boolean {
@@ -123,8 +65,11 @@ abstract class AssertionTemplate : IAssertionTemplate {
     }
 
     override fun hashCode(): Int {
-        var result = stabilityGroup.hashCode()
-        result = 31 * result + assertionName.hashCode()
-        return result
+        return id.hashCode()
     }
 }
+
+data class Assertion(
+    val flickerAssertions: List<AssertionData>,
+    val genericAssertions: List<Throwable>
+)

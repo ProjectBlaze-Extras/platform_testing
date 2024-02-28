@@ -18,27 +18,7 @@
 
 package android.tools.device.traces
 
-import android.os.Trace
-import android.tools.common.LoggerBuilder
-import android.util.Log
-
 internal const val LOG_TAG = "FLICKER-PARSER"
-
-val ANDROID_LOGGER =
-    LoggerBuilder()
-        .setD { tag, msg -> Log.d(tag, msg) }
-        .setI { tag, msg -> Log.i(tag, msg) }
-        .setW { tag, msg -> Log.w(tag, msg) }
-        .setE { tag, msg, error -> Log.e(tag, msg, error) }
-        .setOnTracing { name, predicate ->
-            try {
-                Trace.beginSection(name)
-                predicate()
-            } finally {
-                Trace.endSection()
-            }
-        }
-        .build()
 
 val TRACE_CONFIG_REQUIRE_CHANGES =
     TraceConfigs(

@@ -17,5 +17,5 @@
 package android.tools.common.flicker.config.settings
 
 internal object Settings {
-    val SCENARIOS = listOf(SettingsPageScroll(), SettingsSlider(), SettingsToggle())
+    val SCENARIOS = listOf(SettingsPageScroll, SettingsSlider, SettingsToggle)
 }

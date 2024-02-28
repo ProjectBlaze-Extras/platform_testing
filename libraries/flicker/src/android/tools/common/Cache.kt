@@ -22,18 +22,18 @@ object Cache {
     data class Backup(val cache: MutableMap<Any, Any>)
 
     fun <T : Any> get(element: T): T {
-        return Cache.cache.getOrPut(element) { element } as T
+        return cache.getOrPut(element) { element } as T
     }
 
     fun clear() {
-        Cache.cache = mutableMapOf<Any, Any>()
+        cache = mutableMapOf()
     }
 
     fun backup(): Backup {
         return Backup(cache.toMutableMap())
     }
 
-    fun restore(backup: Cache.Backup) {
+    fun restore(backup: Backup) {
         cache = backup.cache
     }
 }

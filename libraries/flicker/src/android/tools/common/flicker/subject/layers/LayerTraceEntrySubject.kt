@@ -24,7 +24,7 @@ import android.tools.common.flicker.subject.exceptions.IncorrectVisibilityExcept
 import android.tools.common.flicker.subject.exceptions.InvalidElementException
 import android.tools.common.flicker.subject.exceptions.InvalidPropertyException
 import android.tools.common.flicker.subject.region.RegionSubject
-import android.tools.common.io.IReader
+import android.tools.common.io.Reader
 import android.tools.common.traces.component.ComponentSplashScreenMatcher
 import android.tools.common.traces.component.IComponentMatcher
 import android.tools.common.traces.component.IComponentNameMatcher
@@ -58,7 +58,7 @@ import android.tools.common.traces.surfaceflinger.LayersTrace
  */
 class LayerTraceEntrySubject(
     val entry: LayerTraceEntry,
-    override val reader: IReader? = null,
+    override val reader: Reader? = null,
     val trace: LayersTrace? = null,
 ) : FlickerSubject(), ILayerSubject<LayerTraceEntrySubject, RegionSubject> {
     override val timestamp = entry.timestamp

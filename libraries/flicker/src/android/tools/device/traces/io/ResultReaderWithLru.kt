@@ -17,7 +17,7 @@
 package android.tools.device.traces.io
 
 import android.tools.common.Timestamp
-import android.tools.common.io.IReader
+import android.tools.common.io.Reader
 import android.tools.common.io.ResultArtifactDescriptor
 import android.tools.common.io.TraceType
 import android.tools.common.io.TransitionTimeRange
@@ -38,7 +38,7 @@ open class ResultReaderWithLru(
     result: IResultData,
     traceConfig: TraceConfigs,
     private val reader: ResultReader = ResultReader(result, traceConfig)
-) : IReader by reader {
+) : Reader by reader {
     /** {@inheritDoc} */
     @Throws(IOException::class)
     override fun readWmTrace(): WindowManagerTrace? {

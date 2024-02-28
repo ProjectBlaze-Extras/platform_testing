@@ -31,25 +31,25 @@ import kotlin.js.JsName
  */
 @JsExport
 class WindowState(
-    @JsName("attributes") val attributes: WindowLayoutParams,
+    val attributes: WindowLayoutParams,
     @JsName("displayId") val displayId: Int,
     @JsName("stackId") val stackId: Int,
     @JsName("layer") val layer: Int,
-    @JsName("isSurfaceShown") val isSurfaceShown: Boolean,
-    @JsName("windowType") val windowType: Int,
-    @JsName("requestedSize") val requestedSize: Size,
-    @JsName("surfacePosition") val surfacePosition: Rect?,
+    val isSurfaceShown: Boolean,
+    val windowType: Int,
+    val requestedSize: Size,
+    val surfacePosition: Rect?,
     @JsName("frame") val frame: Rect,
-    @JsName("containingFrame") val containingFrame: Rect,
+    val containingFrame: Rect,
     val parentFrame: Rect,
     val contentFrame: Rect,
     val contentInsets: Rect,
     val surfaceInsets: Rect,
     val givenContentInsets: Rect,
     @JsName("crop") val crop: Rect,
-    windowContainer: WindowContainer,
+    private val windowContainer: IWindowContainer,
     val isAppWindow: Boolean
-) : WindowContainer(windowContainer, getWindowTitle(windowContainer.title)) {
+) : IWindowContainer by windowContainer {
     override val isVisible: Boolean = windowContainer.isVisible && attributes.alpha > 0
 
     override val isFullscreen: Boolean
@@ -78,7 +78,6 @@ class WindowState(
         if (this === other) return true
         if (other !is WindowState) return false
 
-        if (name != other.name) return false
         if (attributes != other.attributes) return false
         if (displayId != other.displayId) return false
         if (stackId != other.stackId) return false
@@ -95,6 +94,7 @@ class WindowState(
         if (surfaceInsets != other.surfaceInsets) return false
         if (givenContentInsets != other.givenContentInsets) return false
         if (crop != other.crop) return false
+        if (windowContainer != other.windowContainer) return false
         if (isAppWindow != other.isAppWindow) return false
 
         return true
@@ -107,6 +107,8 @@ class WindowState(
         result = 31 * result + layer
         result = 31 * result + isSurfaceShown.hashCode()
         result = 31 * result + windowType
+        result = 31 * result + requestedSize.hashCode()
+        result = 31 * result + (surfacePosition?.hashCode() ?: 0)
         result = 31 * result + frame.hashCode()
         result = 31 * result + containingFrame.hashCode()
         result = 31 * result + parentFrame.hashCode()
@@ -115,26 +117,14 @@ class WindowState(
         result = 31 * result + surfaceInsets.hashCode()
         result = 31 * result + givenContentInsets.hashCode()
         result = 31 * result + crop.hashCode()
+        result = 31 * result + windowContainer.hashCode()
         result = 31 * result + isAppWindow.hashCode()
+        result = 31 * result + isVisible.hashCode()
         result = 31 * result + isStartingWindow.hashCode()
         result = 31 * result + isExitingWindow.hashCode()
         result = 31 * result + isDebuggerWindow.hashCode()
         result = 31 * result + isValidNavBarType.hashCode()
         result = 31 * result + frameRegion.hashCode()
         return result
-    }
-
-    companion object {
-        @JsName("getWindowTitle")
-        private fun getWindowTitle(title: String): String {
-            return when {
-                // Existing code depends on the prefix being removed
-                title.startsWith(PlatformConsts.STARTING_WINDOW_PREFIX) ->
-                    title.substring(PlatformConsts.STARTING_WINDOW_PREFIX.length)
-                title.startsWith(PlatformConsts.DEBUGGER_WINDOW_PREFIX) ->
-                    title.substring(PlatformConsts.DEBUGGER_WINDOW_PREFIX.length)
-                else -> title
-            }
-        }
     }
 }

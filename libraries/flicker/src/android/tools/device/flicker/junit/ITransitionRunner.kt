@@ -16,9 +16,9 @@
 
 package android.tools.device.flicker.junit
 
-import android.tools.common.IScenario
+import android.tools.common.Scenario
 import org.junit.runner.Description
 
 interface ITransitionRunner {
-    fun runTransition(scenario: IScenario, test: Any, description: Description?)
+    fun runTransition(scenario: Scenario, test: Any, description: Description?)
 }

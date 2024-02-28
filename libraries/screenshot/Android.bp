@@ -25,7 +25,8 @@ android_test {
         enabled: false
     },
     srcs: [
-        "src/**/*.kt"
+        "src/**/*.java",
+        "src/**/*.kt",
     ],
     static_libs: [
         "androidx.test.core",
@@ -52,6 +53,7 @@ android_library {
         enabled: false
     },
     srcs: [
+        "src/main/java/platform/test/screenshot/**/*.java",
         "src/main/java/platform/test/screenshot/**/*.kt",
     ],
     static_libs: [

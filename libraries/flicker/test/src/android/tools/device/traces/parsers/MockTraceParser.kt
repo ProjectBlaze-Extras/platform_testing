@@ -16,8 +16,8 @@
 
 package android.tools.device.traces.parsers
 
-import android.tools.common.CrossPlatform
 import android.tools.common.Timestamp
+import android.tools.common.Timestamps
 import android.tools.common.parsers.AbstractTraceParser
 import android.tools.common.traces.wm.WindowManagerState
 import android.tools.common.traces.wm.WindowManagerTrace
@@ -36,6 +36,6 @@ class MockTraceParser(private val data: WindowManagerTrace) :
     override fun getEntries(input: WindowManagerTrace): List<WindowManagerState> =
         input.entries.toList()
     override fun getTimestamp(entry: WindowManagerState): Timestamp =
-        CrossPlatform.timestamp.from(elapsedNanos = entry.elapsedTimestamp)
+        Timestamps.from(elapsedNanos = entry.elapsedTimestamp)
     override fun onBeforeParse(input: WindowManagerTrace) {}
 }

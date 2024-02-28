@@ -16,8 +16,8 @@
 
 package android.tools.device.traces.monitors.wm
 
-import android.tools.common.CrossPlatform
 import android.tools.common.FLICKER_TAG
+import android.tools.common.Logger
 import android.tools.common.io.TraceType
 import android.tools.common.traces.wm.TransitionsTrace
 import android.tools.device.traces.executeShellCommand
@@ -33,14 +33,14 @@ open class ShellTransitionTraceMonitor : TraceMonitor() {
     override fun doStart() {
         require(!isEnabled) { "Trace already running" }
         isEnabled = true
-        CrossPlatform.log.d(FLICKER_TAG, "Running '$START_TRACING_COMMAND'")
+        Logger.d(FLICKER_TAG, "Running '$START_TRACING_COMMAND'")
         executeShellCommand(START_TRACING_COMMAND)
     }
 
     override fun doStop(): File {
         require(isEnabled) { "Trace not running" }
         isEnabled = false
-        CrossPlatform.log.d(FLICKER_TAG, "Running '$START_TRACING_COMMAND'")
+        Logger.d(FLICKER_TAG, "Running '$START_TRACING_COMMAND'")
         executeShellCommand(STOP_TRACING_COMMAND)
 
         return TRACE_DIR.resolve(traceType.fileName)

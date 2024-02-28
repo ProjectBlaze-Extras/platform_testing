@@ -45,8 +45,8 @@ class Task(
     val createdByOrganizer: Boolean,
     val minWidth: Int,
     val minHeight: Int,
-    windowContainer: WindowContainer
-) : WindowContainer(windowContainer) {
+    private val windowContainer: IWindowContainer
+) : IWindowContainer by windowContainer {
     override val isVisible: Boolean = false
     override val name: String = taskId.toString()
     override val isEmpty: Boolean
@@ -141,6 +141,7 @@ class Task(
         if (orientation != other.orientation) return false
         if (title != other.title) return false
         if (token != other.token) return false
+        if (windowContainer != other.windowContainer) return false
 
         return true
     }
@@ -166,6 +167,7 @@ class Task(
         result = 31 * result + minHeight
         result = 31 * result + isVisible.hashCode()
         result = 31 * result + name.hashCode()
+        result = 31 * result + windowContainer.hashCode()
         return result
     }
 }

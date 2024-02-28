@@ -29,6 +29,7 @@ android_test {
         "app-helpers-auto-interfaces",
         "ub-uiautomator",
         "hamcrest-library",
+        "platform-test-junit-rules",
         "platform-test-options",
     ],
     srcs: ["src/**/*.java"],

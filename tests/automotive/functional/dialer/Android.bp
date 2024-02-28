@@ -23,6 +23,7 @@ android_test {
         "androidx.test.rules",
         "automotive-dial-app-helper",
         "automotive-vehiclehardkeys-app-helper",
+        "platform-test-junit-rules",
         "platform-test-options",
     ],
     srcs: ["src/**/*.java"],

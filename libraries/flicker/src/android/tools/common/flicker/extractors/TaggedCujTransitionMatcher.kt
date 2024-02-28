@@ -20,13 +20,13 @@ import android.tools.common.flicker.extractors.TransitionTransforms.inCujRangeFi
 import android.tools.common.flicker.extractors.TransitionTransforms.mergeTrampolineTransitions
 import android.tools.common.flicker.extractors.TransitionTransforms.noOpTransitionsTransform
 import android.tools.common.flicker.extractors.TransitionTransforms.permissionDialogFilter
-import android.tools.common.io.IReader
+import android.tools.common.io.Reader
 import android.tools.common.traces.events.Cuj
 import android.tools.common.traces.wm.Transition
 import android.tools.common.traces.wm.TransitionType
 
 typealias TransitionsTransform =
-    (transitions: List<Transition>, cujEntry: Cuj, reader: IReader) -> List<Transition>
+    (transitions: List<Transition>, cujEntry: Cuj, reader: Reader) -> List<Transition>
 
 class TaggedCujTransitionMatcher(
     private val mainTransform: TransitionsTransform = noOpTransitionsTransform,
@@ -42,8 +42,8 @@ class TaggedCujTransitionMatcher(
             mergeTrampolineTransitions,
             finalTransform
         )
-) {
-    fun getMatches(reader: IReader, cujEntry: Cuj): Collection<Transition> {
+) : TransitionMatcher {
+    override fun getMatches(reader: Reader, cujEntry: Cuj): Collection<Transition> {
         val transitionsTrace = reader.readTransitionsTrace() ?: error("Missing transitions trace")
 
         val completeTransitions = transitionsTrace.entries.filter { !it.isIncomplete }
@@ -142,7 +142,7 @@ object TransitionTransforms {
 
     val noOpTransitionsTransform: TransitionsTransform = { transitions, _, _ -> transitions }
 
-    private fun isPermissionDialogOpenTransition(transition: Transition, reader: IReader): Boolean {
+    private fun isPermissionDialogOpenTransition(transition: Transition, reader: Reader): Boolean {
         if (transition.changes.size != 1) {
             return false
         }
@@ -165,7 +165,7 @@ object TransitionTransforms {
     private fun isTrampolinedOpenTransition(
         firstTransition: Transition,
         secondTransition: Transition,
-        reader: IReader
+        reader: Reader
     ): Boolean {
         val candidateTaskLayers =
             firstTransition.changes

@@ -25,7 +25,8 @@ import kotlin.js.JsExport
  * Java/Android functionality
  */
 @JsExport
-class RootWindowContainer(windowContainer: WindowContainer) : WindowContainer(windowContainer) {
+class RootWindowContainer(private val windowContainer: IWindowContainer) :
+    IWindowContainer by windowContainer {
     override fun toString(): String {
         return "${this::class.simpleName}: {$token $title}"
     }

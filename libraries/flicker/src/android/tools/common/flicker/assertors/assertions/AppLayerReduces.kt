@@ -16,19 +16,21 @@
 
 package android.tools.common.flicker.assertors.assertions
 
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.ComponentTemplate
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
 
 /** Checks that the visible region of [component] always reduces during the animation */
 class AppLayerReduces(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(scenarioInstance: IScenarioInstance, layerSubject: LayersTraceSubject) {
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
         val layerMatcher = component.build(scenarioInstance)
-        val layerList = layerSubject.layers { layerMatcher.layerMatchesAnyOf(it) && it.isVisible }
-        layerList.zipWithNext { previous, current ->
-            current.visibleRegion.coversAtMost(previous.visibleRegion.region)
+        flicker.assertLayers {
+            val layerList = layers { layerMatcher.layerMatchesAnyOf(it) && it.isVisible }
+            layerList.zipWithNext { previous, current ->
+                current.visibleRegion.coversAtMost(previous.visibleRegion.region)
+            }
         }
     }
 }

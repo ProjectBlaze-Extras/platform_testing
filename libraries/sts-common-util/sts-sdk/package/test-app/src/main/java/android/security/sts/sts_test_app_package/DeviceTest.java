@@ -18,56 +18,82 @@ package android.security.sts.sts_test_app_package;
 
 import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assume.assumeNoException;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.util.Log;
 
-import androidx.annotation.IntegerRes;
-import androidx.annotation.StringRes;
-import androidx.test.runner.AndroidJUnit4;
-import androidx.test.uiautomator.UiDevice;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+/**
+ * An example device test that starts an activity and uses broadcasts to wait for the artifact
+ * proving vulnerability
+ */
 @RunWith(AndroidJUnit4.class)
 public class DeviceTest {
+    private static final String TAG = DeviceTest.class.getSimpleName();
+    Context mContext;
 
-    Context mAppContext;
+    /** Test broadcast action */
+    public static final String ACTION_BROADCAST = "action_security_test_broadcast";
+    /** Broadcast intent extra name for artifacts */
+    public static final String INTENT_ARTIFACT = "artifact";
 
-    int getInteger(@IntegerRes int resId) {
-        return mAppContext.getResources().getInteger(resId);
-    }
-
-    String getString(@StringRes int resId) {
-        return mAppContext.getResources().getString(resId);
-    }
-
+    /** Device test */
     @Test
-    public void testDeviceSideMethod() {
+    public void testDeviceSideMethod() throws Exception {
+        mContext = getApplicationContext();
+
+        AtomicReference<String> actual = new AtomicReference<>();
+        final Semaphore broadcastReceived = new Semaphore(0);
+        BroadcastReceiver broadcastReceiver =
+                new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        try {
+                            if (!intent.getAction().equals(ACTION_BROADCAST)) {
+                                Log.i(
+                                        TAG,
+                                        String.format(
+                                                "got a broadcast that we didn't expect: %s",
+                                                intent.getAction()));
+                            }
+                            actual.set(intent.getStringExtra(INTENT_ARTIFACT));
+                            broadcastReceived.release();
+                        } catch (Exception e) {
+                            Log.e(TAG, "got an exception when handling broadcast", e);
+                        }
+                    }
+                };
+        IntentFilter filter = new IntentFilter(); // see if there's a shorthand
+        filter.addAction(ACTION_BROADCAST); // what does this return?
+        mContext.registerReceiver(broadcastReceiver, filter);
+
+        // start the target app
         try {
-            mAppContext = getApplicationContext();
-            UiDevice device = UiDevice.getInstance(getInstrumentation());
-            device.executeShellCommand(
-                    "am start -n com.android.nfc/.handover.ConfirmConnectActivity");
-            long startTime = System.currentTimeMillis();
-            while ((System.currentTimeMillis() - startTime)
-                    < getInteger(R.integer.MAX_WAIT_TIME_MS)) {
-                SharedPreferences sh =
-                        mAppContext.getSharedPreferences(
-                                getString(R.string.SHARED_PREFERENCE), Context.MODE_APPEND);
-                int result =
-                        sh.getInt(getString(R.string.RESULT_KEY), getInteger(R.integer.DEFAULT));
-                assertNotEquals(
-                        "NFC Android App broadcasts Bluetooth device information!",
-                        result,
-                        getInteger(R.integer.FAIL));
-                Thread.sleep(getInteger(R.integer.SLEEP_TIME_MS));
-            }
-        } catch (Exception e) {
-            assumeNoException(e);
+            Log.d(TAG, "starting local activity");
+            Intent newActivityIntent = new Intent(mContext, PocActivity.class);
+            newActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            // this could be startActivityForResult, but is generic for illustrative purposes
+            mContext.startActivity(newActivityIntent);
+        } finally {
+            getInstrumentation().getUiAutomation().dropShellPermissionIdentity();
         }
+        assertTrue(
+                "Timed out when getting result from other activity",
+                broadcastReceived.tryAcquire(/* TIMEOUT_MS */ 5000, TimeUnit.MILLISECONDS));
+        assertEquals("The target artifact should have been 'secure'", "secure", actual.get());
     }
 }

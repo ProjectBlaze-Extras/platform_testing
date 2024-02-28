@@ -17,5 +17,5 @@
 package android.tools.common.flicker.config.wallpaper
 
 internal object Wallpaper {
-    val SCENARIOS = listOf(WallpaperTransition())
+    val SCENARIOS = listOf(WallpaperTransition)
 }

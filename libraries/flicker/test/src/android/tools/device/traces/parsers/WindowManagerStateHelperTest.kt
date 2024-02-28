@@ -17,10 +17,9 @@
 package android.tools.device.traces.parsers
 
 import android.annotation.SuppressLint
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.common.Cache
-import android.tools.common.CrossPlatform
 import android.tools.common.Rotation
+import android.tools.common.Timestamps
 import android.tools.common.datatypes.ActiveBuffer
 import android.tools.common.datatypes.Color
 import android.tools.common.datatypes.Matrix33
@@ -39,6 +38,7 @@ import android.tools.common.traces.wm.WindowManagerState
 import android.tools.common.traces.wm.WindowManagerTrace
 import android.tools.getWmDumpReaderFromAsset
 import android.tools.getWmTraceReaderFromAsset
+import android.tools.rules.CleanFlickerEnvironmentRule
 import androidx.test.filters.FlakyTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth
@@ -342,8 +342,7 @@ class WindowManagerStateHelperTest {
         val trace = reader.readWmTrace() ?: error("Unable to read WM trace")
         val initialTimestamp = 69443918698679
         val supplier = trace.asSupplier(startingTimestamp = initialTimestamp)
-        val initialEntry =
-            trace.getEntryExactlyAt(CrossPlatform.timestamp.from(elapsedNanos = initialTimestamp))
+        val initialEntry = trace.getEntryExactlyAt(Timestamps.from(elapsedNanos = initialTimestamp))
         val helper =
             TestWindowManagerStateHelper(
                 initialEntry,
@@ -411,6 +410,6 @@ class WindowManagerStateHelperTest {
     }
 
     companion object {
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

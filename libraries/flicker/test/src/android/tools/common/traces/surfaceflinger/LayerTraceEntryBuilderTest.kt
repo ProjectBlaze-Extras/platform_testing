@@ -16,8 +16,7 @@
 
 package android.tools.common.traces.surfaceflinger
 
-import android.tools.CleanFlickerEnvironmentRule
-import android.tools.common.CrossPlatform
+import android.tools.common.Timestamps
 import android.tools.common.datatypes.ActiveBuffer
 import android.tools.common.datatypes.Color
 import android.tools.common.datatypes.Rect
@@ -25,6 +24,7 @@ import android.tools.common.datatypes.RectF
 import android.tools.common.datatypes.Region
 import android.tools.common.datatypes.Size
 import android.tools.common.traces.surfaceflinger.Display.Companion.BLANK_LAYER_STACK
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
 import org.junit.ClassRule
 import org.junit.FixMethodOrder
@@ -51,8 +51,7 @@ class LayerTraceEntryBuilderTest {
         Truth.assertThat(entry.elapsedTimestamp).isEqualTo(100)
         Truth.assertThat(entry.clockTimestamp).isEqualTo(600)
 
-        Truth.assertThat(entry.timestamp.elapsedNanos)
-            .isEqualTo(CrossPlatform.timestamp.empty().elapsedNanos)
+        Truth.assertThat(entry.timestamp.elapsedNanos).isEqualTo(Timestamps.empty().elapsedNanos)
         Truth.assertThat(entry.timestamp.systemUptimeNanos).isEqualTo(100)
         Truth.assertThat(entry.timestamp.unixNanos).isEqualTo(600)
     }
@@ -69,11 +68,9 @@ class LayerTraceEntryBuilderTest {
         Truth.assertThat(entry.elapsedTimestamp).isEqualTo(100)
         Truth.assertThat(entry.clockTimestamp).isEqualTo(null)
 
-        Truth.assertThat(entry.timestamp.elapsedNanos)
-            .isEqualTo(CrossPlatform.timestamp.empty().elapsedNanos)
+        Truth.assertThat(entry.timestamp.elapsedNanos).isEqualTo(Timestamps.empty().elapsedNanos)
         Truth.assertThat(entry.timestamp.systemUptimeNanos).isEqualTo(100)
-        Truth.assertThat(entry.timestamp.unixNanos)
-            .isEqualTo(CrossPlatform.timestamp.empty().unixNanos)
+        Truth.assertThat(entry.timestamp.unixNanos).isEqualTo(Timestamps.empty().unixNanos)
     }
 
     @Test
@@ -147,6 +144,6 @@ class LayerTraceEntryBuilderTest {
     @Test fun keepsOffDisplays() {}
 
     companion object {
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

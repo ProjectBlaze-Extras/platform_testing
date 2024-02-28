@@ -16,7 +16,7 @@
 
 package android.tools.common.flicker.assertors.assertions
 
-import android.tools.common.flicker.assertors.Components
+import android.tools.common.flicker.config.common.Components.LAUNCHER
 
 /** Checks that [Components.LAUNCHER] starts on top and moves out of top during the transition */
-class LauncherWindowMovesOutOfTop : WindowMovesOutOfTop(Components.LAUNCHER)
+class LauncherWindowMovesOutOfTop : WindowMovesOutOfTop(LAUNCHER)

@@ -21,12 +21,13 @@ import android.platform.test.rule.Orientation.NATURAL
 import android.platform.test.rule.Orientation.PORTRAIT
 import android.platform.test.rule.RotationUtils.clearOrientationOverride
 import android.platform.test.rule.RotationUtils.setOrientationOverride
-import android.platform.test.util.HealthTestingUtils.waitForCondition
 import android.platform.test.util.HealthTestingUtils.waitForValueToSettle
+import android.platform.uiautomator_helpers.WaitUtils.ensureThat
 import android.util.Log
 import androidx.test.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.tapl.LauncherInstrumentation
+import java.time.Duration
 import org.junit.runner.Description
 
 /** Locks the orientation in Landscape before starting the test, and goes back to natural after. */
@@ -108,17 +109,28 @@ object RotationUtils {
      * takes care of cleaning the override. Those should be called only when the test needs to
      * change orientation in the middle.
      */
-    fun setOrientationOverride(orientation: Orientation) {
+    fun setOrientationOverride(
+        orientation: Orientation,
+        timeoutDuration: Duration = Duration.ofSeconds(10)
+    ) {
         val expectedOrientation =
             if (orientation == NATURAL) device.naturalOrientation else orientation
         launcher.setEnableRotation(true)
         if (device.stableOrientation == expectedOrientation) {
             return
         }
-        changeOrientation()
-        waitForCondition({ "Visible orientation did not become  ${expectedOrientation.name}" }) {
+
+        // Change orientation might be called soon before the device is unfolded, and lose its
+        // effect after unfold
+        ensureThat(
+            "orientation is $expectedOrientation",
+            timeout = timeoutDuration,
+            ignoreException = true
+        ) {
+            changeOrientation()
             device.stableOrientation == expectedOrientation
         }
+
         log("Rotation override set to ${expectedOrientation.name}")
     }
 

@@ -25,7 +25,8 @@ import kotlin.js.JsExport
  * Java/Android functionality
  */
 @JsExport
-class WindowToken(windowContainer: WindowContainer) : WindowContainer(windowContainer) {
+class WindowToken(private val windowContainer: IWindowContainer) :
+    IWindowContainer by windowContainer {
     override val isVisible: Boolean
         get() = false
     override fun toString(): String {
@@ -35,16 +36,13 @@ class WindowToken(windowContainer: WindowContainer) : WindowContainer(windowCont
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is WindowToken) return false
-        if (!super.equals(other)) return false
 
-        if (isVisible != other.isVisible) return false
+        if (windowContainer != other.windowContainer) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = super.hashCode()
-        result = 31 * result + isVisible.hashCode()
-        return result
+        return windowContainer.hashCode()
     }
 }

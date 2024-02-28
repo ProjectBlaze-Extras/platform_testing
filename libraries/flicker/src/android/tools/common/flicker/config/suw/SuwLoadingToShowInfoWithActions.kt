@@ -17,24 +17,22 @@
 package android.tools.common.flicker.config.suw
 
 import android.tools.common.flicker.config.AssertionTemplates
-import android.tools.common.flicker.config.FaasScenarioType
-import android.tools.common.flicker.config.IScenarioConfig
+import android.tools.common.flicker.config.FlickerConfigEntry
+import android.tools.common.flicker.config.ScenarioId
 import android.tools.common.flicker.extractors.TaggedCujTransitionMatcher
-import android.tools.common.flicker.extractors.TaggedScenarioExtractor
+import android.tools.common.flicker.extractors.TaggedScenarioExtractorBuilder
 import android.tools.common.traces.events.CujType
 
-class SuwLoadingToShowInfoWithActions : IScenarioConfig {
-    override val enabled = false
-
-    override val type = FaasScenarioType.SUW_LOADING_TO_SHOW_INFO_WITH_ACTIONS
-
-    override val assertionTemplates =
-        AssertionTemplates.COMMON_ASSERTIONS // TODO: Add specific assertions
-
-    override val extractor =
-        TaggedScenarioExtractor(
-            targetTag = CujType.CUJ_SUW_LOADING_TO_SHOW_INFO_WITH_ACTIONS,
-            type,
-            transitionMatcher = TaggedCujTransitionMatcher(associatedTransitionRequired = false),
-        )
-}
+val SuwLoadingToShowInfoWithActions =
+    FlickerConfigEntry(
+        enabled = false,
+        scenarioId = ScenarioId("SUW_LOADING_TO_SHOW_INFO_WITH_ACTIONS"),
+        assertions = AssertionTemplates.COMMON_ASSERTIONS,
+        extractor =
+            TaggedScenarioExtractorBuilder()
+                .setTargetTag(CujType.CUJ_SUW_LOADING_TO_SHOW_INFO_WITH_ACTIONS)
+                .setTransitionMatcher(
+                    TaggedCujTransitionMatcher(associatedTransitionRequired = false)
+                )
+                .build()
+    )

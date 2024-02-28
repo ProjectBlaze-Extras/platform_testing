@@ -17,8 +17,8 @@
 package android.tools.common.traces.wm
 
 import android.tools.common.traces.component.IComponentMatcher
+import android.tools.common.traces.wm.Utils.collectDescendants
 import kotlin.js.JsExport
-import kotlin.js.JsName
 
 /**
  * Represents an activity in the window manager hierarchy
@@ -28,14 +28,12 @@ import kotlin.js.JsName
  */
 @JsExport
 class Activity(
-    name: String,
-    @JsName("state") val state: String,
-    visible: Boolean,
-    @JsName("frontOfTask") val frontOfTask: Boolean,
-    @JsName("procId") val procId: Int,
-    @JsName("isTranslucent") val isTranslucent: Boolean,
-    windowContainer: WindowContainer
-) : WindowContainer(windowContainer, name, visible) {
+    val state: String,
+    val frontOfTask: Boolean,
+    val procId: Int,
+    val isTranslucent: Boolean,
+    private val windowContainer: IWindowContainer
+) : IWindowContainer by windowContainer {
     /**
      * Checks if the activity contains a [WindowState] matching [componentMatcher]
      *
@@ -50,11 +48,9 @@ class Activity(
      *
      * @param componentMatcher Components to search
      */
-    @JsName("hasWindow")
     fun hasWindow(componentMatcher: IComponentMatcher): Boolean =
         getWindows(componentMatcher).isNotEmpty()
 
-    @JsName("hasWindowState")
     internal fun hasWindowState(windowState: WindowState): Boolean =
         getWindows { windowState == it }.isNotEmpty()
 
@@ -76,6 +72,7 @@ class Activity(
         if (orientation != other.orientation) return false
         if (title != other.title) return false
         if (token != other.token) return false
+        if (windowContainer != other.windowContainer) return false
 
         return true
     }
@@ -86,6 +83,7 @@ class Activity(
         result = 31 * result + frontOfTask.hashCode()
         result = 31 * result + procId
         result = 31 * result + isTranslucent.hashCode()
+        result = 31 * result + windowContainer.hashCode()
         return result
     }
 }

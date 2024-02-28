@@ -16,22 +16,21 @@
 
 package android.tools.common.flicker.assertors.assertions
 
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.ComponentTemplate
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
 
 /**
- * Checks if the [componentMatcher] layer is invisible at the start of the transition and becomes
- * visible
+ * Checks if the [component] layer is invisible at the start of the transition and becomes visible
  */
 class LayerBecomesVisible(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(scenarioInstance: IScenarioInstance, layerSubject: LayersTraceSubject) {
-        layerSubject
-            .isInvisible(component.build(scenarioInstance))
-            .then()
-            .isVisible(component.build(scenarioInstance))
-            .forAllEntries()
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+        flicker.assertLayers {
+            isInvisible(component.build(scenarioInstance))
+                .then()
+                .isVisible(component.build(scenarioInstance))
+        }
     }
 }

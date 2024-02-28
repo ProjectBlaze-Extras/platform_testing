@@ -63,10 +63,8 @@ java_library {
 
 // TESTS ==============================================================
 
-java_test {
+java_test_host {
     name: "audiotestharness-client-grpclib-tests",
-    test_suites: ["general-tests"],
-    host_supported: true,
     srcs: [
         "src/test/java/com/android/media/audiotestharness/client/grpc/*.java",
     ],
@@ -79,7 +77,6 @@ java_test {
         "mockito",
         "objenesis",
     ],
-    sdk_version: "current",
     test_options: {
         unit_test: false,
     },

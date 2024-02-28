@@ -16,17 +16,23 @@
 
 package android.tools.common.flicker.subject.surfaceflinger
 
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.TestComponents
 import android.tools.assertFail
 import android.tools.assertThatErrorContainsDebugInfo
 import android.tools.assertThrows
 import android.tools.common.Cache
+import android.tools.common.ScenarioBuilder
+import android.tools.common.Timestamps
 import android.tools.common.datatypes.Region
 import android.tools.common.flicker.subject.layers.LayersTraceSubject
-import android.tools.common.io.IReader
+import android.tools.common.flicker.subject.region.RegionSubject
+import android.tools.common.io.Reader
 import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.device.flicker.datastore.DataStore
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.traces.io.IResultData
 import android.tools.getLayerTraceReaderFromAsset
+import android.tools.rules.CleanFlickerEnvironmentRule
 import androidx.test.filters.FlakyTest
 import com.google.common.truth.Truth
 import org.junit.Before
@@ -34,6 +40,7 @@ import org.junit.ClassRule
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runners.MethodSorters
+import org.mockito.Mockito
 
 /**
  * Contains [LayersTraceSubject] tests. To run this test: `atest
@@ -177,7 +184,7 @@ class LayersTraceSubjectTest {
         Truth.assertThat(error).hasMessageThat().contains("is not visible for 2 entries")
     }
 
-    private fun testCanDetectVisibleLayersMoreThanOneConsecutiveEntry(reader: IReader) {
+    private fun testCanDetectVisibleLayersMoreThanOneConsecutiveEntry(reader: Reader) {
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         LayersTraceSubject(trace, reader)
             .visibleLayersShownMoreThanOneConsecutiveEntry()
@@ -342,10 +349,49 @@ class LayersTraceSubjectTest {
         }
     }
 
+    @Test
+    fun snapshotStartingWindowLayerCoversExactlyApp() {
+        val reader =
+            getLayerTraceReaderFromAsset(
+                "layers_trace_snapshotStartingWindowLayerCoversExactlyApp.winscope",
+                from = Timestamps.from(systemUptimeNanos = 1688243428961872440),
+                to = Timestamps.from(systemUptimeNanos = 1688243432147782644)
+            )
+        val component =
+            ComponentNameMatcher(FLICKER_APP_PACKAGE, "$FLICKER_APP_PACKAGE.ImeActivity")
+        val builder = ScenarioBuilder()
+        val flicker = LegacyFlickerTest(builder, { _ -> reader })
+        val scenario = flicker.initialize("test")
+        val result = Mockito.mock(IResultData::class.java)
+        DataStore.addResult(scenario, result)
+        flicker.assertLayers {
+            invoke("snapshotStartingWindowLayerCoversExactlyOnApp") {
+                val snapshotLayers =
+                    it.subjects.filter { subject ->
+                        ComponentNameMatcher.SNAPSHOT.layerMatchesAnyOf(subject.layer) &&
+                            subject.isVisible
+                    }
+                val visibleAreas =
+                    snapshotLayers
+                        .mapNotNull { snapshotLayer -> snapshotLayer.layer.visibleRegion }
+                        .toTypedArray()
+                val snapshotRegion = RegionSubject(visibleAreas, timestamp)
+                // Verify the size of snapshotRegion covers appVisibleRegion exactly in animation.
+                if (snapshotRegion.region.isNotEmpty) {
+                    val appVisibleRegion = it.visibleRegion(component)
+                    snapshotRegion.coversExactly(appVisibleRegion.region)
+                }
+            }
+        }
+    }
+
     companion object {
+        private const val LABEL = "ImeActivity"
+        private const val FLICKER_APP_PACKAGE = "com.android.server.wm.flicker.testapp"
+
         private val DISPLAY_REGION = Region.from(0, 0, 1440, 2880)
         private val DISPLAY_REGION_ROTATED = Region.from(0, 0, 2160, 1080)
 
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

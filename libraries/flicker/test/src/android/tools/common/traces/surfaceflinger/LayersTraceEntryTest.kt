@@ -16,15 +16,15 @@
 
 package android.tools.common.traces.surfaceflinger
 
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.TestComponents
 import android.tools.assertThatErrorContainsDebugInfo
 import android.tools.assertThrows
 import android.tools.common.Cache
-import android.tools.common.CrossPlatform
+import android.tools.common.Timestamps
 import android.tools.common.flicker.subject.layers.LayersTraceSubject
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.getLayerTraceReaderFromAsset
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
 import org.junit.Before
 import org.junit.ClassRule
@@ -68,7 +68,7 @@ class LayersTraceEntryTest {
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         val visibleLayers =
             trace
-                .getEntryExactlyAt(CrossPlatform.timestamp.from(systemUptimeNanos = 90480846872160))
+                .getEntryExactlyAt(Timestamps.from(systemUptimeNanos = 90480846872160))
                 .visibleLayers
         val msg = "Visible Layers:\n" + visibleLayers.joinToString("\n") { "\t" + it.name }
         Truth.assertWithMessage(msg).that(visibleLayers).asList().hasSize(6)
@@ -87,7 +87,7 @@ class LayersTraceEntryTest {
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         val visibleLayers =
             trace
-                .getEntryExactlyAt(CrossPlatform.timestamp.from(systemUptimeNanos = 90493757372977))
+                .getEntryExactlyAt(Timestamps.from(systemUptimeNanos = 90493757372977))
                 .visibleLayers
         val msg = "Visible Layers:\n" + visibleLayers.joinToString("\n") { "\t" + it.name }
         Truth.assertWithMessage(msg).that(visibleLayers).asList().hasSize(7)
@@ -107,7 +107,7 @@ class LayersTraceEntryTest {
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         val visibleLayers =
             trace
-                .getEntryExactlyAt(CrossPlatform.timestamp.from(systemUptimeNanos = 90488463619533))
+                .getEntryExactlyAt(Timestamps.from(systemUptimeNanos = 90488463619533))
                 .visibleLayers
         val msg = "Visible Layers:\n" + visibleLayers.joinToString("\n") { "\t" + it.name }
         Truth.assertWithMessage(msg).that(visibleLayers).asList().hasSize(10)
@@ -164,8 +164,7 @@ class LayersTraceEntryTest {
         val reader =
             getLayerTraceReaderFromAsset("layers_trace_backcolorsurface.pb", legacyTrace = true)
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
-        val entry =
-            trace.getEntryExactlyAt(CrossPlatform.timestamp.from(systemUptimeNanos = 131954021476))
+        val entry = trace.getEntryExactlyAt(Timestamps.from(systemUptimeNanos = 131954021476))
         Truth.assertWithMessage("$layerName should not be visible")
             .that(entry.visibleLayers.map { it.name })
             .doesNotContain(layerName)
@@ -224,8 +223,7 @@ class LayersTraceEntryTest {
                 vSyncId = 123,
                 _rootLayers = emptyArray()
             )
-        Truth.assertThat(entry.timestamp.elapsedNanos)
-            .isEqualTo(CrossPlatform.timestamp.empty().elapsedNanos)
+        Truth.assertThat(entry.timestamp.elapsedNanos).isEqualTo(Timestamps.empty().elapsedNanos)
         Truth.assertThat(entry.timestamp.systemUptimeNanos).isEqualTo(100)
         Truth.assertThat(entry.timestamp.unixNanos).isEqualTo(600)
 
@@ -239,14 +237,12 @@ class LayersTraceEntryTest {
                 vSyncId = 123,
                 _rootLayers = emptyArray()
             )
-        Truth.assertThat(entry.timestamp.elapsedNanos)
-            .isEqualTo(CrossPlatform.timestamp.empty().elapsedNanos)
+        Truth.assertThat(entry.timestamp.elapsedNanos).isEqualTo(Timestamps.empty().elapsedNanos)
         Truth.assertThat(entry.timestamp.systemUptimeNanos).isEqualTo(100)
-        Truth.assertThat(entry.timestamp.unixNanos)
-            .isEqualTo(CrossPlatform.timestamp.empty().unixNanos)
+        Truth.assertThat(entry.timestamp.unixNanos).isEqualTo(Timestamps.empty().unixNanos)
     }
 
     companion object {
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

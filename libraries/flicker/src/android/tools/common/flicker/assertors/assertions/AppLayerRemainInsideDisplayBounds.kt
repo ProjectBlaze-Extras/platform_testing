@@ -16,9 +16,9 @@
 
 package android.tools.common.flicker.assertors.assertions
 
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.ComponentTemplate
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
 
 /**
  * Checks if the [component] layer remains inside the display bounds throughout the whole animation
@@ -26,16 +26,15 @@ import android.tools.common.flicker.subject.layers.LayersTraceSubject
 class AppLayerRemainInsideDisplayBounds(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(scenarioInstance: IScenarioInstance, layerSubject: LayersTraceSubject) {
-        layerSubject
-            .containsAtLeastOneDisplay()
-            .invoke("appLayerRemainInsideDisplayBounds") { subject ->
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+        flicker.assertLayers {
+            containsAtLeastOneDisplay().invoke("appLayerRemainInsideDisplayBounds") { subject ->
                 subject.entry.displays.forEach { display ->
                     subject
                         .visibleRegion(component.build(scenarioInstance))
                         .coversAtMost(display.layerStackSpace)
                 }
             }
-            .forAllEntries()
+        }
     }
 }

@@ -16,16 +16,16 @@
 
 package android.platform.tests;
 
+import static junit.framework.Assert.assertTrue;
 
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoHomeHelper;
+
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import static junit.framework.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 public class HomeTest {
@@ -48,5 +48,10 @@ public class HomeTest {
     @Test
     public void testMediaWidget() {
         assertTrue(mHomeHelper.get().hasMediaWidget());
+    }
+
+    @Test
+    public void testTempetraureWidget() {
+        assertTrue("Driver temperature is not displayed", mHomeHelper.get().hasTemperatureWidget());
     }
 }

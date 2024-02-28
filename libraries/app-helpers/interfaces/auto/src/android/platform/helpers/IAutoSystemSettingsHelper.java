@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 
 package android.platform.helpers;
 
-/**
- * Helper class for functional tests of system settings
- */
+/** Helper class for functional tests of system settings */
+import android.platform.spectatio.exceptions.MissingUiElementException;
 
 import java.util.Date;
 
@@ -88,11 +87,54 @@ public interface IAutoSystemSettingsHelper extends IAppHelper {
      * Reset application preferences.
      */
     void resetAppPreferences();
+    /**
+     * Setup expectation: System setting is open.
+     *
+     * <p>Open Storage Menu
+     */
+    void openStorageMenu();
+
+    /**
+     * Setup expectation: Storage setting is open
+     *
+     * <p>To verify if App usage in GB
+     *
+     * @param option - input storage option.
+     */
+    boolean verifyUsageinGB(String option);
 
     /**
      * Setup expectation: System setting is open.
      *
-     * Open Languages & input menu.
+     * <p>Open Languages & input menu.
      */
     void openLanguagesInputMenu();
+
+    /**
+     * Setup expectation: System setting is open.
+     *
+     * <p>Click on build number.
+     */
+    void enterDeveloperMode();
+
+    /**
+     * Setup expectation: Click to open developer options.
+     *
+     * <p>Click on about.
+     */
+    void openDeveloperOptions();
+
+    /**
+     * Setup expectation: Scroll to developer options and Checks if Developer Options is available
+     *
+     * <p>Checks if Developer Options is available
+     */
+    boolean hasDeveloperOptions() throws MissingUiElementException;
+
+    /**
+     * Setup expectation: Location setting is open.
+     *
+     * <p>Clicks on view all.
+     */
+    void openViewAll();
 }

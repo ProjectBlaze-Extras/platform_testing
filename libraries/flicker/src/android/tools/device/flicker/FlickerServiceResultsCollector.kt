@@ -19,14 +19,16 @@ package android.tools.device.flicker
 import android.app.Instrumentation
 import android.device.collectors.BaseMetricListener
 import android.device.collectors.DataRecord
-import android.tools.common.CrossPlatform
 import android.tools.common.FLICKER_TAG
+import android.tools.common.Logger
 import android.tools.common.ScenarioBuilder
 import android.tools.common.flicker.AssertionInvocationGroup
-import android.tools.common.flicker.IFlickerService
-import android.tools.common.flicker.ITracesCollector
-import android.tools.common.flicker.assertors.IAssertionResult
-import android.tools.common.flicker.config.FaasScenarioType
+import android.tools.common.flicker.FlickerConfig
+import android.tools.common.flicker.FlickerService
+import android.tools.common.flicker.TracesCollector
+import android.tools.common.flicker.assertions.AssertionResult
+import android.tools.common.flicker.config.FlickerServiceConfig
+import android.tools.common.flicker.config.ScenarioId
 import android.tools.common.io.RunStatus
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.internal.annotations.VisibleForTesting
@@ -39,8 +41,9 @@ import org.junit.runner.notification.Failure
  * the CrystalBall database.
  */
 class FlickerServiceResultsCollector(
-    private val tracesCollector: ITracesCollector,
-    private val flickerService: IFlickerService = FlickerService(),
+    private val tracesCollector: TracesCollector,
+    private val flickerService: FlickerService =
+        FlickerService(FlickerConfig().use(FlickerServiceConfig.DEFAULT)),
     instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation(),
     private val collectMetricsPerTest: Boolean = true,
     private val reportOnlyForPassingTests: Boolean = true
@@ -52,11 +55,11 @@ class FlickerServiceResultsCollector(
     override val executionErrors
         get() = _executionErrors
 
-    @VisibleForTesting val assertionResults = mutableListOf<IAssertionResult>()
+    @VisibleForTesting val assertionResults = mutableListOf<AssertionResult>()
     @VisibleForTesting
-    val assertionResultsByTest = mutableMapOf<Description, Collection<IAssertionResult>>()
+    val assertionResultsByTest = mutableMapOf<Description, Collection<AssertionResult>>()
     @VisibleForTesting
-    val detectedScenariosByTest = mutableMapOf<Description, Collection<FaasScenarioType>>()
+    val detectedScenariosByTest = mutableMapOf<Description, Collection<ScenarioId>>()
 
     init {
         setInstrumentation(instrumentation)
@@ -66,10 +69,7 @@ class FlickerServiceResultsCollector(
         errorReportingBlock {
             tracesCollector.cleanup() // Cleanup any trace archives from previous runs
 
-            CrossPlatform.log.i(
-                LOG_TAG,
-                "onTestRunStart :: collectMetricsPerTest = $collectMetricsPerTest"
-            )
+            Logger.i(LOG_TAG, "onTestRunStart :: collectMetricsPerTest = $collectMetricsPerTest")
             if (!collectMetricsPerTest) {
                 hasFailedTest = false
                 val scenario =
@@ -84,10 +84,7 @@ class FlickerServiceResultsCollector(
 
     override fun onTestStart(testData: DataRecord, description: Description) {
         errorReportingBlock {
-            CrossPlatform.log.i(
-                LOG_TAG,
-                "onTestStart :: collectMetricsPerTest = $collectMetricsPerTest"
-            )
+            Logger.i(LOG_TAG, "onTestStart :: collectMetricsPerTest = $collectMetricsPerTest")
             if (collectMetricsPerTest) {
                 hasFailedTest = false
                 val scenario =
@@ -105,24 +102,21 @@ class FlickerServiceResultsCollector(
 
     override fun onTestFail(testData: DataRecord, description: Description, failure: Failure) {
         errorReportingBlock {
-            CrossPlatform.log.i(LOG_TAG, "onTestFail")
+            Logger.i(LOG_TAG, "onTestFail")
             hasFailedTest = true
         }
     }
 
     override fun testSkipped(description: Description) {
         errorReportingBlock {
-            CrossPlatform.log.i(LOG_TAG, "testSkipped")
+            Logger.i(LOG_TAG, "testSkipped")
             testSkipped = true
         }
     }
 
     override fun onTestEnd(testData: DataRecord, description: Description) {
         errorReportingBlock {
-            CrossPlatform.log.i(
-                LOG_TAG,
-                "onTestEnd :: collectMetricsPerTest = $collectMetricsPerTest"
-            )
+            Logger.i(LOG_TAG, "onTestEnd :: collectMetricsPerTest = $collectMetricsPerTest")
             if (collectMetricsPerTest && !testSkipped) {
                 stopTracingAndCollectFlickerMetrics(testData, description)
             }
@@ -131,10 +125,7 @@ class FlickerServiceResultsCollector(
 
     override fun onTestRunEnd(runData: DataRecord, result: Result) {
         errorReportingBlock {
-            CrossPlatform.log.i(
-                LOG_TAG,
-                "onTestRunEnd :: collectMetricsPerTest = $collectMetricsPerTest"
-            )
+            Logger.i(LOG_TAG, "onTestRunEnd :: collectMetricsPerTest = $collectMetricsPerTest")
             if (!collectMetricsPerTest) {
                 stopTracingAndCollectFlickerMetrics(runData)
             }
@@ -146,20 +137,19 @@ class FlickerServiceResultsCollector(
         description: Description? = null
     ) {
         errorReportingBlock {
-            CrossPlatform.log.i(LOG_TAG, "Stopping trace collection")
+            Logger.i(LOG_TAG, "Stopping trace collection")
             val reader = tracesCollector.stop()
-            CrossPlatform.log.i(LOG_TAG, "Stopped trace collection")
+            Logger.i(LOG_TAG, "Stopped trace collection")
             if (reportOnlyForPassingTests && hasFailedTest) {
                 return@errorReportingBlock
             }
 
             try {
-                CrossPlatform.log.i(LOG_TAG, "Processing traces")
+                Logger.i(LOG_TAG, "Processing traces")
                 val scenarios = flickerService.detectScenarios(reader)
-                val assertions = flickerService.generateAssertions(scenarios)
-                val results = flickerService.executeAssertions(assertions)
+                val results = scenarios.flatMap { it.generateAssertions() }.map { it.execute() }
                 reader.artifact.updateStatus(RunStatus.RUN_EXECUTED)
-                CrossPlatform.log.i(LOG_TAG, "Got ${results.size} results")
+                Logger.i(LOG_TAG, "Got ${results.size} results")
                 assertionResults.addAll(results)
                 if (description != null) {
                     require(assertionResultsByTest[description] == null) {
@@ -177,26 +167,20 @@ class FlickerServiceResultsCollector(
                     reader.artifact.updateStatus(RunStatus.ASSERTION_SUCCESS)
                 }
 
-                CrossPlatform.log.v(
-                    LOG_TAG,
-                    "Adding metric $FLICKER_ASSERTIONS_COUNT_KEY = ${results.size}"
-                )
+                Logger.v(LOG_TAG, "Adding metric $FLICKER_ASSERTIONS_COUNT_KEY = ${results.size}")
                 dataRecord.addStringMetric(FLICKER_ASSERTIONS_COUNT_KEY, "${results.size}")
 
                 val aggregatedResults = processFlickerResults(results)
                 collectMetrics(dataRecord, aggregatedResults)
             } finally {
-                CrossPlatform.log.v(
-                    LOG_TAG,
-                    "Adding metric $WINSCOPE_FILE_PATH_KEY = ${reader.artifactPath}"
-                )
+                Logger.v(LOG_TAG, "Adding metric $WINSCOPE_FILE_PATH_KEY = ${reader.artifactPath}")
                 dataRecord.addStringMetric(WINSCOPE_FILE_PATH_KEY, reader.artifactPath)
             }
         }
     }
 
     private fun processFlickerResults(
-        results: Collection<IAssertionResult>
+        results: Collection<AssertionResult>
     ): Map<String, AggregatedFlickerResult> {
         val aggregatedResults = mutableMapOf<String, AggregatedFlickerResult>()
         for (result in results) {
@@ -219,7 +203,7 @@ class FlickerServiceResultsCollector(
             val (key, aggregatedResult) = it.next()
             aggregatedResult.results.forEachIndexed { index, result ->
                 val resultStatus = if (result.passed) 0 else 1
-                CrossPlatform.log.v(LOG_TAG, "Adding metric ${key}_$index = $resultStatus")
+                Logger.v(LOG_TAG, "Adding metric ${key}_$index = $resultStatus")
                 data.addStringMetric("${key}_$index", "$resultStatus")
             }
         }
@@ -229,18 +213,18 @@ class FlickerServiceResultsCollector(
         try {
             function()
         } catch (e: Throwable) {
-            CrossPlatform.log.e(FLICKER_TAG, "Error executing in FlickerServiceResultsCollector", e)
+            Logger.e(FLICKER_TAG, "Error executing in FlickerServiceResultsCollector", e)
             _executionErrors.add(e)
         }
     }
 
-    override fun resultsForTest(description: Description): Collection<IAssertionResult> {
+    override fun resultsForTest(description: Description): Collection<AssertionResult> {
         val resultsForTest = assertionResultsByTest[description]
         requireNotNull(resultsForTest) { "No results set for test $description" }
         return resultsForTest
     }
 
-    override fun detectedScenariosForTest(description: Description): Collection<FaasScenarioType> {
+    override fun detectedScenariosForTest(description: Description): Collection<ScenarioId> {
         val scenariosForTest = detectedScenariosByTest[description]
         requireNotNull(scenariosForTest) { "No detected scenarios set for test $description" }
         return scenariosForTest
@@ -253,32 +237,34 @@ class FlickerServiceResultsCollector(
         const val WINSCOPE_FILE_PATH_KEY = "winscope_file_path"
         const val FLICKER_ASSERTIONS_COUNT_KEY = "flicker_assertions_count"
 
-        fun getKeyForAssertionResult(result: IAssertionResult): String {
-            return "$FAAS_METRICS_PREFIX::${result.assertion.name}"
+        fun getKeyForAssertionResult(result: AssertionResult): String {
+            return "$FAAS_METRICS_PREFIX::${result.name}"
         }
 
         class AggregatedFlickerResult {
-            val results = mutableListOf<IAssertionResult>()
+            val results = mutableListOf<AssertionResult>()
             var failures = 0
             var passes = 0
             val errors = mutableListOf<String>()
             var invocationGroup: AssertionInvocationGroup? = null
 
-            fun addResult(result: IAssertionResult) {
+            fun addResult(result: AssertionResult) {
                 results.add(result)
 
                 if (result.failed) {
                     failures++
-                    errors.add(result.assertionError?.message ?: "FAILURE WITHOUT ERROR MESSAGE...")
+                    result.assertionErrors.forEach {
+                        errors.add(it.message ?: "FAILURE WITHOUT ERROR MESSAGE...")
+                    }
                 } else {
                     passes++
                 }
 
                 if (invocationGroup == null) {
-                    invocationGroup = result.assertion.stabilityGroup
+                    invocationGroup = result.stabilityGroup
                 }
 
-                if (invocationGroup != result.assertion.stabilityGroup) {
+                if (invocationGroup != result.stabilityGroup) {
                     error("Unexpected assertion group mismatch")
                 }
             }

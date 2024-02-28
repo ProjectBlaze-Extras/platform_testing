@@ -18,7 +18,6 @@ package android.tools.device.traces.monitors
 
 import android.app.Instrumentation
 import android.support.test.uiautomator.UiDevice
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.common.io.RunStatus
 import android.tools.common.io.TraceType
 import android.tools.common.traces.DeviceTraceDump
@@ -28,6 +27,7 @@ import android.tools.device.traces.io.ResultReader
 import android.tools.device.traces.parsers.DeviceDumpParser
 import android.tools.newTestResultWriter
 import android.tools.outputFileName
+import android.tools.rules.CleanFlickerEnvironmentRule
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth
 import org.junit.After
@@ -131,6 +131,6 @@ abstract class TraceMonitorTest<T : TraceMonitor> {
     }
 
     companion object {
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

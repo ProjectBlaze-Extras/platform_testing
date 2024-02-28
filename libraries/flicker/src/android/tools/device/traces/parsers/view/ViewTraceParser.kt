@@ -16,7 +16,7 @@
 
 package android.tools.device.traces.parsers.view
 
-import android.tools.common.CrossPlatform
+import android.tools.common.Timestamps
 import android.tools.common.parsers.AbstractTraceParser
 import android.tools.common.traces.view.ViewTrace
 import com.android.app.viewcapture.data.ExportedData
@@ -36,9 +36,9 @@ class ViewTraceParser :
 
     override fun getTimestamp(entry: WindowData) =
         if (entry.frameDataList.isEmpty()) {
-            CrossPlatform.timestamp.empty()
+            Timestamps.empty()
         } else {
-            CrossPlatform.timestamp.from(systemUptimeNanos = entry.frameDataList.first()?.timestamp)
+            Timestamps.from(systemUptimeNanos = entry.frameDataList.first()?.timestamp)
         }
 
     override fun doParseEntry(entry: WindowData): ViewTrace =

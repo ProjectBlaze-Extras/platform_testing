@@ -16,8 +16,8 @@
 
 package android.tools.common.traces.wm
 
-import android.tools.CleanFlickerEnvironmentRule
-import android.tools.common.CrossPlatform
+import android.tools.common.Timestamps
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
 import org.junit.ClassRule
 import org.junit.FixMethodOrder
@@ -39,8 +39,8 @@ class WindowManagerStateTest {
                 orientation = 0,
                 layerId = 0,
                 _isVisible = true,
-                children = emptyArray(),
-                configurationContainer = ConfigurationContainer(null, null, null),
+                _children = emptyArray(),
+                configurationContainer = ConfigurationContainer.EMPTY,
                 computedZ = 0
             )
         )
@@ -93,11 +93,10 @@ class WindowManagerStateTest {
                     )
             )
         Truth.assertThat(entry.timestamp.elapsedNanos).isEqualTo(100)
-        Truth.assertThat(entry.timestamp.unixNanos)
-            .isEqualTo(CrossPlatform.timestamp.empty().unixNanos)
+        Truth.assertThat(entry.timestamp.unixNanos).isEqualTo(Timestamps.empty().unixNanos)
     }
 
     companion object {
-        @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }

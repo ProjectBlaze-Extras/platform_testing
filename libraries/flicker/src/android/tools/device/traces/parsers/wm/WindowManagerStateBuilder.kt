@@ -30,6 +30,7 @@ import android.tools.common.traces.wm.ConfigurationContainer
 import android.tools.common.traces.wm.DisplayArea
 import android.tools.common.traces.wm.DisplayContent
 import android.tools.common.traces.wm.DisplayCutout
+import android.tools.common.traces.wm.IWindowContainer
 import android.tools.common.traces.wm.KeyguardControllerState
 import android.tools.common.traces.wm.RootWindowContainer
 import android.tools.common.traces.wm.Task
@@ -83,28 +84,30 @@ class WindowManagerStateBuilder {
         requireNotNull(proto) { "Proto object not specified" }
 
         computedZCounter = 0
-        return WindowManagerTraceEntryBuilder(
-                _elapsedTimestamp = timestamp.toString(),
-                policy = createWindowManagerPolicy(proto.policy),
-                focusedApp = proto.focusedApp,
-                focusedDisplayId = proto.focusedDisplayId,
-                focusedWindow = proto.focusedWindow?.title ?: "",
-                inputMethodWindowAppToken =
-                    if (proto.inputMethodWindow != null) {
-                        Integer.toHexString(proto.inputMethodWindow.hashCode)
-                    } else {
-                        ""
-                    },
-                isHomeRecentsComponent = proto.rootWindowContainer.isHomeRecentsComponent,
-                isDisplayFrozen = proto.displayFrozen,
-                pendingActivities =
-                    proto.rootWindowContainer.pendingActivities.map { it.title }.toTypedArray(),
-                root = createRootWindowContainer(proto.rootWindowContainer),
-                keyguardControllerState =
-                    createKeyguardControllerState(proto.rootWindowContainer.keyguardController),
-                where = where,
-                realToElapsedTimeOffsetNs = realToElapsedTimeOffsetNanos.toString()
+        return WindowManagerTraceEntryBuilder()
+            .setElapsedTimestamp(timestamp.toString())
+            .setPolicy(createWindowManagerPolicy(proto.policy))
+            .setFocusedApp(proto.focusedApp)
+            .setFocusedDisplayId(proto.focusedDisplayId)
+            .setFocusedWindow(proto.focusedWindow?.title ?: "")
+            .setInputMethodWindowAppToken(
+                if (proto.inputMethodWindow != null) {
+                    Integer.toHexString(proto.inputMethodWindow.hashCode)
+                } else {
+                    ""
+                }
             )
+            .setIsHomeRecentsComponent(proto.rootWindowContainer.isHomeRecentsComponent)
+            .setIsDisplayFrozen(proto.displayFrozen)
+            .setPendingActivities(
+                proto.rootWindowContainer.pendingActivities.map { it.title }.toTypedArray()
+            )
+            .setRoot(createRootWindowContainer(proto.rootWindowContainer))
+            .setKeyguardControllerState(
+                createKeyguardControllerState(proto.rootWindowContainer.keyguardController)
+            )
+            .setWhere(where)
+            .setRealToElapsedTimeOffsetNs(realToElapsedTimeOffsetNanos.toString())
             .build()
     }
 
@@ -153,7 +156,7 @@ class WindowManagerStateBuilder {
     private fun createWindowContainerChild(
         proto: WindowContainerChildProto,
         isActivityInTree: Boolean
-    ): WindowContainer? {
+    ): IWindowContainer? {
         return createDisplayContent(proto.displayContent, isActivityInTree)
             ?: createDisplayArea(proto.displayArea, isActivityInTree)
                 ?: createTask(proto.task, isActivityInTree)
@@ -309,9 +312,7 @@ class WindowManagerStateBuilder {
             null
         } else {
             Activity(
-                name = proto.name,
                 state = proto.state,
-                visible = proto.visible,
                 frontOfTask = proto.frontOfTask,
                 procId = proto.procId,
                 isTranslucent = proto.translucent,
@@ -320,7 +321,8 @@ class WindowManagerStateBuilder {
                         proto.windowToken.windowContainer,
                         proto.windowToken.windowContainer.children.mapNotNull { p ->
                             createWindowContainerChild(p, isActivityInTree = true)
-                        }
+                        },
+                        nameOverride = proto.name
                     )
                         ?: error("Window container should not be null")
             )
@@ -386,18 +388,24 @@ class WindowManagerStateBuilder {
                             createWindowContainerChild(p, isActivityInTree)
                         },
                         nameOverride =
-                            when {
-                                // Existing code depends on the prefix being removed
-                                identifierName.startsWith(PlatformConsts.STARTING_WINDOW_PREFIX) ->
-                                    identifierName.substring(
-                                        PlatformConsts.STARTING_WINDOW_PREFIX.length
-                                    )
-                                identifierName.startsWith(PlatformConsts.DEBUGGER_WINDOW_PREFIX) ->
-                                    identifierName.substring(
-                                        PlatformConsts.DEBUGGER_WINDOW_PREFIX.length
-                                    )
-                                else -> identifierName
-                            }
+                            getWindowTitle(
+                                when {
+                                    // Existing code depends on the prefix being removed
+                                    identifierName.startsWith(
+                                        PlatformConsts.STARTING_WINDOW_PREFIX
+                                    ) ->
+                                        identifierName.substring(
+                                            PlatformConsts.STARTING_WINDOW_PREFIX.length
+                                        )
+                                    identifierName.startsWith(
+                                        PlatformConsts.DEBUGGER_WINDOW_PREFIX
+                                    ) ->
+                                        identifierName.substring(
+                                            PlatformConsts.DEBUGGER_WINDOW_PREFIX.length
+                                        )
+                                    else -> identifierName
+                                }
+                            )
                     )
                         ?: error("Window container should not be null"),
                 isAppWindow = isActivityInTree
@@ -443,7 +451,7 @@ class WindowManagerStateBuilder {
     private fun createConfigurationContainer(
         proto: ConfigurationContainerProto?
     ): ConfigurationContainer {
-        return ConfigurationContainer(
+        return ConfigurationContainer.from(
             overrideConfiguration = createConfiguration(proto?.overrideConfiguration),
             fullConfiguration = createConfiguration(proto?.fullConfiguration),
             mergedOverrideConfiguration = createConfiguration(proto?.mergedOverrideConfiguration)
@@ -484,9 +492,10 @@ class WindowManagerStateBuilder {
 
     private fun createWindowContainer(
         proto: WindowContainerProto?,
-        children: List<WindowContainer>,
-        nameOverride: String? = null
-    ): WindowContainer? {
+        children: List<IWindowContainer>,
+        nameOverride: String? = null,
+        visibleOverride: Boolean? = null
+    ): IWindowContainer? {
         return if (proto == null) {
             null
         } else {
@@ -494,10 +503,10 @@ class WindowManagerStateBuilder {
                 title = nameOverride ?: proto.identifier?.title ?: "",
                 token = proto.identifier?.hashCode?.toString(16) ?: "",
                 orientation = proto.orientation,
-                _isVisible = proto.visible,
+                _isVisible = visibleOverride ?: proto.visible,
                 configurationContainer = createConfigurationContainer(proto.configurationContainer),
                 layerId = proto.surfaceControl?.layerId ?: 0,
-                children = children.toTypedArray(),
+                _children = children.toTypedArray(),
                 computedZ = computedZCounter++
             )
         }
@@ -507,7 +516,7 @@ class WindowManagerStateBuilder {
         return if (proto == null) {
             null
         } else {
-            DisplayCutout(
+            DisplayCutout.from(
                 proto.insets?.toInsets() ?: Insets.EMPTY,
                 proto.boundLeft?.toRect() ?: Rect.EMPTY,
                 proto.boundTop?.toRect() ?: Rect.EMPTY,
@@ -577,5 +586,16 @@ class WindowManagerStateBuilder {
         private const val TRANSIT_KEYGUARD_UNOCCLUDE = "TRANSIT_KEYGUARD_UNOCCLUDE"
         private const val TRANSIT_TRANSLUCENT_ACTIVITY_OPEN = "TRANSIT_TRANSLUCENT_ACTIVITY_OPEN"
         private const val TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE = "TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE"
+
+        private fun getWindowTitle(title: String): String {
+            return when {
+                // Existing code depends on the prefix being removed
+                title.startsWith(PlatformConsts.STARTING_WINDOW_PREFIX) ->
+                    title.substring(PlatformConsts.STARTING_WINDOW_PREFIX.length)
+                title.startsWith(PlatformConsts.DEBUGGER_WINDOW_PREFIX) ->
+                    title.substring(PlatformConsts.DEBUGGER_WINDOW_PREFIX.length)
+                else -> title
+            }
+        }
     }
 }

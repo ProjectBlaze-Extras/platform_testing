@@ -17,7 +17,7 @@
 package android.tools.common.flicker.subject.inputmethod
 
 import android.tools.common.flicker.subject.FlickerSubject
-import android.tools.common.io.IReader
+import android.tools.common.io.Reader
 import android.tools.common.traces.inputmethod.InputMethodServiceEntry
 import android.tools.common.traces.inputmethod.InputMethodServiceTrace
 
@@ -36,7 +36,7 @@ import android.tools.common.traces.inputmethod.InputMethodServiceTrace
 class InputMethodServiceEntrySubject(
     val entry: InputMethodServiceEntry,
     val trace: InputMethodServiceTrace?,
-    override val reader: IReader? = null
+    override val reader: Reader? = null
 ) : FlickerSubject(), IInputMethodServiceSubject<InputMethodServiceEntrySubject> {
     override val timestamp = entry.timestamp
 

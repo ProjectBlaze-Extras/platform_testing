@@ -19,21 +19,22 @@ package android.tools.device.flicker.junit
 import android.app.Instrumentation
 import android.tools.common.ScenarioBuilder
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTest
 import androidx.test.platform.app.InstrumentationRegistry
+import org.junit.Test
 
 object TestUtils {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-    val VALID_ARGS_EMPTY = FlickerTest()
+    val VALID_ARGS_EMPTY = LegacyFlickerTest()
 
     var executionCount = 0
 
-    class DummyTestClassValid(test: FlickerTest) {
+    class DummyTestClassValid(test: LegacyFlickerTest) {
         @FlickerBuilderProvider
         fun myMethod(): FlickerBuilder =
             FlickerBuilder(instrumentation).apply { transitions { executionCount++ } }
 
-        fun dummyExecute() {}
+        @Test fun dummyExecute() {}
 
         companion object {
             val SCENARIO = ScenarioBuilder().forClass(DummyTestClassValid::class.java.name).build()

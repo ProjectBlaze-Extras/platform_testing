@@ -138,7 +138,7 @@ private constructor(@JsName("type") val type: Int?, @JsName("matrix") val matrix
             return transformType
         }
 
-        return "$transformType ${matrix.prettyPrint()}"
+        return "$transformType $matrix"
     }
 
     @JsName("getTypeAsString")

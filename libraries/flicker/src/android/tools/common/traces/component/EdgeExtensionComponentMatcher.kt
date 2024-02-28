@@ -18,11 +18,11 @@ package android.tools.common.traces.component
 
 import android.tools.common.traces.surfaceflinger.Layer
 import android.tools.common.traces.wm.Activity
-import android.tools.common.traces.wm.WindowContainer
+import android.tools.common.traces.wm.IWindowContainer
 
 class EdgeExtensionComponentMatcher : IComponentMatcher {
     /** {@inheritDoc} */
-    override fun windowMatchesAnyOf(windows: Array<WindowContainer>): Boolean {
+    override fun windowMatchesAnyOf(windows: Array<IWindowContainer>): Boolean {
         // Doesn't have a window component only layers
         return false
     }

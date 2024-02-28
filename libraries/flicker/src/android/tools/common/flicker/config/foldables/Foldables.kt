@@ -17,5 +17,5 @@
 package android.tools.common.flicker.config.foldables
 
 internal object Foldables {
-    val SCENARIOS = listOf(FoldablesUnfoldAnimation())
+    val SCENARIOS = listOf(FoldablesUnfoldAnimation)
 }

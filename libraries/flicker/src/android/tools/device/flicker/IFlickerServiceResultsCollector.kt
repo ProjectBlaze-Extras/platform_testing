@@ -16,8 +16,8 @@
 
 package android.tools.device.flicker
 
-import android.tools.common.flicker.assertors.IAssertionResult
-import android.tools.common.flicker.config.FaasScenarioType
+import android.tools.common.flicker.assertions.AssertionResult
+import android.tools.common.flicker.config.ScenarioId
 import org.junit.runner.Description
 import org.junit.runner.notification.Failure
 
@@ -27,6 +27,6 @@ interface IFlickerServiceResultsCollector {
     fun testFailure(failure: Failure)
     fun testSkipped(description: Description)
     fun testFinished(description: Description)
-    fun resultsForTest(description: Description): Collection<IAssertionResult>
-    fun detectedScenariosForTest(description: Description): Collection<FaasScenarioType>
+    fun resultsForTest(description: Description): Collection<AssertionResult>
+    fun detectedScenariosForTest(description: Description): Collection<ScenarioId>
 }

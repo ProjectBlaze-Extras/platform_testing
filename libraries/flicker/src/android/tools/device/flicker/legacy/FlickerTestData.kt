@@ -17,36 +17,43 @@
 package android.tools.device.flicker.legacy
 
 import android.app.Instrumentation
-import android.tools.common.traces.surfaceflinger.LayersTrace
-import android.tools.common.traces.wm.WindowManagerTrace
 import android.tools.device.traces.monitors.ITransitionMonitor
 import android.tools.device.traces.parsers.WindowManagerStateHelper
 import androidx.test.uiautomator.UiDevice
 import java.io.File
 
-@DslMarker annotation class FlickerDslMarker
-
-/**
- * Defines the runner for the flicker tests. This component is responsible for running the flicker
- * tests and executing assertions on the traces to check for inconsistent behaviors on
- * [WindowManagerTrace] and [LayersTrace]
- */
-@FlickerDslMarker
-open class FlickerTestData(
+interface FlickerTestData {
     /** Instrumentation to run the tests */
-    override val instrumentation: Instrumentation,
+    val instrumentation: Instrumentation
     /** Test automation component used to interact with the device */
-    override val device: UiDevice,
+    val device: UiDevice
     /** Output directory for test results */
-    override val outputDir: File,
+    val outputDir: File
     /** Enabled tracing monitors */
-    override val traceMonitors: List<ITransitionMonitor>,
+    val traceMonitors: List<ITransitionMonitor>
     /** Commands to be executed before the transition */
-    override val transitionSetup: List<IFlickerTestData.() -> Any>,
+    val transitionSetup: List<FlickerTestData.() -> Any>
     /** Test commands */
-    override val transitions: List<IFlickerTestData.() -> Any>,
+    val transitions: List<FlickerTestData.() -> Any>
     /** Commands to be executed after the transition */
-    override val transitionTeardown: List<IFlickerTestData.() -> Any>,
+    val transitionTeardown: List<FlickerTestData.() -> Any>
     /** Helper object for WM Synchronization */
-    override val wmHelper: WindowManagerStateHelper
-) : AbstractFlickerTestData()
+    val wmHelper: WindowManagerStateHelper
+
+    fun setAssertionsCheckedCallback(callback: (Boolean) -> Unit)
+
+    fun setCreateTagListener(callback: (String) -> Unit)
+
+    fun clearTagListener()
+
+    /**
+     * Runs a set of commands and, at the end, creates a tag containing the device state
+     *
+     * @param tag Identifier for the tag to be created
+     * @param commands Commands to execute before creating the tag
+     * @throws IllegalArgumentException If [tag] cannot be converted to a valid filename
+     */
+    fun withTag(tag: String, commands: FlickerTestData.() -> Any)
+
+    fun createTag(tag: String)
+}

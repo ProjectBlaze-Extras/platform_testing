@@ -33,7 +33,7 @@ private constructor(
     @JsName("top") val top: Float,
     @JsName("right") val right: Float,
     @JsName("bottom") val bottom: Float
-) {
+) : DataType() {
     @JsName("height")
     val height: Float
         get() = bottom - top
@@ -42,12 +42,8 @@ private constructor(
         get() = right - left
 
     /** Returns true if the rectangle is empty (left >= right or top >= bottom) */
-    @JsName("isEmpty")
-    val isEmpty: Boolean
+    override val isEmpty: Boolean
         get() = width <= 0f || height <= 0f
-    @JsName("isNotEmpty")
-    val isNotEmpty: Boolean
-        get() = !isEmpty
 
     /**
      * Returns a [Rect] version fo this rectangle.
@@ -143,38 +139,12 @@ private constructor(
     @JsName("intersectionWithRect")
     fun intersection(r: RectF): RectF = intersection(r.left, r.top, r.right, r.bottom)
 
-    @JsName("prettyPrint")
-    fun prettyPrint(): String =
-        if (isEmpty) {
-            "[empty]"
-        } else {
-            val left = FloatFormatter.format(left)
-            val top = FloatFormatter.format(top)
-            val right = FloatFormatter.format(right)
-            val bottom = FloatFormatter.format(bottom)
-            "($left, $top) - ($right, $bottom)"
-        }
-
-    override fun toString(): String = prettyPrint()
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is RectF) return false
-
-        if (left != other.left) return false
-        if (top != other.top) return false
-        if (right != other.right) return false
-        if (bottom != other.bottom) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = left.hashCode()
-        result = 31 * result + top.hashCode()
-        result = 31 * result + right.hashCode()
-        result = 31 * result + bottom.hashCode()
-        return result
+    override fun doPrintValue(): String {
+        val left = FloatFormatter.format(left)
+        val top = FloatFormatter.format(top)
+        val right = FloatFormatter.format(right)
+        val bottom = FloatFormatter.format(bottom)
+        return "($left, $top) - ($right, $bottom)"
     }
 
     companion object {

@@ -16,10 +16,9 @@
 
 package android.tools.common.flicker.assertors.assertions
 
-import android.tools.common.datatypes.Rect
-import android.tools.common.flicker.IScenarioInstance
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.flicker.assertors.ComponentTemplate
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
 
 /**
  * Checks that the app layer doesn't exist or is invisible at the start of the transition, but is
@@ -28,14 +27,14 @@ import android.tools.common.flicker.subject.layers.LayersTraceSubject
 class LayerRemainInsideVisibleBounds(private val component: ComponentTemplate) :
     AssertionTemplateWithComponent(component) {
     /** {@inheritDoc} */
-    override fun doEvaluate(
-        scenarioInstance: IScenarioInstance,
-        layersTraceSubject: LayersTraceSubject
-    ) {
-        val displayBounds = Rect.EMPTY // TODO: Get display bounds from subject
-        layersTraceSubject
-            .visibleRegion(component.build(scenarioInstance))
-            .coversAtMost(displayBounds)
-            .forAllEntries()
+    override fun doEvaluate(scenarioInstance: ScenarioInstance, flicker: FlickerTest) {
+        flicker.assertLayers {
+            subjects.forEach {
+                val displayBounds =
+                    it.entry.physicalDisplayBounds ?: error("Missing physical display bounds")
+
+                it.visibleRegion(component.build(scenarioInstance)).coversAtMost(displayBounds)
+            }
+        }
     }
 }

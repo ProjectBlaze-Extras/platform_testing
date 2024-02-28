@@ -18,7 +18,6 @@ package android.platform.tests;
 
 import static junit.framework.Assert.assertTrue;
 
-import android.platform.helpers.AutoUtility;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoAppGridHelper;
 import android.platform.helpers.IAutoPrivacySettingsHelper;
@@ -28,7 +27,6 @@ import android.platform.helpers.SettingsConstants;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -45,11 +43,6 @@ public class MicroPhoneRecentAppsTest {
         mAppGridHelper = new HelperAccessor<>(IAutoAppGridHelper.class);
         mSettingHelper = new HelperAccessor<>(IAutoSettingHelper.class);
         mPrivacySettingsHelper = new HelperAccessor<>(IAutoPrivacySettingsHelper.class);
-    }
-
-    @BeforeClass
-    public static void exitSuw() {
-        AutoUtility.exitSuw();
     }
 
     @Before

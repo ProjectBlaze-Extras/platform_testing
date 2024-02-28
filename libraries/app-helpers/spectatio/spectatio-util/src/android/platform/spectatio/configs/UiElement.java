@@ -117,6 +117,9 @@ public class UiElement {
     public BySelector getBySelectorForUiElement() {
         switch (mType) {
             case JsonConfigConstants.RESOURCE_ID:
+                if (mPackage == null) {
+                    return By.res(Pattern.compile(".*" + Pattern.quote(":id/" + mValue)));
+                }
                 return By.res(mPackage, mValue);
             case JsonConfigConstants.CLICKABLE:
                 return By.clickable(mFlag);

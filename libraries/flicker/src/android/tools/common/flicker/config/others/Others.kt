@@ -19,15 +19,15 @@ package android.tools.common.flicker.config.others
 internal object Others {
     val SCENARIOS =
         listOf(
-            OthersBiometricPromptTransition(),
-            OthersDefault(),
-            OthersOneHandedEnterTransition(),
-            OthersOneHandedExitTransition(),
-            OthersScreenOff(),
-            OthersScreenOffShowAod(),
-            OthersTakeScreenshot(),
-            OthersUserDialogOpen(),
-            OthersUserSwitch(),
-            OthersVolumeControl()
+            OthersBiometricPromptTransition,
+            EntireTrace,
+            OthersOneHandedEnterTransition,
+            OthersOneHandedExitTransition,
+            OthersScreenOff,
+            OthersScreenOffShowAod,
+            OthersTakeScreenshot,
+            OthersUserDialogOpen,
+            OthersUserSwitch,
+            OthersVolumeControl
         )
 }

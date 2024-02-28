@@ -17,25 +17,24 @@
 package android.tools.device.traces.io
 
 import android.annotation.SuppressLint
-import android.tools.CleanFlickerEnvironmentRule
 import android.tools.TEST_SCENARIO
 import android.tools.TestTraces
 import android.tools.assertExceptionMessage
 import android.tools.assertThrows
-import android.tools.common.CrossPlatform
 import android.tools.common.ScenarioBuilder
+import android.tools.common.Timestamps
 import android.tools.common.io.RunStatus
 import android.tools.common.io.TraceType
 import android.tools.device.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.device.traces.deleteIfExists
 import android.tools.newTestResultWriter
 import android.tools.outputFileName
+import android.tools.rules.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
 import java.io.File
 import kotlin.io.path.createTempDirectory
 import org.junit.ClassRule
 import org.junit.FixMethodOrder
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runners.MethodSorters
 
@@ -65,10 +64,10 @@ class ResultWriterTest {
         Truth.assertWithMessage("File exists").that(path.exists()).isTrue()
         Truth.assertWithMessage("Transition start time")
             .that(result.transitionTimeRange.start)
-            .isEqualTo(CrossPlatform.timestamp.min())
+            .isEqualTo(Timestamps.min())
         Truth.assertWithMessage("Transition end time")
             .that(result.transitionTimeRange.end)
-            .isEqualTo(CrossPlatform.timestamp.max())
+            .isEqualTo(Timestamps.max())
         val reader = ResultReader(result, TRACE_CONFIG_REQUIRE_CHANGES)
         Truth.assertWithMessage("File count").that(reader.countFiles()).isEqualTo(0)
     }
@@ -210,6 +209,6 @@ class ResultWriterTest {
                 .contains(status.prefix)
         }
 
-        @Rule @ClassRule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+        @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()
     }
 }
