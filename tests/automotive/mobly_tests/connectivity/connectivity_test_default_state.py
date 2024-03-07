@@ -22,39 +22,14 @@
 
 """
 
-import sys
-import logging
-import pprint
-
 from mobly import asserts
-from mobly import base_test
-from mobly import test_runner
-from mobly.controllers import android_device
-
-from mbs_utils import constants
-from mbs_utils import spectatio_utils
-from mbs_utils import bt_utils
+from utilities.main_utils import common_main
+from bluetooth_test import bluetooth_base_test
 
 
-class BluetoothDefaultStateTest(base_test.BaseTestClass):
+class BluetoothDefaultStateTest(bluetooth_base_test.BluetoothBaseTest):
 
-    def setup_class(self):
-        # Registering android_device controller module, and declaring that the test
-        # requires at least two Android devices.
-        self.ads = self.register_controller(android_device, min_number=2)
-
-        # Even in a default state test, tags should be set to make debugging easier.
-        self.discoverer = android_device.get_device(
-            self.ads, label='auto')
-        self.discoverer.debug_tag = 'discoverer'
-        self.discoverer.load_snippet('mbs', android_device.MBS_PACKAGE)
-
-
-    def setup_test(self):
-        # Default state test requires no setup.
-        pass
-
-    def test_device_connectivity_in_level_two(self):
+    def test_bluetooth_default_state(self):
         # Confirm that the bluetooth state is ON
         asserts.assert_true(
             self.discoverer.mbs.btIsEnabled(),
@@ -65,7 +40,5 @@ class BluetoothDefaultStateTest(base_test.BaseTestClass):
         self.discoverer.mbs.btDisable()
 
 
-
 if __name__ == '__main__':
-    # Take test args
-    test_runner.main()
+    common_main()

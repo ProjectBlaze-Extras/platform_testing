@@ -15,6 +15,8 @@
  */
 package android.platform.test.rule;
 
+import static com.android.systemui.Flags.keyguardBottomAreaRefactor;
+
 import android.os.RemoteException;
 
 import androidx.test.uiautomator.By;
@@ -25,8 +27,11 @@ import org.junit.runner.Description;
 /** This rule will unlock phone screen before a test case. */
 public class UnlockScreenRule extends TestWatcher {
 
-    protected static final BySelector SCREEN_LOCK =
+    protected static final BySelector KEYGUARD_BOTTOM_AREA_VIEW =
             By.res("com.android.systemui", "keyguard_bottom_area");
+
+    protected static final BySelector KEYGUARD_ROOT_VIEW =
+            By.res("com.android.systemui", "keyguard_root_view");
 
     @Override
     protected void starting(Description description) {
@@ -35,7 +40,15 @@ public class UnlockScreenRule extends TestWatcher {
             if (!getUiDevice().isScreenOn()) {
                 getUiDevice().wakeUp();
             }
-            if (getUiDevice().hasObject(SCREEN_LOCK)) {
+
+            BySelector screenLock;
+            if (keyguardBottomAreaRefactor()) {
+                screenLock = KEYGUARD_ROOT_VIEW;
+            } else {
+                screenLock = KEYGUARD_BOTTOM_AREA_VIEW;
+            }
+
+            if (getUiDevice().hasObject(screenLock)) {
                 getUiDevice().pressMenu();
                 getUiDevice().waitForIdle();
             }

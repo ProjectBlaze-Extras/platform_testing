@@ -17,8 +17,9 @@
 package android.platform.helpers;
 
 import android.graphics.Rect;
-import android.support.test.uiautomator.Direction;
-import android.support.test.uiautomator.UiObject2;
+
+import androidx.test.uiautomator.Direction;
+import androidx.test.uiautomator.UiObject2;
 
 public interface INewsHelper extends IAppHelper {
     /**

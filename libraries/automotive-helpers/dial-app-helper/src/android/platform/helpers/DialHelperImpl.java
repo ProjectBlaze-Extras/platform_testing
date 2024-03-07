@@ -86,6 +86,28 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
     }
 
     /** {@inheritDoc} */
+    @Override
+    public void pressMobileCallOnContact() {
+        BySelector mobileCallButtonSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.CALL_MOBILE_BUTTON);
+
+        UiObject2 mobileCallButton = getSpectatioUiUtil().findUiObject(mobileCallButtonSelector);
+
+        if (mobileCallButton != null) getSpectatioUiUtil().clickAndWait(mobileCallButton);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void pressContactResult(String expectedName) {
+        BySelector searchResultSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.CONTACT_SEARCH_RESULT);
+
+        UiObject2 searchResult = getSpectatioUiUtil().findUiObject(searchResultSelector);
+
+        if (searchResult != null) getSpectatioUiUtil().clickAndWait(searchResult);
+    }
+
+    /** {@inheritDoc} */
     public void open() {
         getSpectatioUiUtil().pressHome();
         getSpectatioUiUtil().wait1Second();
@@ -94,6 +116,16 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
                         getCommandFromConfig(
                                 AutomotiveConfigConstants.OPEN_PHONE_ACTIVITY_COMMAND));
         getSpectatioUiUtil().wait1Second();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int getNumberOfCallHistoryEntries() {
+        BySelector historyEntrySelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.CALL_HISTORY_INFO);
+        ArrayList<UiObject2> callEntries =
+                new ArrayList<UiObject2>(getSpectatioUiUtil().findUiObjects(historyEntrySelector));
+        return callEntries.size();
     }
 
     /** {@inheritDoc} */
@@ -168,7 +200,7 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
 
     /** {@inheritDoc} */
     public void deleteDialedNumber() {
-        String phoneNumber = getDialInNumber();
+        String phoneNumber = getNumberInDialPad();
         BySelector deleteButtonSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.DELETE_NUMBER);
         UiObject2 deleteButton = getSpectatioUiUtil().findUiObject(deleteButtonSelector);
@@ -180,7 +212,8 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
     }
 
     /** {@inheritDoc} */
-    public String getDialInNumber() {
+    @Override
+    public String getNumberInDialPad() {
         BySelector dialedInNumberSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.DIAL_IN_NUMBER);
         UiObject2 dialInNumber = getSpectatioUiUtil().findUiObject(dialedInNumberSelector);
@@ -196,6 +229,17 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
         UiObject2 dialedNumber = getSpectatioUiUtil().findUiObject(dialedNumberSelector);
         getSpectatioUiUtil()
                 .validateUiObject(dialedNumber, AutomotiveConfigConstants.DIALED_CONTACT_TITLE);
+        return dialedNumber.getText();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String getDialingNumber() {
+        BySelector dialedNumberSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.DIALING_NUMBER);
+        UiObject2 dialedNumber = getSpectatioUiUtil().findUiObject(dialedNumberSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(dialedNumber, AutomotiveConfigConstants.DIALING_NUMBER);
         return dialedNumber.getText();
     }
 
@@ -328,12 +372,12 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
     /** {@inheritDoc} */
     public String getFirstSearchResult() {
         BySelector searchResultSelector =
-                getUiElementFromConfig(AutomotiveConfigConstants.SEARCH_RESULT);
+                getUiElementFromConfig(AutomotiveConfigConstants.CONTACT_SEARCH_RESULT_NAME);
         UiObject2 searchResult = getSpectatioUiUtil().findUiObject(searchResultSelector);
         getSpectatioUiUtil()
-                .validateUiObject(searchResult, AutomotiveConfigConstants.SEARCH_RESULT);
+                .validateUiObject(
+                        searchResult, AutomotiveConfigConstants.CONTACT_SEARCH_RESULT_NAME);
         String result = searchResult.getText();
-        exitSearchResultPage();
         return result;
     }
 
@@ -515,6 +559,17 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
     }
 
     /** {@inheritDoc} */
+    @Override
+    public void openDialPad() {
+        BySelector contactMenuSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.DIALER_DIALPAD);
+        UiObject2 contactMenuButton = getSpectatioUiUtil().findUiObject(contactMenuSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(contactMenuButton, AutomotiveConfigConstants.DIALER_DIALPAD);
+        getSpectatioUiUtil().clickAndWait(contactMenuButton);
+    }
+
+    /** {@inheritDoc} */
     public void openDetailsPage(String contactName) {
         openContacts();
         UiObject2 contact = getContactFromContactList(contactName);
@@ -636,6 +691,13 @@ public class DialHelperImpl extends AbstractStandardAppHelper implements IAutoDi
         getSpectatioUiUtil()
                 .executeShellCommand(
                         getCommandFromConfig(AutomotiveConfigConstants.OPEN_DIAL_PAD_COMMAND));
+        BySelector dialPadMenuSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.DIAL_PAD_MENU);
+        UiObject2 dialMenuButton = getSpectatioUiUtil().findUiObject(dialPadMenuSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(dialMenuButton, AutomotiveConfigConstants.DIAL_PAD_MENU);
+        getSpectatioUiUtil().clickAndWait(dialMenuButton);
+        getSpectatioUiUtil().wait1Second();
         BySelector dialPadSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.DIAL_PAD_FRAGMENT);
         UiObject2 dialPad = getSpectatioUiUtil().findUiObject(dialPadSelector);

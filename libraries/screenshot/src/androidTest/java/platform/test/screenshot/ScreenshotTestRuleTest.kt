@@ -18,6 +18,9 @@ package platform.test.screenshot
 
 import android.content.Context
 import android.graphics.Rect
+import android.platform.uiautomator_helpers.DeviceHelpers.context
+import android.platform.uiautomator_helpers.DeviceHelpers.shell
+import android.provider.Settings.System
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
@@ -26,7 +29,9 @@ import java.io.File
 import java.lang.AssertionError
 import java.util.ArrayList
 import org.junit.After
+import org.junit.AfterClass
 import org.junit.Assert.assertThrows
+import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,25 +56,39 @@ class CustomGoldenImagePathManager(
 @MediumTest
 class ScreenshotTestRuleTest {
 
-    val customizedAssetsPath = "platform_testing/libraries/screenshot/src/androidTest/assets"
+    private val customizedAssetsPath = "platform_testing/libraries/screenshot/src/androidTest/assets"
 
     @get:Rule
     val rule = ScreenshotTestRule(
-        CustomGoldenImagePathManager(InstrumentationRegistry.getInstrumentation().getContext())
+        CustomGoldenImagePathManager(InstrumentationRegistry.getInstrumentation().context)
     )
 
     @get:Rule
     val customizedRule = ScreenshotTestRule(
-        CustomGoldenImagePathManager(
-            InstrumentationRegistry.getInstrumentation().getContext(),
-            customizedAssetsPath
-        )
+        CustomGoldenImagePathManager(context, customizedAssetsPath)
     )
 
     @Test
     fun performDiff_sameBitmaps() {
         val goldenIdentifier = "round_rect_gray"
         val first = loadBitmap(goldenIdentifier)
+
+        first
+            .assertAgainstGolden(rule, goldenIdentifier, matcher = PixelPerfectMatcher())
+
+        assertThat(rule.getPathOnDeviceFor(IMAGE_ACTUAL, goldenIdentifier).exists()).isFalse()
+        assertThat(rule.getPathOnDeviceFor(IMAGE_DIFF, goldenIdentifier).exists()).isFalse()
+        assertThat(rule.getPathOnDeviceFor(IMAGE_EXPECTED, goldenIdentifier).exists()).isFalse()
+        assertThat(rule.getPathOnDeviceFor(RESULT_BIN_PROTO, goldenIdentifier).exists()).isFalse()
+    }
+
+    @Test
+    fun performDiff_sameBitmaps_materialYouColors() {
+        val goldenIdentifier = "defaultClock_largeClock_regionSampledColor"
+        val first = bitmapWithMaterialYouColorsSimulation(
+            loadBitmap("defaultClock_largeClock_regionSampledColor_original"),
+            /* isDarkTheme= */ true
+        )
 
         first
             .assertAgainstGolden(rule, goldenIdentifier, matcher = PixelPerfectMatcher())
@@ -315,6 +334,64 @@ class ScreenshotTestRuleTest {
     }
 
     @Test
+    fun screenshotAsserterHooks_disablesVisibleDebugSettings() {
+        // Turn visual debug settings on
+        pointerLocationSetting = 1
+        showTouchesSetting = 1
+
+        var preRan = false
+        val bitmap = loadBitmap("round_rect_green")
+        val asserter = ScreenshotRuleAsserter.Builder(rule)
+                .setOnBeforeScreenshot {
+                    preRan = true
+                    assertThat(pointerLocationSetting).isEqualTo(0)
+                    assertThat(showTouchesSetting).isEqualTo(0)
+                }
+                .setScreenshotProvider {bitmap}
+                .build()
+        asserter.assertGoldenImage("round_rect_green")
+        assertThat(preRan).isTrue()
+
+        // Clear visual debug settings
+        pointerLocationSetting = 0
+        showTouchesSetting = 0
+    }
+
+    @Test
+    fun screenshotAsserterHooks_whenVisibleDebugSettingsOn_revertsSettings() {
+        // Turn visual debug settings on
+        pointerLocationSetting = 1
+        showTouchesSetting = 1
+
+        val bitmap = loadBitmap("round_rect_green")
+        val asserter = ScreenshotRuleAsserter.Builder(rule)
+                .setScreenshotProvider {bitmap}
+                .build()
+        asserter.assertGoldenImage("round_rect_green")
+        assertThat(pointerLocationSetting).isEqualTo(1)
+        assertThat(showTouchesSetting).isEqualTo(1)
+
+        // Clear visual debug settings to pre-test values
+        pointerLocationSetting = 0
+        showTouchesSetting = 0
+    }
+
+    @Test
+    fun screenshotAsserterHooks_whenVisibleDebugSettingsOff_retainsSettings() {
+        // Turn visual debug settings off
+        pointerLocationSetting = 0
+        showTouchesSetting = 0
+
+        val bitmap = loadBitmap("round_rect_green")
+        val asserter = ScreenshotRuleAsserter.Builder(rule)
+                .setScreenshotProvider {bitmap}
+                .build()
+        asserter.assertGoldenImage("round_rect_green")
+        assertThat(pointerLocationSetting).isEqualTo(0)
+        assertThat(showTouchesSetting).isEqualTo(0)
+    }
+
+    @Test
     fun screenshotAsserterHooks_assertionException() {
         var preRan = false
         var postRan = false
@@ -350,5 +427,32 @@ class ScreenshotTestRuleTest {
         }
 
         throw AssertionError("No AssertionError thrown!")
+    }
+
+    private companion object {
+        var prevPointerLocationSetting: Int = 0
+        var prevShowTouchesSetting: Int = 0
+
+        private var pointerLocationSetting: Int
+            get() = shell("settings get system ${System.POINTER_LOCATION}").trim().toIntOrNull() ?: 0
+            set(value) { shell("settings put system ${System.POINTER_LOCATION} $value") }
+
+        private var showTouchesSetting
+            get() = shell("settings get system ${System.SHOW_TOUCHES}").trim().toIntOrNull() ?: 0
+            set(value) { shell("settings put system ${System.SHOW_TOUCHES} $value") }
+
+        @JvmStatic
+        @BeforeClass
+        fun setUpClass() {
+            prevPointerLocationSetting = pointerLocationSetting
+            prevShowTouchesSetting = showTouchesSetting
+        }
+
+        @JvmStatic
+        @AfterClass
+        fun tearDownClass() {
+            pointerLocationSetting = prevPointerLocationSetting
+            showTouchesSetting = prevShowTouchesSetting
+        }
     }
 }

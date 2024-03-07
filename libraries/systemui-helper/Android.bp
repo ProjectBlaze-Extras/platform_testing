@@ -32,7 +32,7 @@ java_library {
         "tapl-common",
     ],
     static_libs: [
-        "truth-prebuilt",
+        "truth",
     ],
     srcs: [
         "src/**/*.java",

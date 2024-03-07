@@ -24,6 +24,7 @@ import android.tools.common.flicker.config.FlickerConfigEntry
 import android.tools.common.flicker.config.ScenarioId
 import android.tools.common.flicker.extractors.ScenarioExtractor
 import android.tools.common.flicker.extractors.TraceSlice
+import android.tools.common.flicker.subject.exceptions.SimpleFlickerAssertionError
 import android.tools.common.io.Reader
 import android.tools.getTraceReaderFromScenario
 import com.google.common.truth.Truth
@@ -51,7 +52,9 @@ class ScenarioInstanceTest {
                                         scenarioInstance: ScenarioInstance,
                                         flicker: FlickerTest
                                     ) {
-                                        flicker.assertLayers { throw Throwable(errorMessage) }
+                                        flicker.assertLayers {
+                                            throw SimpleFlickerAssertionError(errorMessage)
+                                        }
                                     }
                                 } to AssertionInvocationGroup.BLOCKING,
                                 object : AssertionTemplate("myAssertionMultiple") {
@@ -62,8 +65,12 @@ class ScenarioInstanceTest {
                                         flicker.assertLayers {
                                             // No errors
                                         }
-                                        flicker.assertLayers { throw Throwable(errorMessage) }
-                                        flicker.assertWmStart { throw Throwable(errorMessage) }
+                                        flicker.assertLayers {
+                                            throw SimpleFlickerAssertionError(errorMessage)
+                                        }
+                                        flicker.assertWmStart {
+                                            throw SimpleFlickerAssertionError(errorMessage)
+                                        }
                                         flicker.assertWm {
                                             // No errors
                                         }
@@ -96,16 +103,16 @@ class ScenarioInstanceTest {
         Truth.assertThat(singleAssertionResult.assertionErrors.asList()).hasSize(1)
         Truth.assertThat(singleAssertionResult.assertionErrors.first())
             .hasMessageThat()
-            .isEqualTo(errorMessage)
+            .startsWith(errorMessage)
 
         Truth.assertThat(multipleAssertionResult.failed).isTrue()
         Truth.assertThat(multipleAssertionResult.assertionErrors.asList()).hasSize(2)
         Truth.assertThat(multipleAssertionResult.assertionErrors.first())
             .hasMessageThat()
-            .isEqualTo(errorMessage)
+            .startsWith(errorMessage)
         Truth.assertThat(multipleAssertionResult.assertionErrors.last())
             .hasMessageThat()
-            .isEqualTo(errorMessage)
+            .startsWith(errorMessage)
     }
 
     @Test
@@ -129,7 +136,7 @@ class ScenarioInstanceTest {
                                         scenarioInstance: ScenarioInstance,
                                         flicker: FlickerTest
                                     ) {
-                                        throw Throwable(errorMessage)
+                                        throw SimpleFlickerAssertionError(errorMessage)
                                     }
                                 } to AssertionInvocationGroup.BLOCKING,
                                 object : AssertionTemplate("myAssertion2") {
@@ -138,9 +145,9 @@ class ScenarioInstanceTest {
                                         flicker: FlickerTest
                                     ) {
                                         flicker.assertLayers {
-                                            throw Throwable("Some flicker error")
+                                            throw SimpleFlickerAssertionError("Some flicker error")
                                         }
-                                        throw Throwable(errorMessage)
+                                        throw SimpleFlickerAssertionError(errorMessage)
                                     }
                                 } to AssertionInvocationGroup.BLOCKING
                             ),
@@ -165,13 +172,12 @@ class ScenarioInstanceTest {
         Truth.assertThat(assertion1Result.assertionErrors.asList()).hasSize(1)
         Truth.assertThat(assertion1Result.assertionErrors.first())
             .hasMessageThat()
-            .isEqualTo(errorMessage)
+            .startsWith(errorMessage)
 
         val assertion2Result = results.first { it.name == "MY_CUSTOM_SCENARIO::myAssertion2" }
         Truth.assertThat(assertion2Result.failed).isTrue()
         Truth.assertThat(assertion2Result.assertionErrors.asList()).hasSize(2)
-        Truth.assertThat(assertion2Result.assertionErrors.map { it.message }).contains(errorMessage)
-        Truth.assertThat(assertion2Result.assertionErrors.map { it.message })
-            .contains("Some flicker error")
+        Truth.assertThat(assertion2Result.assertionErrors[0].message).contains("Some flicker error")
+        Truth.assertThat(assertion2Result.assertionErrors[1].message).contains(errorMessage)
     }
 }

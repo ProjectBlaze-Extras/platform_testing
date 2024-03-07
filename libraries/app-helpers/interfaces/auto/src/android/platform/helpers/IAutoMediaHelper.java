@@ -216,4 +216,96 @@ public interface IAutoMediaHelper extends IAppHelper, Scrollable {
      * <p>This method is return is Bluetooth Audio disconnected label visible.
      */
     boolean isBluetoothAudioDisconnectedLabelVisible();
+
+    /**
+     * Setup expectations: Bluetooth Audio page opened.
+     *
+     * <p>This method returns whether connect to bluetooth label visible or not.
+     */
+    boolean isConnectToBluetoothLabelVisible();
+
+    /**
+     * Setup expectations: on home screen.
+     *
+     * <p>This method is used to open Bluetooth Audio screen.
+     */
+    void openBluetoothMediaApp();
+
+    /**
+     * Setup expectations: Bluetooth Settings page opened.
+     *
+     * <p>This method is used to enable/disable Bluetooth conncetion.
+     */
+    void clickOnBluetoothToggle();
+
+    /**
+     * Setup expectations: Bluetooth Audio page opened.
+     *
+     * <p>This method is used to Cancel Bluetooth Audio conncetion.
+     */
+    void cancelBluetoothAudioConncetion();
+
+    /**
+     * Setup expectations: Bluetooth Audio page opened.
+     *
+     * <p>This method is used to Scroll down playlist.
+     */
+    void scrollPlayListDown();
+
+
+    /**
+     * Setup expectations: Bluetooth Audio page opened.
+     *
+     * <p>This method is used to select song from playlist.
+     */
+    void clickOnSongFromPlaylist();
+
+    /**
+     * Setup expectations: Media app is open and maximized now playing.
+     *
+     * @return get current artist tile
+     */
+    String getArtistrTitle();
+
+    /**
+     * Setup expectations: Media app is open and maximized now playing.
+     *
+     * @return get current album tile
+     */
+    String getAlbumTitle();
+
+    /**
+     * Setup expectations: Media app is open and maximized now playing.
+     *
+     * @return get current song playing time
+     */
+    String getSongCurrentPlayingTime();
+
+    /**
+     * Setup expectations: Media app is open and maximized now playing.
+     *
+     * @return get current song max playing time
+     */
+    String getCurrentSongMaxPlayingTime();
+
+    /**
+     * Setup expectations: Bluetooth Audio track maximized.
+     *
+     * <p>This method is return is "Now Playing" label visible.
+     */
+    boolean isNowPlayingLabelVisible();
+
+    /**
+     * Setup expectations: Bluetooth Audio track maximized.
+     *
+     * <p>This method is return is Playlist icon visible.
+     */
+    boolean isPlaylistIconVisible();
+
+    /**
+     * Setup expectations: Bluetooth Audio track maximized.
+     *
+     * <p>This method is used to click on playlist icon.
+     */
+    void clickOnPlaylistIcon();
 }

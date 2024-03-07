@@ -70,8 +70,15 @@ import org.junit.runners.parameterized.TestWithParameters
  *     CloseAppBackButtonTest#launcherWindowBecomesVisible[ROTATION_90_GESTURAL_NAV]`
  * ```
  */
-class LegacyFlickerJUnit4ClassRunner(test: TestWithParameters?, private val scenario: Scenario?) :
-    BlockJUnit4ClassRunnerWithParameters(test), IFlickerJUnitDecorator {
+class LegacyFlickerJUnit4ClassRunner(
+    test: TestWithParameters?,
+    private val scenario: Scenario?,
+    private val arguments: Bundle = InstrumentationRegistry.getArguments()
+) : BlockJUnit4ClassRunnerWithParameters(test), IFlickerJUnitDecorator {
+    private val onlyBlocking
+        get() =
+            scenario?.getConfigValue<Boolean>(Scenario.FAAS_BLOCKING)
+                ?: arguments.getString(Scenario.FAAS_BLOCKING)?.toBoolean() ?: true
 
     @VisibleForTesting
     val transitionRunner =
@@ -105,14 +112,14 @@ class LegacyFlickerJUnit4ClassRunner(test: TestWithParameters?, private val scen
     private fun getCandidateProviderMethods(testClass: TestClass): List<FrameworkMethod> =
         testClass.getAnnotatedMethods(FlickerBuilderProvider::class.java) ?: emptyList()
 
-    private val arguments: Bundle = InstrumentationRegistry.getArguments()
-
     @VisibleForTesting
     val flickerDecorator: LegacyFlickerServiceDecorator =
         LegacyFlickerServiceDecorator(
             this.testClass,
             scenario,
             transitionRunner,
+            arguments = arguments,
+            skipNonBlocking = onlyBlocking,
             inner = LegacyFlickerDecorator(this.testClass, scenario, transitionRunner, inner = this)
         )
 

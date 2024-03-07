@@ -1,5 +1,6 @@
 package android.platform.test.rule
 
+import android.platform.uiautomator_helpers.WaitUtils.ensureThat
 import android.provider.Settings
 import org.junit.rules.ExternalResource
 
@@ -43,15 +44,15 @@ abstract class SettingRule<T>(
     }
 
     fun setSettingValue(value: T?) {
-        if (value == null) {
-            setSettingValueAsString(null)
-        } else if (value is Boolean) {
-            setSettingValueAsString(if (value) "1" else "0")
-        } else if (value!!::class in supportedTypes) {
-            setSettingValueAsString(value.toString())
-        } else {
-            throw IllegalArgumentException("Unsupported type: ${value!!::class}")
-        }
+        val valueAsString =
+            when {
+                value == null -> null
+                value is Boolean -> if (value) "1" else "0"
+                value!!::class in supportedTypes -> value.toString()
+                else -> throw IllegalArgumentException("Unsupported type: ${value!!::class}")
+            }
+        setSettingValueAsString(valueAsString)
+        ensureThat("New setting value set") { getSettingValueAsString() == valueAsString }
     }
 
     abstract fun getSettingValueAsString(): String?

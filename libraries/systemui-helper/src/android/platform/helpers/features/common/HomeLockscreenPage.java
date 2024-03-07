@@ -49,12 +49,10 @@ public class HomeLockscreenPage implements Page {
     // https://hsv.googleplex.com/4836673386971136?node=68
     public static final BySelector SWIPEABLE_AREA =
             By.res("com.android.systemui:id/notification_panel");
-    // https://hsv.googleplex.com/5130837462876160?node=121
+    // https://hsv.googleplex.com/5130837462876160?node=117
     public static final Pattern PAGE_TITLE_SELECTOR_PATTERN =
             Pattern.compile(
-                    String.format(
-                            "com.android.systemui:id/(%s|%s)",
-                            "lockscreen_clock_view", "lockscreen_clock_view_large"));
+                    String.format("com.android.systemui:id/%s", "keyguard_clock_container"));
     private static final BySelector PAGE_TITLE_SELECTOR =
             By.res(PAGE_TITLE_SELECTOR_PATTERN);
     private static final int SHORT_SLEEP_IN_SECONDS = 2;

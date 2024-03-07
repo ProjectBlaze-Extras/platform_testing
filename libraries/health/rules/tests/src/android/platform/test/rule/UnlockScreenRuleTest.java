@@ -15,12 +15,15 @@
  */
 package android.platform.test.rule;
 
+import static com.android.systemui.Flags.keyguardBottomAreaRefactor;
+
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.RemoteException;
 
+import androidx.test.uiautomator.BySelector;
 import androidx.test.uiautomator.UiDevice;
 
 import org.junit.Test;
@@ -95,9 +98,16 @@ public class UnlockScreenRuleTest {
 
         @Override
         protected UiDevice getUiDevice() {
+            BySelector screenLock;
+            if (keyguardBottomAreaRefactor()) {
+                screenLock = KEYGUARD_ROOT_VIEW;
+            } else {
+                screenLock = KEYGUARD_BOTTOM_AREA_VIEW;
+            }
+
             try {
                 when(mUiDevice.isScreenOn()).thenReturn(mIsScreenOn);
-                when(mUiDevice.hasObject(SCREEN_LOCK)).thenReturn(!mIsUnlocked);
+                when(mUiDevice.hasObject(screenLock)).thenReturn(!mIsUnlocked);
             } catch (RemoteException e) {
                 throw new RuntimeException("Could not unlock device.", e);
             }

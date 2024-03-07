@@ -18,37 +18,41 @@ package android.tools.common.flicker.config.appclose
 
 import android.tools.common.flicker.ScenarioInstance
 import android.tools.common.flicker.assertors.ComponentTemplate
+import android.tools.common.flicker.isAppTransitionChange
 import android.tools.common.traces.component.FullComponentIdMatcher
 import android.tools.common.traces.component.IComponentMatcher
+import android.tools.common.traces.surfaceflinger.LayersTrace
 import android.tools.common.traces.wm.Transition
 import android.tools.common.traces.wm.TransitionType
+import android.tools.common.traces.wm.WindowManagerTrace
 
 object Components {
-    val CLOSING_APP =
-        ComponentTemplate("CLOSING_APP") { scenarioInstance: ScenarioInstance ->
+    val CLOSING_APPS =
+        ComponentTemplate("CLOSING_APP(S)") { scenarioInstance: ScenarioInstance ->
             closingAppFrom(
-                scenarioInstance.associatedTransition ?: error("Missing associated transition")
+                scenarioInstance.associatedTransition ?: error("Missing associated transition"),
+                scenarioInstance.reader.readLayersTrace(),
+                scenarioInstance.reader.readWmTrace()
             )
         }
 
-    private fun closingAppFrom(transition: Transition): IComponentMatcher {
+    private fun closingAppFrom(
+        transition: Transition,
+        layersTrace: LayersTrace?,
+        wmTrace: WindowManagerTrace?
+    ): IComponentMatcher {
         val targetChanges =
             transition.changes.filter {
-                it.transitMode == TransitionType.CLOSE || it.transitMode == TransitionType.TO_BACK
+                (it.transitMode == TransitionType.CLOSE ||
+                    it.transitMode == TransitionType.TO_BACK) &&
+                    isAppTransitionChange(it, layersTrace, wmTrace)
             }
 
-        val closingLayerIds = targetChanges.map { it.layerId }
-        require(closingLayerIds.size == 1) {
-            "Expected 1 closing layer but got ${closingLayerIds.size}"
-        }
+        val closingAppMatchers =
+            targetChanges.map { FullComponentIdMatcher(it.windowId, it.layerId) }
 
-        val closingWindowIds = targetChanges.map { it.windowId }
-        require(closingWindowIds.size == 1) {
-            "Expected 1 closing window but got ${closingWindowIds.size}"
+        return closingAppMatchers.reduce<IComponentMatcher, IComponentMatcher> { acc, matcher ->
+            acc.or(matcher)
         }
-
-        val windowId = closingWindowIds.first()
-        val layerId = closingLayerIds.first()
-        return FullComponentIdMatcher(windowId, layerId)
     }
 }

@@ -22,9 +22,90 @@ python_test_host {
     srcs: ["bluetooth_button_enable_disable_test.py"],
     libs: [
         "mobly",
-        "mbs_utils",
-        "BluetoothTestLibrary"
+        "utilities",
+        "bluetooth_test",
     ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_test_host {
+    name: "BTDisableEnablePhoneHFPBluetoothProfile",
+    main: "disable_enable_phone_hfp_bluetooth_profile_test.py",
+    srcs: ["disable_enable_phone_hfp_bluetooth_profile_test.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test"
+        ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_test_host {
+    name: "BluetoothPaletteVerificationTest",
+    main: "verify_bluetooth_palette_buttons_test.py",
+    srcs: ["verify_bluetooth_palette_buttons_test.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test",
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_test_host {
+    name: "BTEnableDisableBluetoothAudioViaMusicButton",
+    main: "enable-disable_bluetooth_audio_via_music_button.py",
+    srcs: ["enable-disable_bluetooth_audio_via_music_button.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test"
+        ],
     test_suites: [
         "catbox",
     ],

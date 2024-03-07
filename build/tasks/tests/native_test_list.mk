@@ -94,7 +94,8 @@ native_tests := \
     libnativehelper_tests \
     libnetworkstats_test \
     libprocinfo_test \
-    libtextclassifier_tests \
+    libtextclassifier_tests-tplus \
+    libtextclassifier_tests-sminus \
     libsurfaceflinger_unittest \
     libunwindstack_unit_test \
     libuwb_core_tests \

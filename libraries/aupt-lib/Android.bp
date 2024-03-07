@@ -22,7 +22,7 @@ java_library {
     name: "AuptLib",
     libs: [
         "androidx.test.runner",
-        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
         "junit",
         "android.test.runner.stubs",
         "android.test.base.stubs",

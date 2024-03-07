@@ -17,11 +17,11 @@
 package android.tools.common.flicker.assertions
 
 import android.annotation.SuppressLint
-import android.tools.TestTraces
 import android.tools.common.Timestamp
 import android.tools.common.flicker.subject.FlickerSubject
 import android.tools.common.flicker.subject.FlickerTraceSubject
 import android.tools.common.io.TraceType
+import android.tools.utils.TestTraces
 
 @SuppressLint("VisibleForTests")
 class SubjectsParserTestParseLayers : BaseSubjectsParserTestParse() {

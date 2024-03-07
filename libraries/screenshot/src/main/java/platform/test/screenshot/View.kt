@@ -24,6 +24,19 @@ import android.view.WindowInsets
 val ViewGroup.children
     get() = sequence { for (i in 0 until childCount) yield(getChildAt(i)) }
 
+/** Returns the total number of child views below this view */
+fun View.getChildCountRecursively(): Int {
+    return if (this is ViewGroup) {
+        var count = childCount
+        for (i in 0 until childCount) {
+            getChildAt(i)?.let { count += it.getChildCountRecursively() }
+        }
+        count
+    } else {
+        0
+    }
+}
+
 /**
  * Elevation/shadows is not deterministic when doing hardware rendering, this exentsion allows to
  * disable it for any view in the hierarchy.

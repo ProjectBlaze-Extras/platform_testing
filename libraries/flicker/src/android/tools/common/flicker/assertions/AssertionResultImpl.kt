@@ -17,12 +17,13 @@
 package android.tools.common.flicker.assertions
 
 import android.tools.common.flicker.AssertionInvocationGroup
+import android.tools.common.flicker.subject.exceptions.FlickerAssertionError
 
 /** Base class for a FaaS assertion */
 internal data class AssertionResultImpl(
     override val name: String,
     override val assertionData: Array<AssertionData>,
-    override val assertionErrors: Array<Throwable>,
+    override val assertionErrors: Array<FlickerAssertionError>,
     override val stabilityGroup: AssertionInvocationGroup
 ) : AssertionResult {
     // Overriding equals because of use of Array

@@ -16,6 +16,7 @@
 
 package android.tools.device.flicker.assertions
 
+import android.tools.common.Logger
 import android.tools.common.io.Reader
 import android.tools.common.io.RunStatus
 import android.tools.device.traces.TRACE_CONFIG_REQUIRE_CHANGES
@@ -33,6 +34,8 @@ class ArtifactAssertionRunner(
     resultReader: Reader = ResultReaderWithLru(result, TRACE_CONFIG_REQUIRE_CHANGES)
 ) : BaseAssertionRunner(resultReader) {
     override fun doUpdateStatus(newStatus: RunStatus) {
-        result.updateStatus(newStatus)
+        Logger.withTracing("ArtifactAssertionRunner#doUpdateStatus") {
+            result.updateStatus(newStatus)
+        }
     }
 }

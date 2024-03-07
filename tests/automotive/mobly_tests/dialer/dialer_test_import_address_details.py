@@ -21,22 +21,19 @@
 
 """
 
-import sys
 import logging
-import pprint
 
 from mobly import asserts
 from mobly import base_test
-from mobly import test_runner
 from mobly.controllers import android_device
 
-from mbs_utils import constants
-from mbs_utils import spectatio_utils
-from mbs_utils import bt_utils
+from utilities.main_utils import common_main
+from utilities import constants
+from utilities import spectatio_utils
+from utilities import bt_utils
 
 
 class ImportAddressDetailsTest(base_test.BaseTestClass):
-
     VCF_ADDRESS_HEADER = "ADR"
 
     def setup_class(self):
@@ -80,11 +77,11 @@ class ImportAddressDetailsTest(base_test.BaseTestClass):
     def test_import_address_details(self):
         # Open the dialer app, and then the contacts page
         self.call_utils.open_phone_app()
-        self.call_utils.wait_with_log(constants.WAIT_TWO_SECONDS)
+        self.call_utils.wait_with_log(2)
         self.call_utils.open_contacts()
-        self.call_utils.wait_with_log(constants.WAIT_TWO_SECONDS)
+        self.call_utils.wait_with_log(2)
         self.call_utils.open_first_contact_details()
-        self.call_utils.wait_with_log(constants.WAIT_TWO_SECONDS)
+        self.call_utils.wait_with_log(2)
 
         # Import the first contact's address from the discoverer device.
         display_address = self.call_utils.get_home_address_from_details()
@@ -96,9 +93,8 @@ class ImportAddressDetailsTest(base_test.BaseTestClass):
         asserts.assert_true(
             self.compare_display_address_to_vcf_line(display_address, vcf_line),
             ("Displayed address does not match address stored in VCF file: " +
-            "\n\tDisplayed address: %s" +
-            "\n\tVCF address: %s") % (display_address, vcf_line))
-
+             "\n\tDisplayed address: %s" +
+             "\n\tVCF address: %s") % (display_address, vcf_line))
 
     def teardown_test(self):
         # Turn Bluetooth off on both devices after test finishes.
@@ -118,8 +114,5 @@ class ImportAddressDetailsTest(base_test.BaseTestClass):
         return True
 
 
-
-
 if __name__ == '__main__':
-    # Take test args
-    test_runner.main()
+    common_main()

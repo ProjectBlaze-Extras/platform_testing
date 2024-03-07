@@ -66,6 +66,53 @@ public class SpectatioUiUtil {
         RIGHT_TO_LEFT
     }
 
+    /**
+     * Defines the swipe fraction, allowing for a swipe to be performed from a 5-pad distance, a
+     * quarter, half, three-quarters of the screen, or the full screen.
+     *
+     * <p>DEFAULT: Swipe from one side of the screen to another side, with a 5-pad distance from the
+     * edge.
+     *
+     * <p>QUARTER: Swipe from one side, a quarter of the distance of the entire screen away from the
+     * edge, to the other side.
+     *
+     * <p>HALF: Swipe from the center of the screen to the other side.
+     *
+     * <p>THREEQUARTER: Swipe from one side, three-quarters of the distance of the entire screen
+     * away from the edge, to the other side.
+     *
+     * <p>FULL: Swipe from one edge of the screen to the other edge.
+     */
+    public enum SwipeFraction {
+        DEFAULT,
+        QUARTER,
+        HALF,
+        THREEQUARTER,
+        FULL,
+    }
+
+    /**
+     * Defines the swipe speed based on the number of steps.
+     *
+     * <p><a
+     * href="https://developer.android.com/reference/androidx/test/uiautomator/UiDevice#swipe(int,int,int,int,int)">UiDevie#Swipe</a>
+     * performs a swipe from one coordinate to another using the number of steps to determine
+     * smoothness and speed. Each step execution is throttled to 5ms per step. So for a 100 steps,
+     * the swipe will take about 1/2 second to complete.
+     */
+    public enum SwipeSpeed {
+        NORMAL(200), // equals to 1000ms in duration.
+        SLOW(1000), // equals to 5000ms in duration.
+        FAST(50), // equals to 250ms in duration.
+        FLING(20); // equals to 100ms in duration.
+
+        final int mNumSteps;
+
+        SwipeSpeed(int numOfSteps) {
+            this.mNumSteps = numOfSteps;
+        }
+    }
+
     private SpectatioUiUtil(UiDevice mDevice) {
         this.mDevice = mDevice;
     }
@@ -455,9 +502,20 @@ public class SpectatioUiUtil {
     }
 
     public void swipe(SwipeDirection swipeDirection, int numOfSteps) {
+        swipe(swipeDirection, numOfSteps, SwipeFraction.DEFAULT);
+    }
+
+    /**
+     * Perform a swipe gesture
+     *
+     * @param swipeDirection The direction to perform the swipe in
+     * @param numOfSteps How many steps the swipe will take
+     * @param swipeFraction The fraction of the screen to swipe across
+     */
+    public void swipe(SwipeDirection swipeDirection, int numOfSteps, SwipeFraction swipeFraction) {
         Rect bounds = getScreenBounds();
 
-        List<Point> swipePoints = getPointsToSwipe(bounds, swipeDirection);
+        List<Point> swipePoints = getPointsToSwipe(bounds, swipeDirection, swipeFraction);
 
         Point startPoint = swipePoints.get(0);
         Point finishPoint = swipePoints.get(1);
@@ -466,50 +524,95 @@ public class SpectatioUiUtil {
         mDevice.swipe(startPoint.x, startPoint.y, finishPoint.x, finishPoint.y, numOfSteps);
     }
 
-    private List<Point> getPointsToSwipe(Rect bounds, SwipeDirection swipeDirection) {
-        Point boundsCenter = new Point(bounds.centerX(), bounds.centerY());
+    /**
+     * Perform a swipe gesture
+     *
+     * @param swipeDirection The direction to perform the swipe in
+     * @param swipeSpeed How fast to swipe
+     */
+    public void swipe(SwipeDirection swipeDirection, SwipeSpeed swipeSpeed) throws IOException {
+        swipe(swipeDirection, swipeSpeed.mNumSteps);
+    }
 
+    /**
+     * Perform a swipe gesture
+     *
+     * @param swipeDirection The direction to perform the swipe in
+     * @param swipeSpeed How fast to swipe
+     * @param swipeFraction The fraction of the screen to swipe across
+     */
+    public void swipe(
+            SwipeDirection swipeDirection, SwipeSpeed swipeSpeed, SwipeFraction swipeFraction)
+            throws IOException {
+        swipe(swipeDirection, swipeSpeed.mNumSteps, swipeFraction);
+    }
+
+    private List<Point> getPointsToSwipe(
+            Rect bounds, SwipeDirection swipeDirection, SwipeFraction swipeFraction) {
         int xStart;
         int yStart;
         int xFinish;
         int yFinish;
-        // Set as 5 for default
-        // TODO: Make padding value dynamic based on the screen of device under test
-        int pad = 5;
+
+        int padXStart = 5;
+        int padXFinish = 5;
+        int padYStart = 5;
+        int padYFinish = 5;
+
+        switch (swipeFraction) {
+            case FULL:
+                padXStart = 0;
+                padXFinish = 0;
+                padYStart = 0;
+                padYFinish = 0;
+                break;
+            case QUARTER:
+                padXStart = bounds.right / 4;
+                padYStart = bounds.bottom / 4;
+                break;
+            case HALF:
+                padXStart = bounds.centerX();
+                padYStart = bounds.centerY();
+                break;
+            case THREEQUARTER:
+                padXStart = bounds.right / 4 * 3;
+                padYStart = bounds.bottom / 4 * 3;
+                break;
+        }
 
         switch (swipeDirection) {
                 // Scroll left = swipe from left to right.
             case LEFT_TO_RIGHT:
-                xStart = bounds.left + pad; // Pad the edges
-                xFinish = bounds.right - pad; // Pad the edges
-                yStart = boundsCenter.y;
-                yFinish = boundsCenter.y;
+                xStart = bounds.left + padXStart;
+                xFinish = bounds.right - padXFinish;
+                yStart = bounds.centerY();
+                yFinish = bounds.centerY();
                 break;
                 // Scroll right = swipe from right to left.
             case RIGHT_TO_LEFT:
-                xStart = bounds.right - pad; // Pad the edges
-                xFinish = bounds.left + pad; // Pad the edges
-                yStart = boundsCenter.y;
-                yFinish = boundsCenter.y;
+                xStart = bounds.right - padXStart;
+                xFinish = bounds.left + padXFinish;
+                yStart = bounds.centerY();
+                yFinish = bounds.centerY();
                 break;
                 // Scroll up = swipe from top to bottom.
             case TOP_TO_BOTTOM:
-                xStart = boundsCenter.x;
-                xFinish = boundsCenter.x;
-                yStart = bounds.top + pad; // Pad the edges
-                yFinish = bounds.bottom - pad; // Pad the edges
+                xStart = bounds.centerX();
+                xFinish = bounds.centerX();
+                yStart = bounds.top + padYStart;
+                yFinish = bounds.bottom - padYFinish;
                 break;
                 // Scroll down = swipe to bottom to top.
             case BOTTOM_TO_TOP:
             default:
-                xStart = boundsCenter.x;
-                xFinish = boundsCenter.x;
-                yStart = bounds.bottom - pad; // Pad the edges
-                yFinish = bounds.top + pad; // Pad the edges
+                xStart = bounds.centerX();
+                xFinish = bounds.centerX();
+                yStart = bounds.bottom - padYStart;
+                yFinish = bounds.top + padYFinish;
                 break;
         }
 
-        List<Point> swipePoints = new ArrayList<Point>();
+        List<Point> swipePoints = new ArrayList<>();
         // Start Point
         swipePoints.add(new Point(xStart, yStart));
         // Finish Point
@@ -653,6 +756,40 @@ public class SpectatioUiUtil {
             canScroll = scrollUsingButton(backward);
             scrollCount++;
         }
+    }
+
+    /**
+     * Swipe in a direction until a target UI Object is found
+     *
+     * @param swipeDirection Direction to swipe
+     * @param numOfSteps Ticks per swipe
+     * @param swipeFraction How far to swipe
+     * @param target The UI Object to find
+     * @return The found object, or null if there isn't one
+     */
+    public UiObject2 swipeAndFindUiObject(
+            SwipeDirection swipeDirection,
+            int numOfSteps,
+            SwipeFraction swipeFraction,
+            BySelector target) {
+        validateSelector(target, "Find UI Object");
+        UiObject2 uiObject = findUiObject(target);
+        if (isValidUiObject(uiObject)) {
+            return uiObject;
+        }
+
+        String previousView = null;
+        String currentView = getViewHierarchy();
+        while (!currentView.equals(previousView)) {
+            swipe(swipeDirection, numOfSteps, swipeFraction);
+            uiObject = findUiObject(target);
+            if (isValidUiObject(uiObject)) {
+                return uiObject;
+            }
+            previousView = currentView;
+            currentView = getViewHierarchy();
+        }
+        return null;
     }
 
     private String getViewHierarchy() {

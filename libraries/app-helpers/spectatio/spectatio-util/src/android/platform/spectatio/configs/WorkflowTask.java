@@ -16,11 +16,14 @@
 
 package android.platform.spectatio.configs;
 
+import android.platform.spectatio.constants.JsonConfigConstants.FindType;
 import android.platform.spectatio.constants.JsonConfigConstants.ScrollActions;
 import android.platform.spectatio.constants.JsonConfigConstants.ScrollDirection;
 import android.platform.spectatio.constants.JsonConfigConstants.SupportedWorkFlowTasks;
 import android.platform.spectatio.exceptions.MissingUiElementException;
 import android.platform.spectatio.utils.SpectatioUiUtil;
+import android.platform.spectatio.utils.SpectatioUiUtil.SwipeDirection;
+import android.platform.spectatio.utils.SpectatioUiUtil.SwipeFraction;
 import android.util.Log;
 
 import androidx.test.uiautomator.BySelector;
@@ -52,17 +55,23 @@ public class WorkflowTask {
     @SerializedName("SCROLL_CONFIG")
     private ScrollConfig mScrollConfig;
 
+    // If task needs swiping, provide Swipe Config
+    @SerializedName("SWIPE_CONFIG")
+    private SwipeConfig mSwipeConfig;
+
     public WorkflowTask(
             String name,
             String type,
             WorkflowTaskConfig taskConfig,
             int repeatCount,
-            ScrollConfig scrollConfig) {
+            ScrollConfig scrollConfig,
+            SwipeConfig swipeConfig) {
         mName = name;
         mType = type;
         mTaskConfig = taskConfig;
         mRepeatCount = repeatCount;
         mScrollConfig = scrollConfig;
+        mSwipeConfig = swipeConfig;
     }
 
     public String getTaskName() {
@@ -85,6 +94,10 @@ public class WorkflowTask {
         return mScrollConfig;
     }
 
+    public SwipeConfig getSwipeConfig() {
+        return mSwipeConfig;
+    }
+
     public void executeTask(String workflowName, SpectatioUiUtil spectatioUiUtil) {
         Log.i(
                 LOG_TAG,
@@ -92,12 +105,9 @@ public class WorkflowTask {
                         "Executing Task %s with Type %s for Workflow %s",
                         mName, mType, workflowName));
 
-        SupportedWorkFlowTasks taskType = null;
-        try {
-            taskType = SupportedWorkFlowTasks.valueOf(mType);
-        } catch (IllegalArgumentException ex) {
-            throwRuntimeException("Workflow Task Type", mType, workflowName, "Not Supported");
-        }
+        SupportedWorkFlowTasks taskType =
+                validateAndGetEnumValue(
+                        workflowName, "Workflow Task Type", SupportedWorkFlowTasks.class, mType);
 
         int executionCount = 0;
         // Execute Task once by default. Repeat it again based on repeat count i.e. mRepeatCount > 0
@@ -136,7 +146,7 @@ public class WorkflowTask {
                 validateAndClickUiElement(
                         workflowName,
                         spectatioUiUtil,
-                        /* scrollToFind= */ false,
+                        FindType.NONE,
                         /* isLongClick= */ false,
                         /* isOptional= */ false);
                 break;
@@ -144,7 +154,7 @@ public class WorkflowTask {
                 validateAndClickUiElement(
                         workflowName,
                         spectatioUiUtil,
-                        /* scrollToFind= */ false,
+                        FindType.NONE,
                         /* isLongClick= */ false,
                         /* isOptional= */ true);
                 break;
@@ -152,7 +162,7 @@ public class WorkflowTask {
                 validateAndClickUiElement(
                         workflowName,
                         spectatioUiUtil,
-                        /* scrollToFind= */ false,
+                        FindType.NONE,
                         /* isLongClick= */ true,
                         /* isOptional= */ false);
                 break;
@@ -166,7 +176,7 @@ public class WorkflowTask {
                 validateAndClickUiElement(
                         workflowName,
                         spectatioUiUtil,
-                        /* scrollToFind= */ true,
+                        FindType.SCROLL,
                         /* isLongClick= */ false,
                         /* isOptional= */ false);
                 break;
@@ -174,7 +184,26 @@ public class WorkflowTask {
                 validateAndClickUiElement(
                         workflowName,
                         spectatioUiUtil,
-                        /* scrollToFind= */ true,
+                        FindType.SCROLL,
+                        /* isLongClick= */ false,
+                        /* isOptional= */ true);
+                break;
+            case SWIPE:
+                validateAndSwipe(workflowName, spectatioUiUtil);
+                break;
+            case SWIPE_TO_FIND_AND_CLICK:
+                validateAndClickUiElement(
+                        workflowName,
+                        spectatioUiUtil,
+                        FindType.SWIPE,
+                        /* isLongClick= */ false,
+                        /* isOptional= */ false);
+                break;
+            case SWIPE_TO_FIND_AND_CLICK_IF_EXIST:
+                validateAndClickUiElement(
+                        workflowName,
+                        spectatioUiUtil,
+                        FindType.SWIPE,
                         /* isLongClick= */ false,
                         /* isOptional= */ true);
                 break;
@@ -215,27 +244,40 @@ public class WorkflowTask {
         }
     }
 
+    private void validateAndSwipe(String workflowName, SpectatioUiUtil spectatioUiUtil) {
+        SwipeConfig swipeConfig = validateAndGetTaskSwipeConfig(workflowName);
+        SwipeDirection direction =
+                validateAndGetEnumValue(
+                        workflowName,
+                        "Swipe Direction",
+                        SwipeDirection.class,
+                        swipeConfig.getSwipeDirection());
+        SwipeFraction fraction =
+                validateAndGetEnumValue(
+                        workflowName,
+                        "Swipe Fraction",
+                        SwipeFraction.class,
+                        swipeConfig.getSwipeFraction());
+        spectatioUiUtil.swipe(direction, swipeConfig.getNumberOfSteps(), fraction);
+    }
+
     private void validateAndClickUiElement(
             String workflowName,
             SpectatioUiUtil spectatioUiUtil,
-            boolean scrollToFind,
+            FindType howToFind,
             boolean isLongClick,
             boolean isOptional) {
         UiElement uiElement = validateAndGetTaskConfigUiElement(workflowName);
         BySelector selector = uiElement.getBySelectorForUiElement();
         UiObject2 uiObject = spectatioUiUtil.findUiObject(selector);
-        if (scrollToFind && !isValidUiObject(uiObject)) {
+        if (howToFind == FindType.SCROLL && !isValidUiObject(uiObject)) {
             ScrollConfig scrollConfig = validateAndGetTaskScrollConfig(workflowName);
-            ScrollActions scrollAction = null;
-            try {
-                scrollAction = ScrollActions.valueOf(scrollConfig.getScrollAction());
-            } catch (IllegalArgumentException ex) {
-                throwRuntimeException(
-                        "Scroll Action",
-                        scrollConfig.getScrollAction(),
-                        workflowName,
-                        "Not Supported");
-            }
+            ScrollActions scrollAction =
+                    validateAndGetEnumValue(
+                            workflowName,
+                            "Scroll Action",
+                            ScrollActions.class,
+                            scrollConfig.getScrollAction());
             try {
                 switch (scrollAction) {
                     case USE_BUTTON:
@@ -253,17 +295,12 @@ public class WorkflowTask {
                         Integer scrollMargin = Integer.valueOf(scrollConfig.getScrollMargin());
                         Integer scrollWaitTime = Integer.valueOf(scrollConfig.getScrollWaitTime());
 
-                        ScrollDirection scrollDirection = null;
-                        try {
-                            scrollDirection =
-                                    ScrollDirection.valueOf(scrollConfig.getScrollDirection());
-                        } catch (IllegalArgumentException ex) {
-                            throwRuntimeException(
-                                    "Scroll Direction",
-                                    scrollConfig.getScrollDirection(),
-                                    workflowName,
-                                    "Not Supported");
-                        }
+                        ScrollDirection scrollDirection =
+                                validateAndGetEnumValue(
+                                        workflowName,
+                                        "Scroll Direction",
+                                        ScrollDirection.class,
+                                        scrollConfig.getScrollDirection());
                         spectatioUiUtil.addScrollValues(scrollMargin, scrollWaitTime);
                         uiObject =
                                 spectatioUiUtil.scrollAndFindUiObject(
@@ -285,6 +322,27 @@ public class WorkflowTask {
                         workflowName,
                         String.format("Missing. Error: %s", ex.getMessage()));
             }
+        }
+        if (howToFind == FindType.SWIPE && !isValidUiObject(uiObject)) {
+            SwipeConfig swipeConfig = validateAndGetTaskSwipeConfig(workflowName);
+            SwipeDirection swipeDirection =
+                    validateAndGetEnumValue(
+                            workflowName,
+                            "Swipe Direction",
+                            SwipeDirection.class,
+                            swipeConfig.getSwipeDirection());
+            SwipeFraction swipeFraction =
+                    validateAndGetEnumValue(
+                            workflowName,
+                            "Swipe Fraction",
+                            SwipeFraction.class,
+                            swipeConfig.getSwipeFraction());
+            uiObject =
+                    spectatioUiUtil.swipeAndFindUiObject(
+                            swipeDirection,
+                            swipeConfig.getNumberOfSteps(),
+                            swipeFraction,
+                            selector);
         }
         if (isOptional && !isValidUiObject(uiObject)) {
             return;
@@ -396,6 +454,24 @@ public class WorkflowTask {
             throwRuntimeException("Config", "SCROLL_CONFIG", workflowName, "Missing or Invalid");
         }
         return mScrollConfig;
+    }
+
+    private SwipeConfig validateAndGetTaskSwipeConfig(String workflowName) {
+        if (mSwipeConfig == null) {
+            throwRuntimeException("Config", "SWIPE_CONFIG", workflowName, "Missing or Invalid");
+        }
+        return mSwipeConfig;
+    }
+
+    private <E extends Enum<E>> E validateAndGetEnumValue(
+            String workflowName, String property, Class<E> enumClass, String value) {
+        E enumValue = null;
+        try {
+            enumValue = Enum.valueOf(enumClass, value);
+        } catch (IllegalArgumentException ex) {
+            throwRuntimeException(property, value, workflowName, "Not Supported");
+        }
+        return enumValue;
     }
 
     private void throwRuntimeException(

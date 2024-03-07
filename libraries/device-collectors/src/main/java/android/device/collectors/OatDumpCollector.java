@@ -32,11 +32,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** Collects an oat dump to help debugging performance issues with ART profiles. */
 @OptionClass(alias = "oat-dump-collector")
@@ -44,6 +43,7 @@ public class OatDumpCollector extends BaseMetricListener {
     private static final String LOG_TAG = OatDumpCollector.class.getSimpleName();
 
     private static final String OAT_DUMP_FMT_COMMAND = "oatdump --oat-file=%s";
+    private static final String DUMPSYS_COMMAND = "dumpsys package %s";
 
     @VisibleForTesting static final String OAT_DUMP_PROCESS = "oat-dump-process";
     @VisibleForTesting static final String ADDITIONAL_TEST_OUTPUT_DIR = "additionalTestOutputDir";
@@ -80,59 +80,26 @@ public class OatDumpCollector extends BaseMetricListener {
      * unoptimized code.
      */
     private void collectOatDumpAndMetrics(DataRecord record, String phaseSuffix) {
-        String apkPath = null;
+        // Get file name from dumpsys
+        String dumpsysCommand = String.format(DUMPSYS_COMMAND, mOatDumpProcess);
+        String dumpsysOutput = null;
         try {
-            Log.v(LOG_TAG, String.format("Running command: pm path %s", mOatDumpProcess));
-            apkPath = getDevice().executeShellCommand(String.format("pm path %s", mOatDumpProcess));
+            dumpsysOutput = getDevice().executeShellCommand(dumpsysCommand);
         } catch (IOException e) {
-            throw new RuntimeException(
-                    String.format("Failed to get path for package: %s.", mOatDumpProcess));
+            throw new RuntimeException("Failed to communicate with device.");
         }
 
-        Log.v(LOG_TAG, String.format("APK path: %s", apkPath));
-        File apkDir = new File(apkPath.substring("package:".length())).getParentFile();
-        File oatDir = new File(apkDir, "oat");
-        if (!oatDir.exists()) {
-            String dirsFound =
-                    Arrays.stream(apkDir.listFiles())
-                            .map(File::getName)
-                            .collect(Collectors.joining(", "));
-            throw new IllegalStateException(
-                    String.format(
-                            "Didn't find an \"oat\" directory. Found these: [ %s ].", dirsFound));
+        Pattern odexFilePattern = Pattern.compile("\\[location is (.+dex)\\]");
+        Matcher odexFileMatch = odexFilePattern.matcher(dumpsysOutput);
+        if (!odexFileMatch.find()) {
+            throw new RuntimeException("Failed to find expected oatdump file location.");
         }
-
-        File[] abiDirs = oatDir.listFiles();
-        if (abiDirs.length != 1) {
-            String abisFound =
-                    Arrays.stream(abiDirs).map(File::getName).collect(Collectors.joining(", "));
-            throw new RuntimeException(
-                    String.format(
-                            "Expected exactly one ABI directory. Found these: [ %s ].", abisFound));
-        }
-
-        File[] odexFiles =
-                abiDirs[0].listFiles(
-                        new FilenameFilter() {
-                            @Override
-                            public boolean accept(File directory, String name) {
-                                return name.endsWith("odex");
-                            }
-                        });
-        if (odexFiles.length != 1) {
-            String odexesFound =
-                    Arrays.stream(odexFiles).map(File::getName).collect(Collectors.joining(", "));
-            throw new RuntimeException(
-                    String.format(
-                            "Expected exactly one odex file. Found these: [ %s ].", odexesFound));
-        }
-
-        String oatDumpCommand = String.format(OAT_DUMP_FMT_COMMAND, odexFiles[0]);
-        Log.i(LOG_TAG, String.format("Running oatdump with \"%s\"", oatDumpCommand));
 
         // The oatdump is very large, so it needs to be written to a file with buffering.
+        File odexFile = new File(odexFileMatch.group(1));
+        String oatDumpCommand = String.format(OAT_DUMP_FMT_COMMAND, odexFile);
+        Log.i(LOG_TAG, String.format("Running oatdump with \"%s\"", oatDumpCommand));
         File oatDumpFile = new File(mAdditionalTestOutputDir, getOatDumpFilePath(phaseSuffix));
-
         Log.i(
                 LOG_TAG,
                 String.format("Writing oatdump output to %s", oatDumpFile.getAbsolutePath()));
@@ -147,18 +114,18 @@ public class OatDumpCollector extends BaseMetricListener {
             while ((length = oatDumpInputStream.read(buffer)) > 0) {
                 outputStream.write(buffer, 0, length);
             }
+
+            String fileKey = getOatDumpFileKey(phaseSuffix);
+            record.addStringMetric(fileKey, oatDumpFile.getAbsolutePath());
+
+            String odexFileSizeKey = getOdexFileSizeKey(phaseSuffix);
+            record.addStringMetric(odexFileSizeKey, String.valueOf(odexFile.length()));
+
+            String reportedSizeKey = getReportedSizeKey(phaseSuffix);
+            record.addStringMetric(reportedSizeKey, readSizeMetricFromOatDump(oatDumpFile));
         } catch (IOException e) {
             throw new RuntimeException("Failed to write the oatdump to the output file.", e);
         }
-
-        String fileKey = getOatDumpFileKey(phaseSuffix);
-        record.addStringMetric(fileKey, oatDumpFile.getAbsolutePath());
-
-        String odexFileSizeKey = getOdexFileSizeKey(phaseSuffix);
-        record.addStringMetric(odexFileSizeKey, String.valueOf(odexFiles[0].length()));
-
-        String reportedSizeKey = getReportedSizeKey(phaseSuffix);
-        record.addStringMetric(reportedSizeKey, readSizeMetricFromOatDump(oatDumpFile));
     }
 
     private String readSizeMetricFromOatDump(File oatDumpFile) {
@@ -188,7 +155,7 @@ public class OatDumpCollector extends BaseMetricListener {
         mOatDumpProcess = args.getString(OAT_DUMP_PROCESS);
 
         assertTrue(
-                "Specify the additionalTestOutput option to use this. See comments for more"
+                "Specify the additionalTestOutputDir option to use this. See comments for more"
                         + " details.",
                 args.containsKey(ADDITIONAL_TEST_OUTPUT_DIR));
         mAdditionalTestOutputDir = args.getString(ADDITIONAL_TEST_OUTPUT_DIR);

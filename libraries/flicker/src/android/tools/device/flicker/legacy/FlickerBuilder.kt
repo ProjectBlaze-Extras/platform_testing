@@ -18,19 +18,16 @@ package android.tools.device.flicker.legacy
 
 import android.app.Instrumentation
 import android.tools.common.io.TraceType
-import android.tools.common.traces.surfaceflinger.LayerTraceEntry
-import android.tools.common.traces.surfaceflinger.LayersTrace
-import android.tools.common.traces.surfaceflinger.TransactionsTrace
 import android.tools.common.traces.wm.TransitionsTrace
 import android.tools.common.traces.wm.WindowManagerState
 import android.tools.common.traces.wm.WindowManagerTrace
 import android.tools.device.traces.getDefaultFlickerOutputDir
 import android.tools.device.traces.monitors.ITransitionMonitor
 import android.tools.device.traces.monitors.NoTraceMonitor
+import android.tools.device.traces.monitors.PerfettoTraceMonitor
 import android.tools.device.traces.monitors.ScreenRecorder
 import android.tools.device.traces.monitors.events.EventLogMonitor
-import android.tools.device.traces.monitors.surfaceflinger.LayersTraceMonitor
-import android.tools.device.traces.monitors.surfaceflinger.TransactionsTraceMonitor
+import android.tools.device.traces.monitors.view.ViewTraceMonitor
 import android.tools.device.traces.monitors.wm.ShellTransitionTraceMonitor
 import android.tools.device.traces.monitors.wm.WindowManagerTraceMonitor
 import android.tools.device.traces.monitors.wm.WmTransitionTraceMonitor
@@ -52,18 +49,15 @@ class FlickerBuilder(
     private val traceMonitors: MutableList<ITransitionMonitor> =
         mutableListOf<ITransitionMonitor>().also {
             it.add(WindowManagerTraceMonitor())
-            it.add(LayersTraceMonitor())
+            it.add(PerfettoTraceMonitor().enableLayersTrace().enableTransactionsTrace())
             it.add(WmTransitionTraceMonitor())
             it.add(ShellTransitionTraceMonitor())
-            it.add(TransactionsTraceMonitor())
             it.add(ScreenRecorder(instrumentation.targetContext))
             it.add(EventLogMonitor())
+            it.add(ViewTraceMonitor())
         }
 ) {
     private var usingExistingTraces = false
-
-    /** Disable [WindowManagerTraceMonitor]. */
-    fun withoutWindowManagerTracing(): FlickerBuilder = apply { withWindowManagerTracing { null } }
 
     /**
      * Configure a [WindowManagerTraceMonitor] to obtain [WindowManagerTrace]
@@ -79,25 +73,6 @@ class FlickerBuilder(
             addMonitor(traceMonitor())
         }
 
-    /** Disable [LayersTraceMonitor]. */
-    fun withoutLayerTracing(): FlickerBuilder = apply { withLayerTracing { null } }
-
-    /**
-     * Configure a [LayersTraceMonitor] to obtain [LayersTrace].
-     *
-     * By default the tracing is always active. To disable tracing return null
-     *
-     * If this tracing is disabled, the assertions for [LayersTrace] and [LayerTraceEntry] will not
-     * be executed
-     */
-    fun withLayerTracing(traceMonitor: () -> LayersTraceMonitor?): FlickerBuilder = apply {
-        traceMonitors.removeIf { it is LayersTraceMonitor }
-        addMonitor(traceMonitor())
-    }
-
-    /** Disable [WmTransitionTraceMonitor]. */
-    fun withoutTransitionTracing(): FlickerBuilder = apply { withTransitionTracing { null } }
-
     /**
      * Configure a [WmTransitionTraceMonitor] to obtain [TransitionsTrace].
      *
@@ -106,20 +81,6 @@ class FlickerBuilder(
     fun withTransitionTracing(traceMonitor: () -> WmTransitionTraceMonitor?): FlickerBuilder =
         apply {
             traceMonitors.removeIf { it is WmTransitionTraceMonitor }
-            addMonitor(traceMonitor())
-        }
-
-    /** Disable [TransactionsTraceMonitor]. */
-    fun withoutTransactionsTracing(): FlickerBuilder = apply { withTransactionsTracing { null } }
-
-    /**
-     * Configure a [TransactionsTraceMonitor] to obtain [TransactionsTrace].
-     *
-     * By default, shell transition tracing is disabled.
-     */
-    fun withTransactionsTracing(traceMonitor: () -> TransactionsTraceMonitor?): FlickerBuilder =
-        apply {
-            traceMonitors.removeIf { it is TransactionsTraceMonitor }
             addMonitor(traceMonitor())
         }
 
@@ -157,8 +118,7 @@ class FlickerBuilder(
 
     data class TraceFiles(
         val wmTrace: File,
-        val layersTrace: File,
-        val transactions: File,
+        val perfetto: File,
         val wmTransitions: File,
         val shellTransitions: File,
         val eventLog: File
@@ -170,10 +130,8 @@ class FlickerBuilder(
         // Remove all trace monitor and use only monitor that read from existing trace file
         this.traceMonitors.clear()
         addMonitor(NoTraceMonitor { it.addTraceResult(TraceType.WM, traceFiles.wmTrace) })
-        addMonitor(NoTraceMonitor { it.addTraceResult(TraceType.SF, traceFiles.layersTrace) })
-        addMonitor(
-            NoTraceMonitor { it.addTraceResult(TraceType.TRANSACTION, traceFiles.transactions) }
-        )
+        addMonitor(NoTraceMonitor { it.addTraceResult(TraceType.SF, traceFiles.perfetto) })
+        addMonitor(NoTraceMonitor { it.addTraceResult(TraceType.TRANSACTION, traceFiles.perfetto) })
         addMonitor(
             NoTraceMonitor { it.addTraceResult(TraceType.WM_TRANSITION, traceFiles.wmTransitions) }
         )

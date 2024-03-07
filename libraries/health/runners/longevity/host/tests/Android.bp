@@ -27,7 +27,7 @@ java_test_host {
         "mockito-host",
         "objenesis-host",
         "test-composers",
-        "truth-host-prebuilt",
+        "truth",
     ],
     srcs: ["src/**/*.java"],
 }

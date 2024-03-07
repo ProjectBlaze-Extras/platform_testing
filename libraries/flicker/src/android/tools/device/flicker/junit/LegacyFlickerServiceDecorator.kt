@@ -23,6 +23,7 @@ import android.tools.common.Scenario
 import android.tools.common.flicker.FlickerConfig
 import android.tools.common.flicker.FlickerService
 import android.tools.common.flicker.annotation.FlickerServiceCompatible
+import android.tools.common.flicker.config.FlickerConfig
 import android.tools.common.flicker.config.FlickerServiceConfig
 import android.tools.common.flicker.config.ScenarioId
 import android.tools.device.flicker.FlickerServiceResultsCollector.Companion.FAAS_METRICS_PREFIX
@@ -31,7 +32,6 @@ import android.tools.device.flicker.datastore.CachedResultReader
 import android.tools.device.flicker.datastore.DataStore
 import android.tools.device.flicker.isShellTransitionsEnabled
 import android.tools.device.traces.TRACE_CONFIG_REQUIRE_CHANGES
-import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.runner.Description
 import org.junit.runners.model.FrameworkMethod
 import org.junit.runners.model.Statement
@@ -41,15 +41,24 @@ class LegacyFlickerServiceDecorator(
     testClass: TestClass,
     val scenario: Scenario?,
     private val transitionRunner: ITransitionRunner,
+    private val skipNonBlocking: Boolean,
+    private val arguments: Bundle,
     inner: IFlickerJUnitDecorator?
 ) : AbstractFlickerRunnerDecorator(testClass, inner) {
-    private val arguments: Bundle = InstrumentationRegistry.getArguments()
-    private val flickerService = FlickerService(FlickerConfig().use(FlickerServiceConfig.DEFAULT))
+    private val flickerService by lazy { FlickerService(getFlickerConfig()) }
 
-    private val onlyBlocking
-        get() =
-            scenario?.getConfigValue<Boolean>(Scenario.FAAS_BLOCKING)
-                ?: arguments.getString(Scenario.FAAS_BLOCKING).toBoolean()
+    private fun getFlickerConfig(): FlickerConfig {
+        val annotatedMethods =
+            testClass.getAnnotatedMethods(
+                android.tools.common.flicker.annotation.FlickerConfigProvider::class.java
+            )
+        if (annotatedMethods.size == 0) {
+            return FlickerConfig().use(FlickerServiceConfig.DEFAULT)
+        }
+
+        val flickerConfigProviderProviderFunction = annotatedMethods[0]
+        return flickerConfigProviderProviderFunction.invokeExplosively(testClass) as FlickerConfig
+    }
 
     private val isClassFlickerServiceCompatible: Boolean
         get() =
@@ -183,7 +192,8 @@ class LegacyFlickerServiceDecorator(
             reader,
             flickerService,
             instrumentation,
-            this
+            this,
+            skipNonBlocking = skipNonBlocking,
         )
     }
 

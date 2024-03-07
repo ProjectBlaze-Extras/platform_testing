@@ -18,24 +18,21 @@ package platform.test.screenshot.matchers
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Rect
-import kotlin.math.abs
-import kotlin.math.sqrt
 import platform.test.screenshot.proto.ScreenshotResultProto
 
 /**
- * Matcher for differences not detectable by human eye
- * The relaxed threshold allows for low quality png storage
- * TODO(b/238758872): replace after b/238758872 is closed
+ * Matcher for differences not detectable by human eye.
+ * The relaxed threshold allows for low quality png storage.
  */
 class AlmostPerfectMatcher(
     private val acceptableThreshold: Double = 0.0,
 ) : BitmapMatcher() {
     override fun compareBitmaps(
-            expected: IntArray,
-            given: IntArray,
-            width: Int,
-            height: Int,
-            regions: List<Rect>
+        expected: IntArray,
+        given: IntArray,
+        width: Int,
+        height: Int,
+        regions: List<Rect>
     ): MatchResult {
         check(expected.size == given.size) { "Size of two bitmaps does not match" }
 
@@ -44,51 +41,34 @@ class AlmostPerfectMatcher(
         var same = 0
         var ignored = 0
 
-        val diffArray = IntArray(width * height)
+        val diffArray = lazy { IntArray(width * height) { Color.TRANSPARENT } }
 
-        for (x in 0 until width) {
-            for (y in 0 until height) {
-                val index = x + y * width
-                if (filter[index] == 0) {
-                    ignored++
-                    continue
-                }
-                val referenceColor = expected[index]
-                val testColor = given[index]
-                if (areSame(referenceColor, testColor)) {
-                    ++same
-                } else {
-                    ++different
-                }
-                diffArray[index] =
-                        diffColor(
-                                referenceColor,
-                                testColor
-                        )
+        expected.indices.forEach { index ->
+            when {
+                !filter[index] -> ignored++
+                areSame(expected[index], given[index]) -> same++
+                else -> diffArray.value[index] = Color.MAGENTA.also { different++ }
             }
         }
 
-        val stats = ScreenshotResultProto.DiffResult.ComparisonStatistics
-                .newBuilder()
+        val matches = different <= (acceptableThreshold * width * height)
+        val diffBmp =
+            if (different <= 0) null
+            else Bitmap.createBitmap(diffArray.value, width, height, Bitmap.Config.ARGB_8888)
+        if (matches) {
+            ignored += different
+            different = 0
+        }
+
+        val stats =
+            ScreenshotResultProto.DiffResult.ComparisonStatistics.newBuilder()
                 .setNumberPixelsCompared(width * height)
                 .setNumberPixelsIdentical(same)
                 .setNumberPixelsDifferent(different)
                 .setNumberPixelsIgnored(ignored)
                 .build()
 
-        if (different > (acceptableThreshold * width * height)) {
-            val diff = Bitmap.createBitmap(diffArray, width, height, Bitmap.Config.ARGB_8888)
-            return MatchResult(matches = false, diff = diff, comparisonStatistics = stats)
-        }
-        return MatchResult(matches = true, diff = null, comparisonStatistics = stats)
-    }
-
-    private fun diffColor(referenceColor: Int, testColor: Int): Int {
-        return if (areSame(referenceColor, testColor)) {
-            Color.TRANSPARENT
-        } else {
-            Color.MAGENTA
-        }
+        return MatchResult(matches = matches, diff = diffBmp, comparisonStatistics = stats)
     }
 
     // ref
@@ -98,19 +78,20 @@ class AlmostPerfectMatcher(
         val green = Color.green(referenceColor) - Color.green(testColor)
         val blue = Color.blue(referenceColor) - Color.blue(testColor)
         val red = Color.red(referenceColor) - Color.red(testColor)
-        val redDelta = abs(red)
-        val redScalar = if (redDelta < 128) 2 else 3
-        val blueScalar = if (redDelta < 128) 3 else 2
+        val redMean = (Color.red(referenceColor) + Color.red(testColor)) / 2
+        val redScalar = if (redMean < 128) 2 else 3
+        val blueScalar = if (redMean < 128) 3 else 2
         val greenScalar = 4
-        val correction = sqrt((
-                (redScalar * red * red) +
-                        (greenScalar * green * green) +
-                        (blueScalar * blue * blue))
-                .toDouble())
+        val correction =
+            (redScalar * red * red) + (greenScalar * green * green) + (blueScalar * blue * blue)
         // 1.5 no difference
         // 3.0 observable by experienced human observer
         // 6.0 minimal difference
         // 12.0 perceivable difference
-        return correction <= 3.0
+        return correction <= THRESHOLD_SQ
+    }
+
+    companion object {
+        const val THRESHOLD_SQ = 3 * 3
     }
 }

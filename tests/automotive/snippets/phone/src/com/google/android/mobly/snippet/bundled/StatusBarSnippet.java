@@ -31,19 +31,25 @@ public class StatusBarSnippet implements Snippet {
         mStatusBarHelper = new HelperAccessor<>(IAutoStatusBarHelper.class);
     }
 
-    @Rpc(description = "Verify Disabled Bluetooth Profile")
-    public boolean verifyDisabledBluetoothProfile() {
-        return mStatusBarHelper.get().verifyDisabledBluetoothProfile();
+    @Rpc(description = "Is Bluetooth Button Enabled")
+    public boolean isBluetoothButtonEnabled() {
+        return mStatusBarHelper.get().isBluetoothButtonEnabled();
     }
 
-    @Rpc(description = "Verify Disabled Phone Profile")
-    public boolean verifyDisabledPhoneProfile() {
-        return mStatusBarHelper.get().verifyDisabledPhoneProfile();
+    @Rpc(description = "Is Bluetooth Palette Phone Button Enabled")
+    public boolean isBluetoothPhoneButtonEnabled() {
+        return mStatusBarHelper.get().isBluetoothPhoneButtonEnabled();
     }
 
-    @Rpc(description = "Verify Disabled Media Profile")
-    public boolean verifyDisabledMediaProfile() {
-        return mStatusBarHelper.get().verifyDisabledMediaProfile();
+    @Rpc(description = "Is Bluetooth Palette PMedia Button Enabled")
+    public boolean isBluetoothMediaButtonEnabled() {
+        return mStatusBarHelper.get().isBluetoothMediaButtonEnabled();
+    }
+
+    /** Clicks on Media Button available on the Bluetooth Palette */
+    @Rpc(description = "Click on Bluetooth Palette Media Button")
+    public void clickOnBluetoothPaletteMediaButton() {
+        mStatusBarHelper.get().clickOnBluetoothPaletteMediaButton();
     }
 
     @Rpc(description = "is Mobile Connected")
@@ -76,24 +82,27 @@ public class StatusBarSnippet implements Snippet {
         mStatusBarHelper.get().open();
     }
 
-    @Rpc(description = "Verify Bluetooth")
-    public boolean verifyBluetooth() {
-        return mStatusBarHelper.get().verifyBluetooth();
-    }
-
-    @Rpc(description = "Verify Phone")
-    public boolean verifyPhone() {
-        return mStatusBarHelper.get().verifyPhone();
-    }
-
-    @Rpc(description = "Verify Media")
-    public boolean verifyMedia() {
-        return mStatusBarHelper.get().verifyMedia();
-    }
-
+    /** Verify device name in Bluetooth Palette */
     @Rpc(description = "Verify Device Name")
     public boolean verifyDeviceName() {
         return mStatusBarHelper.get().verifyDeviceName();
+    }
+
+    /** has Bluetooth Button in Bluetooth Palette */
+    @Rpc(description = "Verify Bluetooth Button")
+    public boolean hasBluetoothButton() {
+        return mStatusBarHelper.get().hasBluetoothButton();
+    }
+
+    /** has Phone Button in Bluetooth Palette */
+    @Rpc(description = "Has Phone Button ")
+    public boolean hasBluetoothPalettePhoneButton() {
+        return mStatusBarHelper.get().hasBluetoothPalettePhoneButton();
+    }
+    /** has Media Button in Bluetooth Palette */
+    @Rpc(description = "Verify Media Button")
+    public boolean hasBluetoothPaletteMediaButton() {
+        return mStatusBarHelper.get().hasBluetoothPaletteMediaButton();
     }
 
     @Override

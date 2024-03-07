@@ -20,8 +20,8 @@ import android.tools.common.Cache
 import android.tools.common.datatypes.Size
 import android.tools.common.flicker.subject.layers.LayerSubject
 import android.tools.common.flicker.subject.layers.LayersTraceSubject
-import android.tools.getLayerTraceReaderFromAsset
-import android.tools.rules.CleanFlickerEnvironmentRule
+import android.tools.utils.CleanFlickerEnvironmentRule
+import android.tools.utils.getLayerTraceReaderFromAsset
 import com.google.common.truth.Truth
 import org.junit.Before
 import org.junit.ClassRule
@@ -39,7 +39,7 @@ class LayerSubjectTest {
 
     @Test
     fun exceptionContainsDebugInfoImaginary() {
-        val reader = getLayerTraceReaderFromAsset("layers_trace_emptyregion.pb", legacyTrace = true)
+        val reader = getLayerTraceReaderFromAsset("layers_trace_emptyregion.perfetto-trace")
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         val foundLayer = LayersTraceSubject(trace, reader).first().layer("ImaginaryLayer", 0)
         Truth.assertWithMessage("ImaginaryLayer is not found").that(foundLayer).isNull()
@@ -47,7 +47,7 @@ class LayerSubjectTest {
 
     @Test
     fun canTestAssertionsOnLayer() {
-        val reader = getLayerTraceReaderFromAsset("layers_trace_emptyregion.pb", legacyTrace = true)
+        val reader = getLayerTraceReaderFromAsset("layers_trace_emptyregion.perfetto-trace")
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         LayersTraceSubject(trace, reader)
             .layer("SoundVizWallpaperV2", 26033)

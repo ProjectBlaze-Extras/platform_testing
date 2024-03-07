@@ -269,5 +269,4 @@ public class AppGridHelperImpl extends AbstractStandardAppHelper implements IAut
         getSpectatioUiUtil().pressHome();
         getSpectatioUiUtil().wait1Second();
     }
-
 }

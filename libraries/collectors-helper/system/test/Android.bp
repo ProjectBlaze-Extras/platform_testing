@@ -27,7 +27,7 @@ java_library {
         "system-metric-helper",
         "junit",
         "mockito-target",
-        "truth-prebuilt",
+        "truth",
     ],
 
     sdk_version: "current",

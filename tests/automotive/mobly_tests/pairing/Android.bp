@@ -22,7 +22,8 @@ python_test_host {
     srcs: ["bt_discovery_test.py"],
     libs: [
         "mobly",
-	"BluetoothTestLibrary",
+        "utilities",
+        "bluetooth_test",
     ],
     test_suites: [
         "catbox",

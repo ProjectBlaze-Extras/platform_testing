@@ -20,6 +20,9 @@ import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /** Util to manage secondary user */
 public class UserUtils {
 
@@ -34,28 +37,32 @@ public class UserUtils {
         private boolean mIsPreCreateOnly; // User type : --pre-created-only
         private boolean mIsRestricted; // User type : --restricted
         private boolean mSwitch; // Switch to newly created user
-        private boolean
-                mDisallowAppInstall; // Disallow app installation in secondary user explicitly
         private int mProfileOf; // Userid associated with managed user
         private int mTestUserId;
+        private Map<String, String> mUserRestrictions; // Map of user-restrictions for new user
 
         /**
          * Create an instance of secondary user.
          *
          * @param device the device {@link ITestDevice} to use.
-         * @throws IllegalArgumentException when {@code device} is null.
+         * @throws Exception
          */
-        public SecondaryUser(ITestDevice device) throws IllegalArgumentException {
+        public SecondaryUser(ITestDevice device) throws Exception {
             // Device should not be null
             if (device == null) {
                 throw new IllegalArgumentException("Device should not be null");
             }
 
+            // Check if device supports multiple users
+            if (!device.isMultiUserSupported()) {
+                throw new IllegalStateException("Device does not support multiple users");
+            }
+
             mDevice = device;
             mName = "testUser"; /* Default username */
+            mUserRestrictions = new HashMap<String, String>();
 
             // Set default value for all flags as false
-            mDisallowAppInstall = false;
             mIsDemo = false;
             mIsEphemeral = false;
             mIsForTesting = false;
@@ -64,17 +71,6 @@ public class UserUtils {
             mIsPreCreateOnly = false;
             mIsRestricted = false;
             mSwitch = false;
-        }
-
-        /**
-         * Disallow app installation in secondary user explicitly. This requires root UID, system
-         * UID, or MANAGE_USERS permission.
-         *
-         * @return this object for method chaining.
-         */
-        public SecondaryUser disallowAppInstallation() {
-            mDisallowAppInstall = true;
-            return this;
         }
 
         /**
@@ -177,6 +173,17 @@ public class UserUtils {
         }
 
         /**
+         * Set user-restrictions on newly created secondary user.
+         * Note: Setting user-restrictions requires enabling root.
+         *
+         * @return this object for method chaining.
+         */
+        public SecondaryUser withUserRestrictions(Map<String, String> restrictions) {
+            mUserRestrictions.putAll(restrictions);
+            return this;
+        }
+
+        /**
          * Create a secondary user and if required, switch to it. Returns an Autocloseable that
          * removes the secondary user.
          *
@@ -233,20 +240,26 @@ public class UserUtils {
                         String.format("Failed to start the user: %s", mTestUserId));
             }
 
-            if (mDisallowAppInstall) {
-                // Enable/Disable app installation in secondary user
-                final CommandResult userRestrictionCmdOutput =
-                        mDevice.executeShellV2Command(
+            // Add user-restrictions to newly created secondary user
+            if (!mUserRestrictions.isEmpty()) {
+                if (!mDevice.isAdbRoot()) {
+                    throw new IllegalStateException("Setting user-restriction requires root");
+                }
+
+                for (Map.Entry<String, String> entry : mUserRestrictions.entrySet()) {
+                    final CommandResult cmdOutput =
+                            mDevice.executeShellV2Command(
+                                    String.format(
+                                            "pm set-user-restriction --user %d %s %s",
+                                            mTestUserId, entry.getKey(), entry.getValue()));
+                    if (cmdOutput.getStatus() != CommandStatus.SUCCESS) {
+                        asSecondaryUser.close();
+                        throw new IllegalStateException(
                                 String.format(
-                                        "pm set-user-restriction --user %d no_install_apps %d",
-                                        mTestUserId, 1));
-                if (userRestrictionCmdOutput.getStatus() != CommandStatus.SUCCESS) {
-                    asSecondaryUser.close();
-                    throw new IllegalStateException(
-                            String.format(
-                                    "Failed to set user restriction 'no_install_apps' with message:"
-                                            + " %s",
-                                    userRestrictionCmdOutput.toString()));
+                                        "Failed to set user restriction %s value %s with"
+                                                + " message %s",
+                                        entry.getKey(), entry.getValue(), cmdOutput.toString()));
+                    }
                 }
             }
 

@@ -16,7 +16,6 @@
 
 package android.tools.common.flicker.config
 
-import android.tools.assertThrows
 import android.tools.common.flicker.AssertionInvocationGroup
 import android.tools.common.flicker.FlickerConfig
 import android.tools.common.flicker.ScenarioInstance
@@ -28,6 +27,7 @@ import android.tools.common.flicker.extractors.ScenarioExtractor
 import android.tools.common.flicker.extractors.TraceSlice
 import android.tools.common.io.Reader
 import android.tools.getTraceReaderFromScenario
+import android.tools.utils.assertThrows
 import com.google.common.truth.Truth
 import org.junit.Test
 
@@ -190,7 +190,11 @@ class FlickerConfigTest {
             EXTRACTOR_FOR_SOME_SCENARIO,
             mapOf(assertion1 to AssertionInvocationGroup.BLOCKING)
         )
-        registry.registerAssertion(SOME_SCENARIO, assertion2, AssertionInvocationGroup.NON_BLOCKING)
+        registry.registerAssertions(
+            SOME_SCENARIO,
+            assertion2,
+            stabilityGroup = AssertionInvocationGroup.NON_BLOCKING
+        )
 
         val entries = registry.getEntries()
         Truth.assertThat(entries).hasSize(1)
@@ -225,7 +229,8 @@ class FlickerConfigTest {
                 }
             }
 
-        val error = assertThrows<Throwable> { registry.registerAssertion(SOME_SCENARIO, assertion) }
+        val error =
+            assertThrows<Throwable> { registry.registerAssertions(SOME_SCENARIO, assertion) }
         Truth.assertThat(error)
             .hasMessageThat()
             .contains("No scenario named 'SOME_SCENARIO' registered")
@@ -278,7 +283,8 @@ class FlickerConfigTest {
             mapOf(assertion to AssertionInvocationGroup.BLOCKING)
         )
 
-        val error = assertThrows<Throwable> { registry.registerAssertion(SOME_SCENARIO, assertion) }
+        val error =
+            assertThrows<Throwable> { registry.registerAssertions(SOME_SCENARIO, assertion) }
         Truth.assertThat(error)
             .hasMessageThat()
             .contains(

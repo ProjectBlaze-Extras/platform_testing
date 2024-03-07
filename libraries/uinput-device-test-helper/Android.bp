@@ -23,4 +23,9 @@ java_library {
     srcs: [
         "src/**/*.kt",
     ],
+    libs: [
+        "androidx.test.uiautomator_uiautomator",
+        "truth",
+        "uiautomator-helpers",
+    ],
 }

@@ -37,37 +37,61 @@ import platform.test.screenshot.matchers.BitmapMatcher
 
 /** A rule for View screenshot diff unit tests. */
 open class ViewScreenshotTestRule(
-    emulationSpec: DeviceEmulationSpec,
+    private val emulationSpec: DeviceEmulationSpec,
     pathManager: GoldenImagePathManager,
-    private val matcher: BitmapMatcher = UnitTestBitmapMatcher
+    private val matcher: BitmapMatcher = UnitTestBitmapMatcher,
+    private val decorFitsSystemWindows: Boolean = false,
 ) : TestRule {
     private val colorsRule = MaterialYouColorsRule()
+    private val timeZoneRule = TimeZoneRule()
     private val deviceEmulationRule = DeviceEmulationRule(emulationSpec)
     protected val screenshotRule = ScreenshotTestRule(pathManager)
     private val activityRule = ActivityScenarioRule(ScreenshotActivity::class.java)
-    private val roboRule =
+    private val commonRule =
         RuleChain.outerRule(deviceEmulationRule).around(screenshotRule).around(activityRule)
-    private val delegateRule = RuleChain.outerRule(colorsRule).around(roboRule)
+    private val deviceRule = RuleChain.outerRule(colorsRule).around(commonRule)
+    private val roboRule = RuleChain.outerRule(timeZoneRule).around(commonRule)
     private val isRobolectric = if (Build.FINGERPRINT.contains("robolectric")) true else false
 
     override fun apply(base: Statement, description: Description): Statement {
-        val ruleToApply = if (isRobolectric) roboRule else delegateRule
+        val ruleToApply = if (isRobolectric) roboRule else deviceRule
         return ruleToApply.apply(base, description)
     }
 
     protected fun takeScreenshot(
         mode: Mode = Mode.WrapContent,
         viewProvider: (ComponentActivity) -> View,
+        /**
+         * Don't set it true unless you have to control MainLooper for the view creation.
+         *
+         * TODO(b/314985107) : remove when looper dependency is removed
+         */
+        inflateViewsInTestScope: Boolean = false,
         beforeScreenshot: (ComponentActivity) -> Unit = {}
     ): Bitmap {
+        var inflatedView: View? = null
+
+        if (inflateViewsInTestScope) {
+            lateinit var componentActivity: ComponentActivity
+            activityRule.scenario.onActivity { activity -> componentActivity = activity }
+            inflatedView = viewProvider(componentActivity)
+        }
+
         activityRule.scenario.onActivity { activity ->
             // Make sure that the activity draws full screen and fits the whole display instead of
             // the system bars.
             val window = activity.window
-            window.setDecorFitsSystemWindows(false)
+            window.setDecorFitsSystemWindows(decorFitsSystemWindows)
 
             // Set the content.
-            activity.setContentView(viewProvider(activity), mode.layoutParams)
+            if (inflateViewsInTestScope) {
+                checkNotNull(inflatedView) {
+                    "The inflated view shouldn't be null when inflateViewsInTestScope is enabled"
+                }
+            } else {
+                inflatedView = viewProvider(activity)
+            }
+            activity.setContentView(inflatedView, mode.layoutParams)
 
             // Elevation/shadows is not deterministic when doing hardware rendering, so we disable
             // it for any view in the hierarchy.
@@ -87,11 +111,18 @@ open class ViewScreenshotTestRule(
             beforeScreenshot(activity)
         }
 
-        return if (isRobolectric) {
-            contentView?.captureToBitmap()?.get(10, TimeUnit.SECONDS)
-                ?: error("timeout while trying to capture view to bitmap")
+        if (isRobolectric) {
+            val originalBitmap = contentView?.captureToBitmap()?.get(10, TimeUnit.SECONDS)
+            if (originalBitmap == null) {
+                error("timeout while trying to capture view to bitmap")
+            }
+            return bitmapWithMaterialYouColorsSimulation(
+                originalBitmap,
+                emulationSpec.isDarkTheme,
+                /* doPixelAveraging= */ true
+            )
         } else {
-            contentView?.toBitmap() ?: error("contentView is null")
+            return contentView?.toBitmap() ?: error("contentView is null")
         }
     }
 
@@ -102,10 +133,16 @@ open class ViewScreenshotTestRule(
     fun screenshotTest(
         goldenIdentifier: String,
         mode: Mode = Mode.WrapContent,
+        /**
+         * Don't set it true unless you have to control MainLooper for the view creation.
+         *
+         * TODO(b/314985107) : remove when looper dependency is removed
+         */
+        inflateViewInTestScope: Boolean = false,
         beforeScreenshot: (ComponentActivity) -> Unit = {},
         viewProvider: (ComponentActivity) -> View,
     ) {
-        val bitmap = takeScreenshot(mode, viewProvider, beforeScreenshot)
+        val bitmap = takeScreenshot(mode, viewProvider, inflateViewInTestScope, beforeScreenshot)
         screenshotRule.assertBitmapAgainstGolden(
             bitmap,
             goldenIdentifier,
@@ -121,47 +158,13 @@ open class ViewScreenshotTestRule(
         goldenIdentifier: String,
         dialogProvider: (Activity) -> Dialog,
     ) {
-        var dialog: Dialog? = null
-        activityRule.scenario.onActivity { activity ->
-            dialog =
-                dialogProvider(activity).apply {
-                    // Make sure that the dialog draws full screen and fits the whole display
-                    // instead of the system bars.
-                    window.setDecorFitsSystemWindows(false)
-
-                    // Disable enter/exit animations.
-                    create()
-                    window.setWindowAnimations(0)
-
-                    // Elevation/shadows is not deterministic when doing hardware rendering, so we
-                    // disable it for any view in the hierarchy.
-                    window.decorView.removeElevationRecursively()
-
-                    // Show the dialog.
-                    show()
-                }
-        }
-
-        try {
-            val bitmap = dialog?.toBitmap() ?: error("dialog is null")
-            screenshotRule.assertBitmapAgainstGolden(
-                bitmap,
-                goldenIdentifier,
-                matcher,
-            )
-        } finally {
-            dialog?.dismiss()
-        }
-    }
-
-    private fun Dialog.toBitmap(): Bitmap {
-        val window = window
-        if (isRobolectric) {
-            return window.decorView.captureToBitmap(window).get(10, TimeUnit.SECONDS)
-                ?: error("timeout while trying to capture view to bitmap for window")
-        } else {
-            return window.decorView.toBitmap(window)
-        }
+        dialogScreenshotTest(
+            activityRule,
+            screenshotRule,
+            matcher,
+            goldenIdentifier,
+            dialogProvider = dialogProvider,
+        )
     }
 
     enum class Mode(val layoutParams: LayoutParams) {

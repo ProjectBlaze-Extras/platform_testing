@@ -31,6 +31,12 @@ public interface IAutoUserHelper extends IAppHelper {
      * <p>This method is to add an a new user.
      */
     void addUserQuickSettings(String userName);
+    /**
+     * Setup expectation: Profiles and Accounts setting is open.
+     *
+     * <p>This method is to open permissions of an existing user.
+     */
+    void openPermissionsPage(String user);
 
     /**
      * Setup expectation: Profiles and Accounts setting is open.
@@ -73,4 +79,24 @@ public interface IAutoUserHelper extends IAppHelper {
      * <p>This method is to check if the new user created is admin.
      */
     boolean isNewUserAnAdmin(String user);
+    /**
+     * Setup expectation: Profiles and Accounts setting is open.
+     *
+     * <p>This method is used to check whether Add Profile button is Visible ?.
+     */
+    boolean isVisibleAddProfile();
+    /**
+     * Setup expectation: Profiles and Accounts setting is open.
+     *
+     * <p>This method is used to check whether a toggle button is on / off mode.
+     */
+    boolean isToggleOn(String buttonText);
+
+    /**
+     * Setup expectation: Profiles and Accounts setting is open.
+     *
+     * <p>This method is used to toggle the switch .
+     */
+    boolean toggle(String buttonText);
 }
+

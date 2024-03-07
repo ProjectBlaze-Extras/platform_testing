@@ -17,11 +17,11 @@
 package android.tools.device.flicker.legacy.runner
 
 import android.app.Instrumentation
-import android.platform.test.rule.ArtifactSaver
 import android.tools.common.Logger
 import android.tools.common.Scenario
 import android.tools.common.io.TraceType
 import android.tools.device.flicker.FlickerTag
+import android.tools.device.flicker.junit.Utils
 import android.tools.device.flicker.legacy.FlickerTestData
 import android.tools.device.traces.getCurrentState
 import android.tools.device.traces.io.ResultWriter
@@ -63,9 +63,6 @@ class TransitionExecutionRule(
                         doRunBeforeTransition()
                         commands.forEach { it.invoke(flicker) }
                         base?.evaluate()
-                    } catch (e: Throwable) {
-                        ArtifactSaver.onError(Utils.expandDescription(description, "transition"), e)
-                        throw e
                     } finally {
                         doRunAfterTransition()
                     }

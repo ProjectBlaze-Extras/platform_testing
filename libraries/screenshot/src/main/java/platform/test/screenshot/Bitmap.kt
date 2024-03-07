@@ -43,7 +43,7 @@ fun View.drawIntoBitmap(): Bitmap {
  * screenshot *unit* tests.
  */
 val UnitTestBitmapMatcher =
-    if (Build.CPU_ABI == "x86_64") {
+    if (Build.CPU_ABI == "x86_64" || Build.FINGERPRINT.contains("robolectric")) {
         // Different CPU architectures can sometimes end up rendering differently, so we can't do
         // pixel-perfect matching on different architectures using the same golden. Given that our
         // presubmits are run on cf_x86_64_phone, our goldens should be perfectly matched on the

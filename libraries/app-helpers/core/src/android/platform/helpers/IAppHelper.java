@@ -17,8 +17,8 @@
 package android.platform.helpers;
 
 import android.content.pm.PackageManager.NameNotFoundException;
-
 import android.support.test.uiautomator.UiWatcher;
+
 import java.io.IOException;
 
 public interface IAppHelper extends ITestHelper {
@@ -99,12 +99,27 @@ public interface IAppHelper extends ITestHelper {
 
     /**
      * Setup expectations: None
-     * <p>
-     * Registers a UiWatcher.
+     *
+     * <p>Registers a UiWatcher.
+     *
      * @param name the name of the UiWatcher to register
      * @param watcher the UiWatcher to register
      */
-    abstract void registerWatcher(String name, UiWatcher watcher);
+    default void registerWatcher(String name, UiWatcher watcher) {
+        throw new UnsupportedOperationException("Not implemented yet.");
+    }
+
+    /**
+     * Setup expectations: None
+     *
+     * <p>Registers a UiWatcher.
+     *
+     * @param name the name of the UiWatcher to register
+     * @param watcher the UiWatcher to register
+     */
+    default void registerWatcher(String name, androidx.test.uiautomator.UiWatcher watcher) {
+        throw new UnsupportedOperationException("Not implemented yet.");
+    }
 
     /**
      * Setup expectations: None

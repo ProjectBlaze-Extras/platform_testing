@@ -27,6 +27,7 @@ java_library {
         "activity-helper",
         "commands-helper",
         "device-helper",
+        "//frameworks/base/packages/SystemUI/aconfig:com_android_systemui_flags_lib",
         "app-helpers-handheld-interfaces",
     ],
 

@@ -84,21 +84,21 @@ public interface IAutoStatusBarHelper extends IAppHelper {
      *
      * <p>This method verifies bluetooth button from bluetooth palette</>
      */
-    boolean verifyBluetooth();
+    boolean hasBluetoothButton();
 
     /**
      * Setup expectations: Verify Phone Button
      *
      * <p>This method verifies phone button from bluetooth palette</>
      */
-    boolean verifyPhone();
+    boolean hasBluetoothPalettePhoneButton();
 
     /**
      * Setup expectations: Verify Media Button
      *
      * <p>This method verifies media button from bluetooth palette</>
      */
-    boolean verifyMedia();
+    boolean hasBluetoothPaletteMediaButton();
 
     /**
      * Setup expectations: Verify the Device name
@@ -112,21 +112,21 @@ public interface IAutoStatusBarHelper extends IAppHelper {
      *
      * <p>This method verifies the disabled bluetooth profile</>
      */
-    boolean verifyDisabledBluetoothProfile();
+    boolean isBluetoothButtonEnabled();
 
     /**
      * Setup expectations: Verify the Disabled Phone profile
      *
      * <p>This method verifies the disabled phone profile</>
      */
-    boolean verifyDisabledPhoneProfile();
+    boolean isBluetoothPhoneButtonEnabled();
 
     /**
      * Setup expectations: Verify the Disabled Media profile
      *
      * <p>This method verifies the disabled Media profile</>
      */
-    boolean verifyDisabledMediaProfile();
+    boolean isBluetoothMediaButtonEnabled();
 
     /**
      * Setup expectations: Status bar Network palette is open.
@@ -225,4 +225,18 @@ public interface IAutoStatusBarHelper extends IAppHelper {
      * <p>Get the current time for given time zone</>
      */
     String getCurrentTimeWithTimeZone(String timezone);
+
+    /**
+     * Setup expectations: Open Bluetooth Palette
+     *
+     * <p>This method checks whether media button is enabled
+     */
+    boolean isBluetoothPaletteMediaButtonEnabled();
+
+    /**
+     * Setup expectations: Open Bluetooth Palette
+     *
+     * <p>This method performs click operation on media button
+     */
+    void clickOnBluetoothPaletteMediaButton();
 }

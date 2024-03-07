@@ -37,7 +37,7 @@ internal class FlickerConfigImpl : FlickerConfig {
         scenario: ScenarioId,
         extractor: ScenarioExtractor,
         assertions: Map<AssertionTemplate, AssertionInvocationGroup>?
-    ) {
+    ) = apply {
         require(!registry.containsKey(scenario)) {
             "${this::class.simpleName} already has a registered scenario with name '$scenario'."
         }
@@ -45,31 +45,33 @@ internal class FlickerConfigImpl : FlickerConfig {
         registry[scenario] = FlickerConfigEntry(scenario, extractor, assertions ?: emptyMap())
     }
 
-    override fun unregisterScenario(scenario: ScenarioId) {
+    override fun unregisterScenario(scenario: ScenarioId) = apply {
         val entry = registry[scenario] ?: error("No scenario named '$scenario' registered.")
         registry.remove(scenario)
     }
 
-    override fun registerAssertion(
+    override fun registerAssertions(
         scenario: ScenarioId,
-        assertion: AssertionTemplate,
+        vararg assertions: AssertionTemplate,
         stabilityGroup: AssertionInvocationGroup
-    ) {
+    ) = apply {
         val entry = registry[scenario]
         require(entry != null) { "No scenario named '$scenario' registered." }
 
-        require(entry.assertions.keys.none { it.id == assertion.id }) {
-            "Assertion with id '${assertion.id.name}' already present for scenario " +
-                "'${scenario.name}'."
-        }
+        assertions.forEach { assertion ->
+            require(entry.assertions.keys.none { it.id == assertion.id }) {
+                "Assertion with id '${assertion.id.name}' already present for scenario " +
+                    "'${scenario.name}'."
+            }
 
-        registry[scenario] =
-            FlickerConfigEntry(
-                entry.scenarioId,
-                entry.extractor,
-                entry.assertions.toMutableMap().apply { this[assertion] = stabilityGroup },
-                entry.enabled
-            )
+            registry[scenario] =
+                FlickerConfigEntry(
+                    entry.scenarioId,
+                    entry.extractor,
+                    entry.assertions.toMutableMap().apply { this[assertion] = stabilityGroup },
+                    entry.enabled
+                )
+        }
     }
 
     override fun getEntries(): Collection<FlickerConfigEntry> {
@@ -80,7 +82,7 @@ internal class FlickerConfigImpl : FlickerConfig {
         scenario: ScenarioId,
         assertionId: AssertionId,
         stabilityGroup: AssertionInvocationGroup
-    ) {
+    ) = apply {
         val entry = registry[scenario]
         require(entry != null) { "No scenario named '$scenario' registered." }
 
@@ -99,7 +101,7 @@ internal class FlickerConfigImpl : FlickerConfig {
             )
     }
 
-    override fun unregisterAssertion(scenario: ScenarioId, assertionId: AssertionId) {
+    override fun unregisterAssertion(scenario: ScenarioId, assertionId: AssertionId) = apply {
         val entry = registry[scenario]
         require(entry != null) { "No scenario named '$scenario' registered." }
 

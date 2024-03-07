@@ -15,6 +15,9 @@
  */
 package android.platform.helpers.uinput
 
+import com.google.common.truth.Truth.assertThat
+
+
 /**
  * Class to represent a keyboard as a [UInputDevice]. This can then be used to register a keyboard
  * using [android.platform.test.rule.InputDeviceRule].
@@ -28,12 +31,20 @@ constructor(
     override val productId: Int = ARBITRARY_PRODUCT_ID,
     override val vendorId: Int = ARBITRARY_VENDOR_ID,
     override val name: String = "Test Keyboard",
-    override val supportedKeys: Array<Int> = SUPPORTED_KEYS_QWEABC,
+    override val supportedKeys: List<Int> = SUPPORTED_KEYS_QWEABC,
 ) : UInputDevice() {
+    override val inputDeviceId = 2
     override val bus = "usb"
 
+    /** Sends a click of the requested keycode. */
+    fun sendKeyClickEvent(eventInjector: EventInjector, keycode: Int) {
+        assertThat(supportedKeys).contains(keycode)
+
+        eventInjector.sendKeyEvent(inputDeviceId, keycode)
+    }
+
     companion object {
-        val SUPPORTED_KEYS_QWEABC = arrayOf(16, 17, 18, 30, 48, 46)
+        val SUPPORTED_KEYS_QWEABC = listOf(16, 17, 18, 30, 48, 46)
 
         const val ARBITRARY_PRODUCT_ID = 0xabcd
         const val ARBITRARY_VENDOR_ID = 0x18d1

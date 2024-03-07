@@ -16,20 +16,19 @@
 
 package com.android.helper;
 
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.SystemClock;
+import android.test.InstrumentationTestRunner;
+
+import androidx.test.uiautomator.UiAutomatorTestCase;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
 import java.util.Properties;
-import android.os.Bundle;
-import android.os.Environment;
-
-import android.os.SystemClock;
-import android.support.test.uiautomator.UiAutomatorTestCase;
-import android.test.InstrumentationTestRunner;
-import android.util.Log;
 
 public class PowerTestHelper extends UiAutomatorTestCase {
     private final static String PARAM_CONFIG = "conf";

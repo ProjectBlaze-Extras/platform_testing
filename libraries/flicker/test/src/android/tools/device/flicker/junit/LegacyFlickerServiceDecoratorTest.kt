@@ -17,11 +17,12 @@
 package android.tools.device.flicker.junit
 
 import android.annotation.SuppressLint
-import android.tools.TEST_SCENARIO
 import android.tools.device.flicker.datastore.DataStore
 import android.tools.device.flicker.isShellTransitionsEnabled
 import android.tools.device.flicker.legacy.LegacyFlickerTest
-import android.tools.rules.CleanFlickerEnvironmentRule
+import android.tools.utils.CleanFlickerEnvironmentRule
+import android.tools.utils.TEST_SCENARIO
+import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth
 import org.junit.Before
 import org.junit.ClassRule
@@ -52,6 +53,8 @@ class LegacyFlickerServiceDecoratorTest {
                 test.testClass,
                 scenario = null,
                 mockTransitionRunner,
+                skipNonBlocking = false,
+                arguments = InstrumentationRegistry.getArguments(),
                 inner = null
             )
         var failures = decorator.doValidateConstructor()
@@ -75,6 +78,8 @@ class LegacyFlickerServiceDecoratorTest {
                 test.testClass,
                 TEST_SCENARIO,
                 transitionRunner,
+                skipNonBlocking = false,
+                arguments = InstrumentationRegistry.getArguments(),
                 inner = null
             )
         val methods =

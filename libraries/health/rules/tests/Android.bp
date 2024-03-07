@@ -25,7 +25,7 @@ android_test {
     sdk_version: "test_current",
     static_libs: [
         "platform-test-rules",
-        "truth-prebuilt",
+        "truth",
         "guava",
         "mockito-target",
     ],

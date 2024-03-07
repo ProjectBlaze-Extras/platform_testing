@@ -56,8 +56,10 @@ class FlickerServiceResultsCollector(
         get() = _executionErrors
 
     @VisibleForTesting val assertionResults = mutableListOf<AssertionResult>()
+
     @VisibleForTesting
     val assertionResultsByTest = mutableMapOf<Description, Collection<AssertionResult>>()
+
     @VisibleForTesting
     val detectedScenariosByTest = mutableMapOf<Description, Collection<ScenarioId>>()
 
@@ -121,6 +123,10 @@ class FlickerServiceResultsCollector(
                 stopTracingAndCollectFlickerMetrics(testData, description)
             }
         }
+
+        if (collectMetricsPerTest) {
+            reportFlickerServiceStatus(testData)
+        }
     }
 
     override fun onTestRunEnd(runData: DataRecord, result: Result) {
@@ -129,6 +135,10 @@ class FlickerServiceResultsCollector(
             if (!collectMetricsPerTest) {
                 stopTracingAndCollectFlickerMetrics(runData)
             }
+        }
+
+        if (!collectMetricsPerTest) {
+            reportFlickerServiceStatus(runData)
         }
     }
 
@@ -230,12 +240,19 @@ class FlickerServiceResultsCollector(
         return scenariosForTest
     }
 
+    private fun reportFlickerServiceStatus(record: DataRecord) {
+        val status = if (executionErrors.isEmpty()) OK_STATUS_CODE else EXECUTION_ERROR_STATUS_CODE
+        record.addStringMetric("${FAAS_METRICS_PREFIX}_STATUS", status.toString())
+    }
+
     companion object {
         // Unique prefix to add to all FaaS metrics to identify them
         const val FAAS_METRICS_PREFIX = "FAAS"
         private const val LOG_TAG = "$FLICKER_TAG-Collector"
         const val WINSCOPE_FILE_PATH_KEY = "winscope_file_path"
         const val FLICKER_ASSERTIONS_COUNT_KEY = "flicker_assertions_count"
+        const val OK_STATUS_CODE = 0
+        const val EXECUTION_ERROR_STATUS_CODE = 1
 
         fun getKeyForAssertionResult(result: AssertionResult): String {
             return "$FAAS_METRICS_PREFIX::${result.name}"

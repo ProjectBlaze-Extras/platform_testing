@@ -17,11 +17,11 @@
 package android.tools.device.flicker.datastore
 
 import android.annotation.SuppressLint
-import android.tools.TEST_SCENARIO
-import android.tools.assertExceptionMessage
-import android.tools.assertThrows
+import android.tools.CleanFlickerEnvironmentRuleWithDataStore
 import android.tools.newTestCachedResultWriter
-import android.tools.rules.CleanFlickerEnvironmentRule
+import android.tools.utils.TEST_SCENARIO
+import android.tools.utils.assertExceptionMessage
+import android.tools.utils.assertThrows
 import com.google.common.truth.Truth
 import org.junit.Rule
 import org.junit.Test
@@ -29,7 +29,7 @@ import org.junit.Test
 /** Tests for [CachedResultWriterTest] */
 @SuppressLint("VisibleForTests")
 class CachedResultWriterTest {
-    @Rule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRule()
+    @Rule @JvmField val cleanFlickerEnvironmentRule = CleanFlickerEnvironmentRuleWithDataStore()
 
     @Test
     fun writeToStore() {

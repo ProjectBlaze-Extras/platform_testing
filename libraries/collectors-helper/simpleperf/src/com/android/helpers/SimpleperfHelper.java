@@ -305,7 +305,7 @@ public class SimpleperfHelper {
      * @param destinationFile file to copy simpleperf output into.
      * @return true if the simpleperf file copied successfully, otherwise false.
      */
-    private boolean copyFileOutput(String destinationFile) {
+    public boolean copyFileOutput(String destinationFile) {
         Path path = Paths.get(destinationFile);
         String destDirectory = path.getParent().toString();
         // Check if directory already exists

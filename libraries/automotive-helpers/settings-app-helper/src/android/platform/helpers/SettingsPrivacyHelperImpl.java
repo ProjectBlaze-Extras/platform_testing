@@ -335,4 +335,42 @@ public class SettingsPrivacyHelperImpl extends AbstractStandardAppHelper
                 .validateUiObject(radioButtonStatus, AutomotiveConfigConstants.RADIO_BUTTON);
         return radioButtonStatus.isChecked();
     }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isStartAndroidAutoPopUpPresent() {
+        BySelector startAndroidAutoPopUpHeader =
+                getUiElementFromConfig(AutomotiveConfigConstants.START_ANDROID_AUTO_POPUP);
+        return getSpectatioUiUtil().hasUiElement(startAndroidAutoPopUpHeader);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void skipStartAndroidAutoPopUp() {
+        UiObject2 notNowButton =
+                getSpectatioUiUtil()
+                        .findUiObject(getUiElementFromConfig(AutomotiveConfigConstants.NOT_NOW_START_ANDROID_AUTO_POPUP_BUTTON));
+        getSpectatioUiUtil().validateUiObject(notNowButton, AutomotiveConfigConstants.NOT_NOW_START_ANDROID_AUTO_POPUP_BUTTON);
+        getSpectatioUiUtil().clickAndWait(notNowButton);
+        getSpectatioUiUtil().waitForIdle();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isAssistantImprovementPopUpPresent() {
+        BySelector assistantImprovementPopUpHeader =
+                getUiElementFromConfig(AutomotiveConfigConstants.ASSISTANT_IMPROVEMENT_POPUP);
+        return getSpectatioUiUtil().hasUiElement(assistantImprovementPopUpHeader);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void skipImprovementCallingAndTextingPopUp() {
+        UiObject2 continueButton =
+                getSpectatioUiUtil()
+                        .findUiObject(getUiElementFromConfig(AutomotiveConfigConstants.SKIP_ASSISTANT_IMPROVEMENT_PAGE_BUTTON));
+        getSpectatioUiUtil().validateUiObject(continueButton, AutomotiveConfigConstants.SKIP_ASSISTANT_IMPROVEMENT_PAGE_BUTTON);
+        getSpectatioUiUtil().clickAndWait(continueButton);
+        getSpectatioUiUtil().waitForIdle();
+    }
 }

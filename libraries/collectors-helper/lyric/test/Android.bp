@@ -27,7 +27,7 @@ java_library {
         "junit",
         "mockito-target",
         "lyric-metric-helper",
-        "truth-prebuilt",
+        "truth",
     ],
 
     sdk_version: "current",

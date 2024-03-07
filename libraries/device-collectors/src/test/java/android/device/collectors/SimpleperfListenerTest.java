@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -34,17 +35,17 @@ import androidx.test.uiautomator.UiDevice;
 
 import com.android.helpers.SimpleperfHelper;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.Description;
-import org.junit.runner.notification.Failure;
 import org.junit.runner.Result;
 import org.junit.runner.RunWith;
+import org.junit.runner.notification.Failure;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Android Unit tests for {@link SimpleperfListener}.
@@ -458,5 +459,42 @@ public class SimpleperfListenerTest {
         // Check if the test count is incremented properly.
         assertEquals(2, (int) mInvocationCount.get(mListener.getTestFileName(mTest1Desc)));
         assertEquals(1, (int) mInvocationCount.get(mListener.getTestFileName(mTest2Desc)));
+    }
+
+    /*
+     * Verify we can skip record and only report metrics.
+     */
+    @Test
+    public void testSimpleperfSkipRecord() throws Exception {
+        Bundle b = new Bundle();
+        b.putString(SimpleperfListener.PROCESSES, "surfaceflinger,system_server");
+        b.putString(SimpleperfListener.COLLECT_PER_RUN, "false");
+        b.putString(SimpleperfListener.REPORT, "true");
+        b.putString(SimpleperfListener.RECORD, "false");
+        b.putString(
+                SimpleperfListener.REPORT_SYMBOLS,
+                "writeInt32;android::Parcel::writeInt32(int);"
+                        + "commit;android::SurfaceFlinger::commit(long,"
+                        + " long, long);composite;android::SurfaceFlinger::composite(long, long)");
+        b.putString(SimpleperfListener.EVENTS, "instructions,cpu-cycles");
+        mListener = initListener(b, mSimpleperfHelperVisibleUidevice);
+        doReturn("680").when(mUiDevice).executeShellCommand(eq("pidof surfaceflinger"));
+        doReturn("1696").when(mUiDevice).executeShellCommand(eq("pidof system_server"));
+        doReturn("").when(mUiDevice).executeShellCommand(eq("pidof simpleperf"));
+        doReturn(true)
+                .when(mSimpleperfHelperVisibleUidevice)
+                .startCollecting(anyString(), anyString());
+        doReturn(true).when(mSimpleperfHelperVisibleUidevice).copyFileOutput(anyString());
+
+        mListener.testRunStarted(mRunDesc);
+        mListener.testStarted(mTest1Desc);
+        verify(mSimpleperfHelperVisibleUidevice, times(2)).getPID(anyString());
+        verify(mSimpleperfHelperVisibleUidevice, never()).startCollecting(anyString(), anyString());
+        mListener.onTestEnd(mListener.createDataRecord(), mTest3Desc);
+        verify(mSimpleperfHelperVisibleUidevice, never()).stopCollecting(anyString());
+        verify(mSimpleperfHelperVisibleUidevice, times(1)).copyFileOutput(anyString());
+        verify(mSimpleperfHelperVisibleUidevice, times(2))
+                .getSimpleperfReport(anyString(), any(), any(), anyInt());
+        testSampleReport();
     }
 }

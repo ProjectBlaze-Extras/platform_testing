@@ -20,7 +20,7 @@ import android.tools.common.Tag
 import android.tools.common.flicker.subject.events.EventLogSubject
 import android.tools.common.flicker.subject.layers.LayerTraceEntrySubject
 import android.tools.common.flicker.subject.wm.WindowManagerStateSubject
-import android.tools.rules.CleanFlickerEnvironmentRule
+import android.tools.utils.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
 import kotlin.reflect.KClass
 import org.junit.ClassRule

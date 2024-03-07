@@ -26,7 +26,7 @@ import org.junit.runner.Description
 /** Test rule to ensure no tasks as running before executing the test */
 class RemoveAllTasksButHomeRule() : TestWatcher() {
     override fun starting(description: Description?) {
-        Logger.withTracing("RemoveAllTasksButHomeRule:finished") {
+        Logger.withTracing("$RemoveAllTasksButHomeRule:starting") {
             Logger.v(FLICKER_TAG, "Removing all tasks (except home)")
             removeAllTasksButHome()
         }

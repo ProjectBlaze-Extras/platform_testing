@@ -16,6 +16,7 @@
 
 package android.tools.device.flicker.datastore
 
+import android.tools.common.Logger
 import android.tools.common.Scenario
 import android.tools.common.io.Reader
 import android.tools.common.io.RunStatus
@@ -33,8 +34,10 @@ class CachedAssertionRunner(
     resultReader: Reader = CachedResultReader(scenario, TRACE_CONFIG_REQUIRE_CHANGES)
 ) : BaseAssertionRunner(resultReader) {
     override fun doUpdateStatus(newStatus: RunStatus) {
-        val result = DataStore.getResult(scenario)
-        result.updateStatus(newStatus)
-        DataStore.replaceResult(scenario, result)
+        return Logger.withTracing("${this::class.simpleName}#doUpdateStatus") {
+            val result = DataStore.getResult(scenario)
+            result.updateStatus(newStatus)
+            DataStore.replaceResult(scenario, result)
+        }
     }
 }

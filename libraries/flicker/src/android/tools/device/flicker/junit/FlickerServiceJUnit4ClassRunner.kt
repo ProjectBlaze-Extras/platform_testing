@@ -18,6 +18,11 @@ package android.tools.device.flicker.junit
 
 import android.os.Bundle
 import android.platform.test.util.TestFilter
+import android.tools.common.CrossPlatform
+import android.tools.common.Scenario
+import android.tools.common.TimestampFactory
+import android.tools.device.AndroidLogger
+import android.tools.device.traces.formatRealTimestamp
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import java.util.Collections
@@ -47,16 +52,29 @@ import org.junit.runners.model.Statement
 
 class FlickerServiceJUnit4ClassRunner
 @JvmOverloads
-constructor(testClass: Class<*>?, paramString: String? = null) :
-    BlockJUnit4ClassRunner(testClass), IFlickerJUnitDecorator {
+constructor(
+    testClass: Class<*>?,
+    paramString: String? = null,
     private val arguments: Bundle = InstrumentationRegistry.getArguments()
+) : BlockJUnit4ClassRunner(testClass), IFlickerJUnitDecorator {
+
+    private val onlyBlocking: Boolean
+        get() = arguments.getString(Scenario.FAAS_BLOCKING)?.toBoolean() ?: true
 
     private val flickerDecorator: FlickerServiceDecorator =
-        FlickerServiceDecorator(this.testClass, paramString = paramString, inner = this)
+        FlickerServiceDecorator(
+            this.testClass,
+            paramString = paramString,
+            onlyBlocking,
+            inner = this
+        )
 
     private var initialized: Boolean? = null
 
     init {
+        CrossPlatform.setLogger(AndroidLogger())
+            .setTimestampFactory(TimestampFactory { formatRealTimestamp(it) })
+
         val errors = mutableListOf<Throwable>()
         flickerDecorator.doValidateInstanceMethods().let { errors.addAll(it) }
         flickerDecorator.doValidateConstructor().let { errors.addAll(it) }

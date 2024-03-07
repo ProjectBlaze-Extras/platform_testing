@@ -16,7 +16,6 @@
 package android.platform.test.rule
 
 import android.content.Intent
-import android.platform.uiautomator_helpers.DeviceHelpers.context
 import android.provider.Settings
 import org.junit.runner.Description
 
@@ -24,6 +23,7 @@ import org.junit.runner.Description
 class SysuiDemoModeRule() : TestWatcher() {
     private val contentResolver = context.contentResolver
     private val DEMO_MODE_FLAG = "sysui_demo_allowed"
+    private val DEMO_MODE_TUNER_FLAG = "sysui_tuner_demo_on"
     private val ENTER_COMMAND = "enter"
     private val DISABLE_COMMAND = "exit"
     private val ENABLE_VALUE = 1
@@ -34,10 +34,18 @@ class SysuiDemoModeRule() : TestWatcher() {
             throw RuntimeException("Could not set SysUI demo mode to $ENABLE_VALUE")
         }
         sendDemoModeBroadcast(ENTER_COMMAND)
+
+        if (!Settings.Global.putInt(contentResolver, DEMO_MODE_TUNER_FLAG, ENABLE_VALUE)) {
+            throw RuntimeException("Could not turn SysUI demo mode on.")
+        }
     }
 
     override fun finished(description: Description) {
         sendDemoModeBroadcast(DISABLE_COMMAND)
+
+        if (!Settings.Global.putInt(contentResolver, DEMO_MODE_TUNER_FLAG, DISABLE_VALUE)) {
+            throw RuntimeException("Could not turn SysUI demo mode off.")
+        }
 
         if (!Settings.Global.putInt(contentResolver, DEMO_MODE_FLAG, DISABLE_VALUE)) {
             throw RuntimeException("Could not disable SysUI demo mode.")

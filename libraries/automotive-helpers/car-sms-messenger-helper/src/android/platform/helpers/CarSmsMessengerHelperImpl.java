@@ -18,6 +18,7 @@ package android.platform.helpers;
 import android.app.Instrumentation;
 
 import androidx.test.uiautomator.BySelector;
+import androidx.test.uiautomator.UiObject2;
 
 /** CarSmsMessengerHelperImpl class for Android Auto platform functional tests */
 public class CarSmsMessengerHelperImpl extends AbstractStandardAppHelper
@@ -61,5 +62,37 @@ public class CarSmsMessengerHelperImpl extends AbstractStandardAppHelper
         BySelector bluetoothErrorSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.SMS_BLUETOOTH_ERROR);
         return getSpectatioUiUtil().hasUiElement(bluetoothErrorSelector);
+    }
+
+    @Override
+    public boolean isUnreadSmsDisplayed() {
+        BySelector unreadBadgeSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.SMS_UNREAD_BADGE);
+        return getSpectatioUiUtil().hasUiElement(unreadBadgeSelector);
+    }
+
+    @Override
+    public boolean isSmsPreviewDisplayed(String text) {
+        BySelector smsTextSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.SMS_PREVIEW_TEXT);
+        UiObject2 smsPreviewTextObj = getSpectatioUiUtil().findUiObject(smsTextSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(smsPreviewTextObj, AutomotiveConfigConstants.SMS_PREVIEW_TEXT);
+        String smsPreviewText = smsPreviewTextObj.getText();
+        return smsPreviewText.contains(text);
+    }
+
+    @Override
+    public boolean isSmsTimeStampDisplayed() {
+        BySelector timeStampSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.SMS_PREVIEW_TIMESTAMP);
+        return getSpectatioUiUtil().hasUiElement(timeStampSelector);
+    }
+
+    @Override
+    public boolean isNoMessagesDisplayed() {
+        BySelector noMessagesSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.SMS_EMPTY_MESSAGE);
+        return getSpectatioUiUtil().hasUiElement(noMessagesSelector);
     }
 }

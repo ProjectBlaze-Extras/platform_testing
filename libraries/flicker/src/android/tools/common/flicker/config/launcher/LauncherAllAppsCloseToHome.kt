@@ -28,7 +28,7 @@ val LauncherAllAppsCloseToHome =
     FlickerConfigEntry(
         enabled = true,
         scenarioId = ScenarioId("LAUNCHER_ALL_APPS_CLOSE_TO_HOME"),
-        assertions = AssertionTemplates.APP_CLOSE_TO_HOME_ASSERTIONS,
+        assertions = AssertionTemplates.COMMON_ASSERTIONS,
         extractor =
             TaggedScenarioExtractorBuilder()
                 .setTargetTag(CujType.CUJ_LAUNCHER_CLOSE_ALL_APPS_TO_HOME)

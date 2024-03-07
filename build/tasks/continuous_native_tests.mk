@@ -29,7 +29,7 @@ include $(BUILD_SYSTEM)/tasks/tools/package-modules.mk
 .PHONY: continuous_native_tests
 continuous_native_tests : $(my_package_zip)
 
-name := $(TARGET_PRODUCT)-continuous_native_tests-$(FILE_NAME_TAG)
+name := $(TARGET_PRODUCT)-continuous_native_tests-FILE_NAME_TAG_PLACEHOLDER
 $(call dist-for-goals, continuous_native_tests, $(my_package_zip):$(name).zip)
 
 # Also build this when you run "make tests".

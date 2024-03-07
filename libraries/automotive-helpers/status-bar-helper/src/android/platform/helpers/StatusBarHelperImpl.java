@@ -205,7 +205,7 @@ public class StatusBarHelperImpl extends AbstractStandardAppHelper implements IA
 
     /** {@inheritDoc} */
     @Override
-    public boolean verifyBluetooth() {
+    public boolean hasBluetoothButton() {
         BySelector bluetoothSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.BLUETOOTH_BUTTON);
         return getSpectatioUiUtil().hasUiElement(bluetoothSelector);
@@ -219,7 +219,7 @@ public class StatusBarHelperImpl extends AbstractStandardAppHelper implements IA
 
     /** {@inheritDoc} */
     @Override
-    public boolean verifyPhone() {
+    public boolean hasBluetoothPalettePhoneButton() {
         BySelector phoneSelector = getUiElementFromConfig(AutomotiveConfigConstants.PHONE_BUTTON);
         return getSpectatioUiUtil().hasUiElement(phoneSelector);
     }
@@ -234,7 +234,7 @@ public class StatusBarHelperImpl extends AbstractStandardAppHelper implements IA
 
     /** {@inheritDoc} */
     @Override
-    public boolean verifyMedia() {
+    public boolean hasBluetoothPaletteMediaButton() {
         BySelector mediaSelector = getUiElementFromConfig(AutomotiveConfigConstants.MEDIA_BUTTON);
         return getSpectatioUiUtil().hasUiElement(mediaSelector);
     }
@@ -296,7 +296,7 @@ public class StatusBarHelperImpl extends AbstractStandardAppHelper implements IA
 
     /** {@inheritDoc} */
     @Override
-    public boolean verifyDisabledBluetoothProfile() {
+    public boolean isBluetoothButtonEnabled() {
         BySelector disabledBluetoothProfileSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.BLUETOOTH_BUTTON);
         UiObject2 disabledBluetoothProfile =
@@ -309,7 +309,7 @@ public class StatusBarHelperImpl extends AbstractStandardAppHelper implements IA
 
     /** {@inheritDoc} */
     @Override
-    public boolean verifyDisabledPhoneProfile() {
+    public boolean isBluetoothPhoneButtonEnabled() {
         BySelector disabledPhoneProfileNameSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.DISABLED_PHONE_PROFILE);
         UiObject2 disabledPhoneProfile =
@@ -322,7 +322,7 @@ public class StatusBarHelperImpl extends AbstractStandardAppHelper implements IA
 
     /** {@inheritDoc} */
     @Override
-    public boolean verifyDisabledMediaProfile() {
+    public boolean isBluetoothMediaButtonEnabled() {
         BySelector disabledMediaProfileNameSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.DISABLED_MEDIA_PROFILE);
         UiObject2 disabledMediaProfile =
@@ -426,5 +426,30 @@ public class StatusBarHelperImpl extends AbstractStandardAppHelper implements IA
                 .validateUiObject(
                         bluetoothDisconnected, AutomotiveConfigConstants.BT_DISCONNECTED_STATUS);
         return bluetoothDisconnected.isEnabled();
+    }
+    /** {@inheritDoc} */
+    @Override
+    public boolean isBluetoothPaletteMediaButtonEnabled() {
+        BySelector bluetoothPaletteMediaButtonSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.MEDIA_BUTTON);
+        UiObject2 bluetoothPaletteMediaButton =
+                getSpectatioUiUtil().findUiObject(bluetoothPaletteMediaButtonSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        bluetoothPaletteMediaButton, AutomotiveConfigConstants.MEDIA_BUTTON);
+        return bluetoothPaletteMediaButton.isChecked();
+    }
+    /** {@inheritDoc} */
+    @Override
+    public void clickOnBluetoothPaletteMediaButton() {
+        BySelector disabledMediaProfileNameSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.DISABLED_MEDIA_PROFILE);
+        UiObject2 disabledMediaProfile =
+                getSpectatioUiUtil().findUiObject(disabledMediaProfileNameSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(
+                        disabledMediaProfile, AutomotiveConfigConstants.DISABLED_MEDIA_PROFILE);
+        getSpectatioUiUtil().clickAndWait(disabledMediaProfile);
+        getSpectatioUiUtil().wait5Seconds();
     }
 }

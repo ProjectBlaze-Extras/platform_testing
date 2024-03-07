@@ -81,4 +81,70 @@ public class MediaPlayerSnippet implements Snippet {
     public boolean isBluetoothAudioDisconnectedLabelVisible() {
         return mAutoMediaHelper.get().isBluetoothAudioDisconnectedLabelVisible();
     }
+
+    @Rpc(description = "Is Connect to Bluetooth label present")
+    public boolean isConnectToBluetoothLabelVisible() {
+        return mAutoMediaHelper.get().isConnectToBluetoothLabelVisible();
+    }
+
+    @Rpc(description = "Open Bluetooth Audio app")
+    public void openBluetoothMediaApp() {
+        mAutoMediaHelper.get().openBluetoothMediaApp();
+    }
+
+    @Rpc(description = "Click on Bluetooth conncetion togle")
+    public void clickOnBluetoothToggle() {
+        mAutoMediaHelper.get().clickOnBluetoothToggle();
+    }
+
+    @Rpc(description = "Click on Cancel Bluetooth Audio conncetion button")
+    public void cancelBluetoothAudioConncetion() {
+        mAutoMediaHelper.get().cancelBluetoothAudioConncetion();
+    }
+
+    @Rpc(description = "Scroll play list down")
+    public void scrollPlayListDown() {
+        mAutoMediaHelper.get().scrollPlayListDown();
+    }
+
+    @Rpc(description = "Select song from playlist")
+    public void clickOnSongFromPlaylist() {
+        mAutoMediaHelper.get().clickOnSongFromPlaylist();
+    }
+
+    @Rpc(description = "Get Artist tile")
+    public String getArtistrTitle() {
+        return mAutoMediaHelper.get().getArtistrTitle();
+    }
+
+    @Rpc(description = "Get Album tile")
+    public String getAlbumTitle() {
+        return mAutoMediaHelper.get().getAlbumTitle();
+    }
+
+    @Rpc(description = "Get song current playing time")
+    public String getSongCurrentPlayingTime() {
+        return mAutoMediaHelper.get().getSongCurrentPlayingTime();
+    }
+
+    @Rpc(description = "Get song max playing time")
+    public String getCurrentSongMaxPlayingTime() {
+        return mAutoMediaHelper.get().getCurrentSongMaxPlayingTime();
+    }
+
+    @Rpc(description = "Is Now Playing label present")
+    public boolean isNowPlayingLabelVisible() {
+        return mAutoMediaHelper.get().isNowPlayingLabelVisible();
+    }
+
+
+    @Rpc(description = "Is Playlist icon visible")
+    public boolean isPlaylistIconVisible() {
+        return mAutoMediaHelper.get().isPlaylistIconVisible();
+    }
+
+    @Rpc(description = "Click on PLaylist icon")
+    public void clickOnPlaylistIcon() {
+        mAutoMediaHelper.get().clickOnPlaylistIcon();
+    }
 }

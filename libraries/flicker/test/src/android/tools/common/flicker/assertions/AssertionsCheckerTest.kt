@@ -16,12 +16,12 @@
 
 package android.tools.common.flicker.assertions
 
-import android.tools.assertFail
 import android.tools.common.ITraceEntry
 import android.tools.common.Timestamp
 import android.tools.common.Timestamps
 import android.tools.common.flicker.subject.FlickerSubject
-import android.tools.rules.CleanFlickerEnvironmentRule
+import android.tools.utils.CleanFlickerEnvironmentRule
+import android.tools.utils.assertFail
 import org.junit.ClassRule
 import org.junit.FixMethodOrder
 import org.junit.Test

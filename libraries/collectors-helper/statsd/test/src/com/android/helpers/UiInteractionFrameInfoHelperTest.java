@@ -21,9 +21,9 @@ import android.app.Application;
 import android.os.SystemClock;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.INotificationHelper;
-import android.support.test.uiautomator.UiObject2;
 
 import androidx.test.runner.AndroidJUnit4;
+import androidx.test.uiautomator.UiObject2;
 
 import org.junit.After;
 import org.junit.Before;

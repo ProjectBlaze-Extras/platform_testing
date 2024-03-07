@@ -27,23 +27,17 @@
 
 """
 
-import sys
 import logging
-import pprint
 
 from bluetooth_test import bluetooth_base_test
-
 from mobly import asserts
-from mobly import base_test
-from mobly import test_runner
-from mobly.controllers import android_device
 
-from mbs_utils import constants
-from mbs_utils import spectatio_utils
-from mbs_utils import bt_utils
+from utilities import constants
+from utilities.main_utils import common_main
 
 MOBILE_DEVICE_NAME = 'target'
 AUTOMOTIVE_DEVICE_NAME = 'discoverer'
+
 
 class BluetoothConnectionStatusOnLevelTwo(bluetooth_base_test.BluetoothBaseTest):
 
@@ -59,24 +53,23 @@ class BluetoothConnectionStatusOnLevelTwo(bluetooth_base_test.BluetoothBaseTest)
     def test_connection_status_displayed_on_device_screen(self):
         # Open bluetooth settings.
         self.call_utils.open_bluetooth_settings()
-        self.call_utils.wait_with_log(constants.WAIT_TWO_SECONDS)
+        self.call_utils.wait_with_log(2)
 
         # Find the target device and disconnect it on the Level One page
         self.call_utils.press_bluetooth_toggle_on_device(MOBILE_DEVICE_NAME)
-        self.call_utils.wait_with_log(constants.WAIT_TWO_SECONDS)
+        self.call_utils.wait_with_log(2)
 
         # Click on the target device.
         self.call_utils.press_device_entry_on_list_of_paired_devices(MOBILE_DEVICE_NAME)
-        self.call_utils.wait_with_log(constants.WAIT_TWO_SECONDS)
+        self.call_utils.wait_with_log(2)
 
         # Confirm that target device displays "disconnected"
         summary = self.call_utils.get_device_summary()
         logging.info("Summary received reads: %s" % summary)
         asserts.assert_true((constants.DISCONNECTED_SUMMARY_STATUS in summary),
-                "Expected summary  to contain %s, but instead summary reads: %s"
+                            "Expected summary  to contain %s, but instead summary reads: %s"
                             % (constants.DISCONNECTED_SUMMARY_STATUS, summary))
 
 
 if __name__ == '__main__':
-    # Take test args
-    test_runner.main()
+    common_main()

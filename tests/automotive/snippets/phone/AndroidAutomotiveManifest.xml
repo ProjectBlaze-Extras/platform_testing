@@ -52,7 +52,9 @@
                        com.google.android.mobly.snippet.bundled.StorageSnippet,
                        com.google.android.mobly.snippet.bundled.StatusBarSnippet,
                        com.google.android.mobly.snippet.bundled.TelephonySnippet,
-                        com.google.android.mobly.snippet.bundled.MediaPlayerSnippet,
+                       com.google.android.mobly.snippet.bundled.UISnippet,
+                       com.google.android.mobly.snippet.bundled.MediaPlayerSnippet,
+                       com.google.android.mobly.snippet.bundled.UxrestrictionSnippet,
                        com.google.android.mobly.snippet.bundled.WifiManagerSnippet" />
 
   </application>

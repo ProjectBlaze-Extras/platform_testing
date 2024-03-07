@@ -34,6 +34,8 @@ import android.tools.common.flicker.config.taskbar.Taskbar
 import android.tools.common.flicker.config.wallpaper.Wallpaper
 
 object FlickerServiceConfig {
+    val IME_DEFAULT = Ime.SCENARIOS
+
     val DEFAULT =
         listOf(
                 AppClose.SCENARIOS,

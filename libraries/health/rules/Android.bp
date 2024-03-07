@@ -27,6 +27,7 @@ java_library {
         "app-helpers-handheld-interfaces",
         "collector-device-lib",
         "collector-device-lib-platform",
+        "//frameworks/base/packages/SystemUI/aconfig:com_android_systemui_flags_lib",
         "guava",
         "memory-helper",
         "notes-role-test-helper",
@@ -69,5 +70,12 @@ java_library {
     srcs: ["src/**/*.java"],
     exclude_srcs: [
         "src/android/platform/test/rule/flicker/**/*.java",
+    ],
+}
+
+filegroup {
+    name: "platform-test-screenshot-rules",
+    srcs: [
+        "src/android/platform/test/rule/DisableAnimationsRule.kt",
     ],
 }

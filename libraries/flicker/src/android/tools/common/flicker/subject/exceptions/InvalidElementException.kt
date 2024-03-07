@@ -20,4 +20,4 @@ package android.tools.common.flicker.subject.exceptions
  * Exception thrown when an element is found and shouldn't exist, or isn't found and should exist
  */
 class InvalidElementException(override val messageBuilder: ExceptionMessageBuilder) :
-    BaseException()
+    FlickerAssertionError()

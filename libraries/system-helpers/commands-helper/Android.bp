@@ -21,8 +21,10 @@ package {
 java_library {
     name: "commands-helper",
     libs: [
-        "ub-uiautomator",
         "androidx.test.rules",
+    ],
+    static_libs: [
+        "androidx.test.uiautomator_uiautomator",
     ],
     srcs: ["src/**/*.java"],
     sdk_version: "current",

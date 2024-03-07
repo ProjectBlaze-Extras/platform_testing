@@ -42,6 +42,27 @@ public class CarSmsMessengerSnippet implements Snippet {
         return mCarSmsMessengerHelper.get().isSmsBluetoothErrorDisplayed();
     }
 
+    @Rpc(description = "Checks Unread Sms Badge")
+    public boolean isUnreadSmsDisplayed() {
+        return mCarSmsMessengerHelper.get().isUnreadSmsDisplayed();
+    }
+
+    /** for checking the sms preview */
+    @Rpc(description = "Checks Sms Preview Text")
+    public boolean isSmsPreviewTextDisplayed(String text) {
+        return mCarSmsMessengerHelper.get().isSmsPreviewDisplayed(text);
+    }
+
+    @Rpc(description = "Checks Sms Preview TimeStamp")
+    public boolean isSmsTimeStampDisplayed() {
+        return mCarSmsMessengerHelper.get().isSmsTimeStampDisplayed();
+    }
+
+    @Rpc(description = "Checks Sms No Messages")
+    public boolean isNoMessagesDisplayed() {
+        return mCarSmsMessengerHelper.get().isNoMessagesDisplayed();
+    }
+
     @Override
     public void shutdown() {}
 }

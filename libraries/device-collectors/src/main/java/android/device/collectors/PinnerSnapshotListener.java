@@ -23,36 +23,18 @@ import com.android.helpers.PinnerHelper;
 
 @OptionClass(alias = "pinner-collector")
 public class PinnerSnapshotListener extends BaseCollectionListener<String> {
-    private static final String TAG = PinnerSnapshotListener.class.getSimpleName();
-    private static final String DEFAULT_OUTPUT_DIR = "/sdcard/test_results";
+  private PinnerHelper mPinnerHelper = new PinnerHelper();
 
-    @VisibleForTesting
-    static final String OUTPUT_DIR_KEY = "output-dir";
+  public PinnerSnapshotListener() { createHelperInstance(mPinnerHelper); }
 
-    private PinnerHelper mPinnerHelper = new PinnerHelper();
-
-    public PinnerSnapshotListener() {
-        createHelperInstance(mPinnerHelper);
-    }
-
-    /**
-     * Constructor to simulate receiving the instrumentation arguments. Should not be used except
-     * for testing.
-     */
-    @VisibleForTesting
-    public PinnerSnapshotListener(Bundle args, PinnerHelper helper) {
-        super(args, helper);
-        mPinnerHelper = helper;
-        createHelperInstance(mPinnerHelper);
-    }
-
-    /**
-     * Adds the options for pinner snapshot collector.
-     */
-    @Override
-    public void setupAdditionalArgs() {
-        Bundle args = getArgsBundle();
-        String testOutputDir = args.getString(OUTPUT_DIR_KEY, DEFAULT_OUTPUT_DIR);
-        mPinnerHelper.setUp(testOutputDir);
-    }
+  /**
+   * Constructor to simulate receiving the instrumentation arguments. Should not
+   * be used except for testing.
+   */
+  @VisibleForTesting
+  public PinnerSnapshotListener(Bundle args, PinnerHelper helper) {
+    super(args, helper);
+    mPinnerHelper = helper;
+    createHelperInstance(mPinnerHelper);
+  }
 }

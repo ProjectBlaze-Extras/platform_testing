@@ -16,10 +16,6 @@
 
 package android.tools.common.flicker.subject.surfaceflinger
 
-import android.tools.TestComponents
-import android.tools.assertFail
-import android.tools.assertThatErrorContainsDebugInfo
-import android.tools.assertThrows
 import android.tools.common.Cache
 import android.tools.common.datatypes.Rect
 import android.tools.common.datatypes.Region
@@ -27,10 +23,14 @@ import android.tools.common.flicker.subject.layers.LayerTraceEntrySubject
 import android.tools.common.flicker.subject.layers.LayersTraceSubject
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.common.traces.component.OrComponentMatcher
-import android.tools.getLayerTraceReaderFromAsset
-import android.tools.rules.CleanFlickerEnvironmentRule
+import android.tools.utils.CleanFlickerEnvironmentRule
 import android.tools.utils.MockLayerBuilder
 import android.tools.utils.MockLayerTraceEntryBuilder
+import android.tools.utils.TestComponents
+import android.tools.utils.assertFail
+import android.tools.utils.assertThatErrorContainsDebugInfo
+import android.tools.utils.assertThrows
+import android.tools.utils.getLayerTraceReaderFromAsset
 import com.google.common.truth.Truth
 import org.junit.Before
 import org.junit.ClassRule
@@ -51,7 +51,7 @@ class LayerTraceEntrySubjectTest {
 
     @Test
     fun exceptionContainsDebugInfo() {
-        val reader = getLayerTraceReaderFromAsset("layers_trace_emptyregion.pb", legacyTrace = true)
+        val reader = getLayerTraceReaderFromAsset("layers_trace_emptyregion.perfetto-trace")
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         val error =
             assertThrows<AssertionError> {
@@ -63,8 +63,7 @@ class LayerTraceEntrySubjectTest {
 
     @Test
     fun testCanInspectBeginning() {
-        val reader =
-            getLayerTraceReaderFromAsset("layers_trace_launch_split_screen.pb", legacyTrace = true)
+        val reader = getLayerTraceReaderFromAsset("layers_trace_launch_split_screen.perfetto-trace")
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         LayerTraceEntrySubject(trace.entries.first(), reader)
             .isVisible(ComponentNameMatcher.NAV_BAR)
@@ -74,8 +73,7 @@ class LayerTraceEntrySubjectTest {
 
     @Test
     fun testCanInspectEnd() {
-        val reader =
-            getLayerTraceReaderFromAsset("layers_trace_launch_split_screen.pb", legacyTrace = true)
+        val reader = getLayerTraceReaderFromAsset("layers_trace_launch_split_screen.perfetto-trace")
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         LayerTraceEntrySubject(trace.entries.last(), reader)
             .isVisible(ComponentNameMatcher.NAV_BAR)
@@ -85,7 +83,7 @@ class LayerTraceEntrySubjectTest {
     // b/75276931
     @Test
     fun canDetectUncoveredRegion() {
-        val reader = getLayerTraceReaderFromAsset("layers_trace_emptyregion.pb", legacyTrace = true)
+        val reader = getLayerTraceReaderFromAsset("layers_trace_emptyregion.perfetto-trace")
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         val expectedRegion = Region.from(0, 0, 1440, 2960)
         assertFail("SkRegion((0,0,1440,1440)) should cover at least SkRegion((0,0,1440,2960))") {
@@ -99,7 +97,7 @@ class LayerTraceEntrySubjectTest {
     // Visible region tests
     @Test
     fun canTestLayerVisibleRegion_layerDoesNotExist() {
-        val reader = getLayerTraceReaderFromAsset("layers_trace_emptyregion.pb", legacyTrace = true)
+        val reader = getLayerTraceReaderFromAsset("layers_trace_emptyregion.perfetto-trace")
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         val expectedVisibleRegion = Region.from(0, 0, 1, 1)
         assertFail(TestComponents.IMAGINARY.toWindowIdentifier()) {
@@ -112,7 +110,7 @@ class LayerTraceEntrySubjectTest {
 
     @Test
     fun canTestLayerVisibleRegion_layerDoesNotHaveExpectedVisibleRegion() {
-        val reader = getLayerTraceReaderFromAsset("layers_trace_emptyregion.pb", legacyTrace = true)
+        val reader = getLayerTraceReaderFromAsset("layers_trace_emptyregion.perfetto-trace")
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         val expectedVisibleRegion = Region.from(0, 0, 1, 1)
         assertFail("[empty] should cover exactly SkRegion((0,0,1,1))") {
@@ -125,7 +123,7 @@ class LayerTraceEntrySubjectTest {
 
     @Test
     fun canTestLayerVisibleRegion_layerIsHiddenByParent() {
-        val reader = getLayerTraceReaderFromAsset("layers_trace_emptyregion.pb", legacyTrace = true)
+        val reader = getLayerTraceReaderFromAsset("layers_trace_emptyregion.perfetto-trace")
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         val expectedVisibleRegion = Region.from(0, 0, 1, 1)
         assertFail("[empty] should cover exactly SkRegion((0,0,1,1))") {
@@ -138,7 +136,7 @@ class LayerTraceEntrySubjectTest {
 
     @Test
     fun canTestLayerVisibleRegion_incorrectRegionSize() {
-        val reader = getLayerTraceReaderFromAsset("layers_trace_emptyregion.pb", legacyTrace = true)
+        val reader = getLayerTraceReaderFromAsset("layers_trace_emptyregion.perfetto-trace")
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         val expectedVisibleRegion = Region.from(0, 0, 1440, 99)
         assertFail("SkRegion((0,0,1440,171)) should cover exactly SkRegion((0,0,1440,99))") {
@@ -151,8 +149,7 @@ class LayerTraceEntrySubjectTest {
 
     @Test
     fun canTestLayerVisibleRegion() {
-        val reader =
-            getLayerTraceReaderFromAsset("layers_trace_launch_split_screen.pb", legacyTrace = true)
+        val reader = getLayerTraceReaderFromAsset("layers_trace_launch_split_screen.perfetto-trace")
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         val expectedVisibleRegion = Region.from(0, 0, 1080, 145)
         LayersTraceSubject(trace, reader)
@@ -164,10 +161,7 @@ class LayerTraceEntrySubjectTest {
     @Test
     fun canTestLayerVisibleRegion_layerIsNotVisible() {
         val reader =
-            getLayerTraceReaderFromAsset(
-                "layers_trace_invalid_layer_visibility.pb",
-                legacyTrace = true
-            )
+            getLayerTraceReaderFromAsset("layers_trace_invalid_layer_visibility.perfetto-trace")
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         assertFail("Bounds is 0x0") {
             LayersTraceSubject(trace, reader)
@@ -360,7 +354,7 @@ class LayerTraceEntrySubjectTest {
 
     @Test
     fun detectOccludedLayerBecauseOfRoundedCorners() {
-        val reader = getLayerTraceReaderFromAsset("layers_trace_rounded_corners.winscope")
+        val reader = getLayerTraceReaderFromAsset("layers_trace_rounded_corners.perfetto-trace")
         val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
         val entry =
             LayersTraceSubject(trace, reader)
@@ -389,6 +383,28 @@ class LayerTraceEntrySubjectTest {
         Truth.assertWithMessage("IME activity has rounded corners")
             .that(imeActivityLayer.cornerRadius)
             .isGreaterThan(0)
+    }
+
+    @Test
+    fun canDetectInvisibleLayerOutOfScreen() {
+        val reader =
+            getLayerTraceReaderFromAsset("layers_trace_visible_outside_bounds.perfetto-trace")
+        val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
+        val subject =
+            LayersTraceSubject(trace, reader)
+                .getEntryBySystemUpTime(1253267561044, byElapsedTimestamp = true)
+        val region = subject.visibleRegion(ComponentNameMatcher.IME_SNAPSHOT)
+        region.isEmpty()
+        subject.isInvisible(ComponentNameMatcher.IME_SNAPSHOT)
+    }
+
+    @Test
+    fun canDetectInvisibleLayerOutOfScreen_ConsecutiveLayers() {
+        val reader =
+            getLayerTraceReaderFromAsset("layers_trace_visible_outside_bounds.perfetto-trace")
+        val trace = reader.readLayersTrace() ?: error("Unable to read layers trace")
+        val subject = LayersTraceSubject(trace, reader)
+        subject.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 
     companion object {

@@ -22,8 +22,35 @@ python_test_host {
     srcs: ["connectivity_test_default_state.py"],
     libs: [
         "mobly",
-        "mbs_utils",
-        "BluetoothTestLibrary"
+        "utilities",
+        "bluetooth_test"
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_test_host {
+    name: "BTDisconnectFromSettings",
+    main: "connectivity_test_disconnect_from_settings.py",
+    srcs: ["connectivity_test_disconnect_from_settings.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test",
     ],
     test_suites: [
         "catbox",
@@ -49,8 +76,8 @@ python_test_host {
     srcs: ["connectivity_test_disconnected_summary_status.py"],
     libs: [
         "mobly",
-        "mbs_utils",
-        "BluetoothTestLibrary"
+        "utilities",
+        "bluetooth_test",
     ],
     test_suites: [
         "catbox",

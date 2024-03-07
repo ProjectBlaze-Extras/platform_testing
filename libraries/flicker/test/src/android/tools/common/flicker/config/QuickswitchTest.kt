@@ -26,7 +26,7 @@ import android.tools.device.apphelpers.CameraAppHelper
 import android.tools.device.flicker.Utils
 import android.tools.device.traces.getDefaultFlickerOutputDir
 import android.tools.device.traces.parsers.WindowManagerStateHelper
-import android.tools.rules.CleanFlickerEnvironmentRule
+import android.tools.utils.CleanFlickerEnvironmentRule
 import android.view.Display
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.tapl.LauncherInstrumentation

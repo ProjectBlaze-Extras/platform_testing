@@ -16,13 +16,17 @@
 
 package android.tools.common.flicker.config
 
+import android.tools.common.CrossPlatform
 import android.tools.common.PlatformConsts.SPLIT_SCREEN_TRANSITION_HANDLER
 import android.tools.common.flicker.extractors.ITransitionMatcher
 import android.tools.common.flicker.extractors.TransitionsTransform
+import android.tools.common.flicker.isAppTransitionChange
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.common.traces.surfaceflinger.LayersTrace
 import android.tools.common.traces.wm.Transition
 import android.tools.common.traces.wm.TransitionType
+import android.tools.common.traces.wm.TransitionType.TO_BACK
+import android.tools.common.traces.wm.TransitionType.TO_FRONT
 import android.tools.common.traces.wm.WmTransitionData
 
 object TransitionFilters {
@@ -30,7 +34,7 @@ object TransitionFilters {
         ts.filter { t ->
             t.changes.any {
                 it.transitMode == TransitionType.OPEN || // cold launch
-                it.transitMode == TransitionType.TO_FRONT // warm launch
+                it.transitMode == TO_FRONT // warm launch
             }
         }
     }
@@ -42,64 +46,96 @@ object TransitionFilters {
         val launcherLayers = layers.filter { ComponentNameMatcher.LAUNCHER.layerMatchesAnyOf(it) }
 
         ts.filter { t ->
-            t.changes.any {
-                it.transitMode == TransitionType.CLOSE || it.transitMode == TransitionType.TO_BACK
-            } &&
+            t.changes.any { it.transitMode == TransitionType.CLOSE || it.transitMode == TO_BACK } &&
                 t.changes.any { change ->
                     launcherLayers.any { it.id == change.layerId }
-                    change.transitMode == TransitionType.TO_FRONT
+                    change.transitMode == TO_FRONT
                 }
         }
     }
 
-    // TODO: Quick switch with split screen support (b/285142231)
     val QUICK_SWITCH_TRANSITION_FILTER: TransitionsTransform = { ts, _, reader ->
         val layersTrace = reader.readLayersTrace() ?: error("Missing layers trace")
+        val wmTrace = reader.readWmTrace()
 
-        val enterQuickswitchTransitions =
-            ts.filter { t ->
-                t.changes.size == 3 &&
-                    t.changes.any {
-                        it.transitMode == TransitionType.TO_FRONT &&
-                            isLauncherTopLevelTaskLayer(it.layerId, layersTrace)
-                    } && // LAUNCHER
-                    t.changes.any {
-                        it.transitMode == TransitionType.TO_FRONT &&
-                            isWallpaperTokenLayer(it.layerId, layersTrace)
-                    } && // WALLPAPER
-                    t.changes.any { it.transitMode == TransitionType.TO_BACK } // closing app
+        val mergedTransitions = ts.filter { it.mergedInto != null }
+        val nonMergedTransitions =
+            mutableMapOf<Int, Transition>().apply {
+                ts.filter { it.mergedInto == null }.forEach { this@apply[it.id] = it }
             }
-
-        val finalTransitions = mutableListOf<Transition>()
-        for (enterQuickswitchTransition in enterQuickswitchTransitions) {
-            val matchingExitQuickswitchTransitions =
-                ts.filter { t ->
-                    t.changes.size == 2 &&
-                        t.changes.any {
-                            it.transitMode == TransitionType.TO_BACK
-                        } && // closing app
-                        t.changes.any {
-                            it.transitMode == TransitionType.TO_FRONT
-                        } && // opening app
-                        t.mergedInto ==
-                            enterQuickswitchTransition
-                                .id // transition merged into previous transition
-                }
-
-            if (matchingExitQuickswitchTransitions.isEmpty()) {
-                continue
+        mergedTransitions.forEach {
+            val mergedInto = it.mergedInto ?: error("Missing merged into id!")
+            val mergedTransition = nonMergedTransitions[mergedInto]?.merge(it)
+            if (mergedTransition != null) {
+                nonMergedTransitions[mergedInto] = mergedTransition
             }
-
-            require(matchingExitQuickswitchTransitions.size == 1) {
-                "Expected 1 transition to have the exit quickswitch properties but got " +
-                    "${matchingExitQuickswitchTransitions.size}"
-            }
-            finalTransitions.add(
-                enterQuickswitchTransition.merge(matchingExitQuickswitchTransitions[0])
-            )
         }
 
-        finalTransitions
+        val artificiallyMergedTransitions = nonMergedTransitions.values
+
+        val quickswitchBetweenAppsTransitions =
+            artificiallyMergedTransitions.filter { transition ->
+                val openingAppLayers =
+                    transition.changes.filter {
+                        it.transitMode == TO_FRONT &&
+                            isAppTransitionChange(it, layersTrace, wmTrace) &&
+                            !isWallpaperTokenLayer(it.layerId, layersTrace) &&
+                            !isLauncherTopLevelTaskLayer(it.layerId, layersTrace)
+                    }
+                val closingAppLayers =
+                    transition.changes.filter {
+                        it.transitMode == TO_BACK && isAppTransitionChange(it, layersTrace, wmTrace)
+                    }
+
+                transition.handler == TransitionHandler.RECENTS &&
+                    transition.changes.count {
+                        it.transitMode == TO_FRONT && isWallpaperTokenLayer(it.layerId, layersTrace)
+                    } == 1 &&
+                    transition.changes.count {
+                        it.transitMode == TO_FRONT &&
+                            isLauncherTopLevelTaskLayer(it.layerId, layersTrace)
+                    } == 1 &&
+                    (openingAppLayers.count() == 1 || openingAppLayers.count() == 5) &&
+                    (closingAppLayers.count() == 1 || closingAppLayers.count() == 5)
+            }
+
+        var quickswitchFromLauncherTransitions =
+            artificiallyMergedTransitions.filter { transition ->
+                val openingAppLayers =
+                    transition.changes.filter {
+                        it.transitMode == TO_FRONT &&
+                            isAppTransitionChange(it, layersTrace, wmTrace)
+                    }
+
+                transition.handler == TransitionHandler.DEFAULT &&
+                    (openingAppLayers.count() == 1 || openingAppLayers.count() == 5) &&
+                    transition.changes.count {
+                        it.transitMode == TO_BACK &&
+                            isLauncherTopLevelTaskLayer(it.layerId, layersTrace)
+                    } == 1
+            }
+
+        // TODO: (b/300068479) temporary work around to ensure transition is associated with CUJ
+        val hundredMs = CrossPlatform.timestamp.from(elapsedNanos = 100000000L)
+
+        quickswitchFromLauncherTransitions =
+            quickswitchFromLauncherTransitions.map {
+                // We create the transition right about the same time we end the CUJ tag
+                val createTimeAdjustedForTolerance = it.wmData.createTime?.minus(hundredMs)
+                Transition(
+                    id = it.id,
+                    wmData =
+                        it.wmData.merge(
+                            WmTransitionData(
+                                createTime = createTimeAdjustedForTolerance,
+                                sendTime = createTimeAdjustedForTolerance
+                            )
+                        ),
+                    shellData = it.shellData
+                )
+            }
+
+        quickswitchBetweenAppsTransitions + quickswitchFromLauncherTransitions
     }
 
     val QUICK_SWITCH_TRANSITION_POST_PROCESSING: TransitionsTransform = { transitions, _, reader ->
@@ -107,28 +143,27 @@ object TransitionFilters {
 
         val transition = transitions[0]
 
-        require(transition.changes.size == 5)
-        require(transition.changes.count { it.transitMode == TransitionType.TO_BACK } == 2)
-        require(transition.changes.count { it.transitMode == TransitionType.TO_FRONT } == 3)
-
         val layersTrace = reader.readLayersTrace() ?: error("Missing layers trace")
         val wallpaperId =
             transition.changes
                 .map { it.layerId }
                 .firstOrNull { isWallpaperTokenLayer(it, layersTrace) }
-                ?: error("Missing wallpaper layer in transition")
+        val isSwitchFromLauncher = wallpaperId == null
         val launcherId =
-            transition.changes
-                .map { it.layerId }
-                .firstOrNull { isLauncherTopLevelTaskLayer(it, layersTrace) }
-                ?: error("Missing launcher layer in transition")
+            if (isSwitchFromLauncher) null
+            else
+                transition.changes
+                    .map { it.layerId }
+                    .firstOrNull { isLauncherTopLevelTaskLayer(it, layersTrace) }
+                    ?: error("Missing launcher layer in transition")
 
         val filteredChanges =
             transition.changes.filter { it.layerId != wallpaperId && it.layerId != launcherId }
 
-        val closingAppChange = filteredChanges.first { it.transitMode == TransitionType.TO_BACK }
-        val openingAppChange = filteredChanges.first { it.transitMode == TransitionType.TO_FRONT }
+        val closingAppChange = filteredChanges.first { it.transitMode == TO_BACK }
+        val openingAppChange = filteredChanges.first { it.transitMode == TO_FRONT }
 
+        // Transition removing the intermediate launcher changes
         listOf(
             Transition(
                 transition.id,
@@ -207,8 +242,7 @@ object TransitionFilters {
     }
 
     fun isSplitscreenEnterTransition(transition: Transition): Boolean {
-        return transition.handler == SPLIT_SCREEN_TRANSITION_HANDLER &&
-            transition.type == TransitionType.TO_FRONT
+        return transition.handler == SPLIT_SCREEN_TRANSITION_HANDLER && transition.type == TO_FRONT
     }
 
     fun isSplitscreenExitTransition(transition: Transition): Boolean {

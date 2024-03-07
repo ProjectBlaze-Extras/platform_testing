@@ -19,6 +19,7 @@ package platform.test.screenshot
 import android.app.Activity
 import android.graphics.Color
 import android.os.Build
+import android.platform.uiautomator_helpers.WaitUtils.waitForValueToSettle
 import android.view.View
 import android.view.Window
 import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
@@ -58,6 +59,7 @@ class ExternalViewScreenshotTestRule(
      * hardware buffers.
      */
     fun screenshotTest(goldenIdentifier: String, view: View, window: Window? = null) {
+        waitForValueToSettle { view.getChildCountRecursively() }
         view.removeElevationRecursively()
 
         ScreenshotRuleAsserter.Builder(screenshotRule)
@@ -94,6 +96,7 @@ class ExternalViewScreenshotTestRule(
                     layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
                 }
 
+            waitForValueToSettle { rootView.getChildCountRecursively() }
             rootView.removeInsetsRecursively()
             activity.currentFocus?.clearFocus()
         }

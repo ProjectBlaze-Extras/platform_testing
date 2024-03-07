@@ -20,7 +20,10 @@ package {
 
 java_library {
     name: "app-helpers-common-interfaces",
-    libs: ["ub-uiautomator"],
+    libs: [
+        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
+    ],
     static_libs: ["app-helpers-core"],
     srcs: ["common/**/*.java"],
     sdk_version: "test_current",

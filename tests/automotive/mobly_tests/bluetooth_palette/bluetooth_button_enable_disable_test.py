@@ -13,48 +13,30 @@
 #  limitations under the License.
 
 
-import sys
-import logging
-import pprint
-
-
 from bluetooth_test import bluetooth_base_test
 from mobly import asserts
-from mobly import test_runner
-from mobly.controllers import android_device
 
-from mbs_utils import constants
-from mbs_utils import spectatio_utils
-from mbs_utils import bt_utils
+from utilities import constants
+from utilities.main_utils import common_main
 
 
 class BluetoothPalette(bluetooth_base_test.BluetoothBaseTest):
-  """Enable and Disable Bluetooth from Bluetooth Palette."""
+    """Enable and Disable Bluetooth from Bluetooth Palette."""
 
-  def setup_test(self):
-    """Setup steps before any test is executed."""
-    # Pair the devices
-    self.bt_utils.pair_primary_to_secondary();
+    def setup_test(self):
+        """Setup steps before any test is executed."""
+        # Pair the devices
+        self.bt_utils.pair_primary_to_secondary();
 
-  def test_enable_disable_bluetooth_button(self):
-    """Tests enable and disable functionality of bluetooth."""
-    self.call_utils.open_bluetooth_palette()
-    self.call_utils.wait_with_log(
-    constants.DEFAULT_WAIT_TIME_FIVE_SECS
-    )
-    asserts.assert_true(self.call_utils.is_bluetooth_connected(),'Bluetooth Connected')
-    self.call_utils.click_bluetooth_button()
-    self.call_utils.wait_with_log(
-    constants.DEFAULT_WAIT_TIME_FIVE_SECS
-    )
-    asserts.assert_false(self.call_utils.is_bluetooth_connected(),'Bluetooth Disconnected')
-
+    def test_enable_disable_bluetooth_button(self):
+        """Tests enable and disable functionality of bluetooth."""
+        self.call_utils.open_bluetooth_palette()
+        self.call_utils.wait_with_log(5)
+        asserts.assert_true(self.call_utils.is_bluetooth_connected(), 'Bluetooth Connected')
+        self.call_utils.click_bluetooth_button()
+        self.call_utils.wait_with_log(5)
+        asserts.assert_false(self.call_utils.is_bluetooth_connected(), 'Bluetooth Disconnected')
 
 
 if __name__ == '__main__':
-    # Pass test arguments after '--' to the test runner.
-    # Needed for Mobly Test Runner
-    if '--' in sys.argv:
-        index = sys.argv.index('--')
-        sys.argv = sys.argv[:1] + sys.argv[index + 1:]
-    test_runner.main()
+    common_main()

@@ -32,7 +32,7 @@ class MSSIMMatcherTest {
     fun performDiff_sameBitmaps() {
         val first = loadBitmap("round_rect_gray")
         val second = loadBitmap("round_rect_gray")
-        val filter = IntArray(first.width * first.height) { 1 }
+        val filter = BooleanArray(first.width * first.height) { true }
 
         val matcher = MSSIMMatcher()
         val result = matcher.calculateSSIM(
@@ -48,7 +48,7 @@ class MSSIMMatcherTest {
     fun performDiff_noPixelsCompared() {
         val first = loadBitmap("checkbox_checked")
         val second = loadBitmap("round_rect_gray")
-        val filter = IntArray(first.width * first.height) { 0 }
+        val filter = BooleanArray(first.width * first.height) { false }
 
         val matcher = MSSIMMatcher()
         val result = matcher.calculateSSIM(
@@ -63,14 +63,14 @@ class MSSIMMatcherTest {
     fun performDiff_sameRegion() {
         val first = loadBitmap("qmc-folder1")
         val second = loadBitmap("qmc-folder2")
-        val filter = IntArray(first.width * first.height) { 0 }
+        val filter = BooleanArray(first.width * first.height) { false }
         val startHeight = 18 * first.height / 20
         val endHeight = 37 * first.height / 40
         val startWidth = 10 * first.width / 20
         val endWidth = 11 * first.width / 20
         for (i in startHeight..endHeight) {
             for (j in startWidth..endWidth) {
-                filter[j + i * first.width] = 1
+                filter[j + i * first.width] = true
             }
         }
 
@@ -88,7 +88,7 @@ class MSSIMMatcherTest {
     fun performDiff_checkedAgainstUnchecked() {
         val first = loadBitmap("checkbox_checked")
         val second = loadBitmap("round_rect_gray")
-        val filter = IntArray(first.width * first.height) { 1 }
+        val filter = BooleanArray(first.width * first.height) { true }
 
         val matcher = MSSIMMatcher()
         val result = matcher.calculateSSIM(
@@ -103,7 +103,7 @@ class MSSIMMatcherTest {
     fun performDiff_differentBorders() {
         val first = loadBitmap("round_rect_gray")
         val second = loadBitmap("round_rect_green")
-        val filter = IntArray(first.width * first.height) { 1 }
+        val filter = BooleanArray(first.width * first.height) { true }
 
         val matcher = MSSIMMatcher()
         val result = matcher.calculateSSIM(
@@ -118,7 +118,7 @@ class MSSIMMatcherTest {
     fun performDiff_fullscreen_differentBorders_dark() {
         val first = loadBitmap("fullscreen_rect_gray")
         val second = loadBitmap("fullscreen_rect_gray_dark")
-        val filter = IntArray(first.width * first.height) { 1 }
+        val filter = BooleanArray(first.width * first.height) { true }
 
         val matcher = MSSIMMatcher()
         val result = matcher.calculateSSIM(
@@ -133,7 +133,7 @@ class MSSIMMatcherTest {
     fun performDiff_differentBorders_dark() {
         val first = loadBitmap("round_rect_gray")
         val second = loadBitmap("round_rect_gray_dark")
-        val filter = IntArray(first.width * first.height) { 1 }
+        val filter = BooleanArray(first.width * first.height) { true }
 
         val matcher = MSSIMMatcher()
         val result = matcher.calculateSSIM(
@@ -148,7 +148,7 @@ class MSSIMMatcherTest {
     fun performDiff_fullscreen_movedToRight() {
         val first = loadBitmap("fullscreen_rect_gray")
         val second = loadBitmap("fullscreen_rect_gray_moved_1px")
-        val filter = IntArray(first.width * first.height) { 1 }
+        val filter = BooleanArray(first.width * first.height) { true }
 
         val matcher = MSSIMMatcher()
         val result = matcher.calculateSSIM(
@@ -163,7 +163,7 @@ class MSSIMMatcherTest {
     fun performDiff_fullscreen_checkboxes_differentRadius() {
         val first = loadBitmap("fullscreen_checked_checkbox")
         val second = loadBitmap("fullscreen_checked_checkbox_round")
-        val filter = IntArray(first.width * first.height) { 1 }
+        val filter = BooleanArray(first.width * first.height) { true }
 
         val matcher = MSSIMMatcher()
         val result = matcher.calculateSSIM(

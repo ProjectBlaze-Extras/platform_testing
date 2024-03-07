@@ -28,7 +28,7 @@ java_library {
         "mockito-target",
         "adservices-collector-helper",
         "app-collector-helper",
-        "truth-prebuilt",
+        "truth",
         "androidx.test.ext.junit",
         "mockito-target-minus-junit4",
     ],

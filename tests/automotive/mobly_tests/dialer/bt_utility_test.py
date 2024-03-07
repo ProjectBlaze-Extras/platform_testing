@@ -32,17 +32,19 @@ import sys
 import logging
 import pprint
 
-from bluetooth_test import bluetooth_base_test
-
-
 from mobly import asserts
 from mobly import base_test
 from mobly import test_runner
 from mobly.controllers import android_device
 
-from mbs_utils import constants
-from mbs_utils import spectatio_utils
-from mbs_utils import bt_utils
+from utilities import constants
+from utilities import spectatio_utils
+from utilities import bt_utils
+from utilities.main_utils import common_main
+
+from bluetooth_test import bluetooth_base_test
+
+
 
 # Number of seconds for the target to stay discoverable on Bluetooth.
 DISCOVERABLE_TIME = 60
@@ -50,28 +52,15 @@ DISCOVERABLE_TIME = 60
 class UtilityClassTest(bluetooth_base_test.BluetoothBaseTest):
 
     def setup_test(self):
-        # Upload contacts to phone device
-        file_path = constants.PATH_TO_CONTACTS_VCF_FILE
-
-        # Make sure bluetooth is on.
-        self.target.mbs.btEnable()
-        self.discoverer.mbs.btEnable()
-
-        # Set Bluetooth name on target device.
-        self.target.mbs.btSetName('FIND THIS')
-
-        self.bt_utils.discover_secondary_from_primary()
+        super().setup_test()
+        # Pair caller phone with automotive device
+        self.bt_utils.pair_primary_to_secondary()
 
     def test_call_utility(self):
-        # Navigate to the constants page
+        # Navigate to the phone app page
         self.call_utils.open_phone_app()
-
-    def teardown_test(self):
-        # Turn Bluetooth off on both devices after test finishes.
-        self.target.mbs.btDisable()
-        self.discoverer.mbs.btDisable()
 
 
 if __name__ == '__main__':
     # Take test args
-    test_runner.main()
+    common_main()

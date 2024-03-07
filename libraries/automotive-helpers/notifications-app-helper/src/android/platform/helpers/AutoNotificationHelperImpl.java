@@ -24,6 +24,8 @@ import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.BySelector;
 import androidx.test.uiautomator.UiObject2;
 
+import java.util.List;
+
 /**
  * Helper for Notifications on Automotive device openNotification() for swipeDown is removed- Not
  * supported in UDC- bug b/285387870
@@ -194,20 +196,28 @@ public class AutoNotificationHelperImpl extends AbstractStandardAppHelper
     /** {@inheritDoc} */
     @Override
     public boolean isNotificationSettingsOpened() {
+        BySelector notificationLayoutSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_SETTINGS_LAYOUT);
+        List<UiObject2> notificationLayoutList =
+                getSpectatioUiUtil().findUiObjects(notificationLayoutSelector);
+        getSpectatioUiUtil()
+                .validateUiObjects(
+                        notificationLayoutList,
+                        AutomotiveConfigConstants.NOTIFICATION_SETTINGS_LAYOUT);
+
         BySelector notificationSettingsSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_SETTINGS_TITLE);
-        BySelector notificationLayOutSelector =
-                getUiElementFromConfig(AutomotiveConfigConstants.NOTIFICATION_SETTINGS_LAYOUT);
-        UiObject2 notificationLayOut =
-                getSpectatioUiUtil().findUiObject(notificationLayOutSelector);
-        getSpectatioUiUtil()
-                .validateUiObject(
-                        notificationLayOut, AutomotiveConfigConstants.NOTIFICATION_SETTINGS_LAYOUT);
+        UiObject2 notificationPageObj = null;
+        for (int i = 0; i < notificationLayoutList.size(); i++) {
+            notificationPageObj =
+                    getSpectatioUiUtil()
+                            .findUiObjectInGivenElement(
+                                    notificationLayoutList.get(i), notificationSettingsSelector);
+            if (notificationPageObj != null) {
+                break;
+            }
+        }
 
-        UiObject2 notificationPageObj =
-                getSpectatioUiUtil()
-                        .findUiObjectInGivenElement(
-                                notificationLayOut, notificationSettingsSelector);
         getSpectatioUiUtil()
                 .validateUiObject(notificationPageObj, String.format("notification page"));
         return notificationPageObj != null;

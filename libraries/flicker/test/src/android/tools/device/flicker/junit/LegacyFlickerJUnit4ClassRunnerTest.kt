@@ -18,9 +18,23 @@ package android.tools.device.flicker.junit
 
 import android.annotation.SuppressLint
 import android.app.Instrumentation
+import android.os.Bundle
 import android.platform.test.annotations.FlakyTest
+import android.tools.common.Scenario
+import android.tools.common.Timestamps
+import android.tools.common.flicker.AssertionInvocationGroup
+import android.tools.common.flicker.FlickerConfig
+import android.tools.common.flicker.ScenarioInstance
+import android.tools.common.flicker.annotation.FlickerConfigProvider
 import android.tools.common.flicker.annotation.FlickerServiceCompatible
 import android.tools.common.flicker.assertions.FlickerTest
+import android.tools.common.flicker.assertors.AssertionTemplate
+import android.tools.common.flicker.config.FlickerConfig
+import android.tools.common.flicker.config.FlickerConfigEntry
+import android.tools.common.flicker.config.ScenarioId
+import android.tools.common.flicker.extractors.ScenarioExtractor
+import android.tools.common.flicker.extractors.TraceSlice
+import android.tools.common.io.Reader
 import android.tools.device.apphelpers.BrowserAppHelper
 import android.tools.device.flicker.IS_FAAS_ENABLED
 import android.tools.device.flicker.isShellTransitionsEnabled
@@ -28,7 +42,7 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.getScenarioTraces
-import android.tools.rules.CleanFlickerEnvironmentRule
+import android.tools.utils.CleanFlickerEnvironmentRule
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth
 import org.junit.Assume
@@ -147,6 +161,42 @@ class LegacyFlickerJUnit4ClassRunnerTest {
         verify(notifier, atLeast(1)).fireTestFinished(argThat { it.methodName.contains("FaaS") })
     }
 
+    @Test
+    fun skipsNonBlockingFaasTestsIfRequested() {
+        val arguments = Bundle()
+        arguments.putString(Scenario.FAAS_BLOCKING, "true")
+        val testClass = TestClass(SimpleFaasTest::class.java)
+        val parameters = LegacyFlickerTestFactory.nonRotationTests()
+        val test = TestWithParameters("[PARAMS]", testClass, listOf(parameters[0]))
+        val runner = createRunner(test, arguments)
+        val notifier = mock(RunNotifier::class.java)
+
+        runner.run(notifier)
+        Truth.assertThat(runner.testCount()).isAtLeast(2)
+        verify(notifier, atLeast(2)).fireTestStarted(argThat { it.methodName.contains("FaaS") })
+        verify(notifier, atLeast(1))
+            .fireTestAssumptionFailed(argThat { it.description.methodName.contains("FaaS") })
+        verify(notifier, atLeast(2)).fireTestFinished(argThat { it.methodName.contains("FaaS") })
+    }
+
+    @Test
+    fun runBlockingFaasTestsIfRequested() {
+        val arguments = Bundle()
+        arguments.putString(Scenario.FAAS_BLOCKING, "false")
+        val testClass = TestClass(SimpleFaasTest::class.java)
+        val parameters = LegacyFlickerTestFactory.nonRotationTests()
+        val test = TestWithParameters("[PARAMS]", testClass, listOf(parameters[0]))
+        val runner = createRunner(test, arguments)
+        val notifier = mock(RunNotifier::class.java)
+
+        runner.run(notifier)
+        Truth.assertThat(runner.testCount()).isAtLeast(2)
+        verify(notifier, atLeast(2)).fireTestStarted(argThat { it.methodName.contains("FaaS") })
+        verify(notifier, never())
+            .fireTestAssumptionFailed(argThat { it.description.methodName.contains("FaaS") })
+        verify(notifier, atLeast(2)).fireTestFinished(argThat { it.methodName.contains("FaaS") })
+    }
+
     /*@Test
     fun injectedFlickerTestsAreNotExcludedByFilter() {
         Assume.assumeTrue(isShellTransitionsEnabled)
@@ -250,7 +300,46 @@ class LegacyFlickerJUnit4ClassRunnerTest {
     @RunWith(Parameterized::class)
     @FlickerServiceCompatible
     @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-    open class SimpleFaasTest(flicker: LegacyFlickerTest) : SimpleTest(flicker)
+    open class SimpleFaasTest(flicker: LegacyFlickerTest) : SimpleTest(flicker) {
+        companion object {
+            @JvmStatic
+            @FlickerConfigProvider
+            fun flickerConfigProvider(): FlickerConfig =
+                FlickerConfig()
+                    .use(
+                        FlickerConfigEntry(
+                            scenarioId = ScenarioId("MY_CUSTOM_SCENARIO"),
+                            extractor =
+                                object : ScenarioExtractor {
+                                    override fun extract(reader: Reader): List<TraceSlice> {
+                                        return listOf(
+                                            TraceSlice(Timestamps.min(), Timestamps.max())
+                                        )
+                                    }
+                                },
+                            assertions =
+                                mapOf(
+                                    object : AssertionTemplate("BlockingAssertion") {
+                                        override fun doEvaluate(
+                                            scenarioInstance: ScenarioInstance,
+                                            flicker: FlickerTest
+                                        ) {
+                                            flicker.assertLayers {}
+                                        }
+                                    } to AssertionInvocationGroup.BLOCKING,
+                                    object : AssertionTemplate("NonBlockingAssertion") {
+                                        override fun doEvaluate(
+                                            scenarioInstance: ScenarioInstance,
+                                            flicker: FlickerTest
+                                        ) {
+                                            flicker.assertLayersEnd {}
+                                        }
+                                    } to AssertionInvocationGroup.NON_BLOCKING
+                                )
+                        )
+                    )
+        }
+    }
 
     @RunWith(Parameterized::class)
     @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
@@ -327,8 +416,12 @@ class LegacyFlickerJUnit4ClassRunnerTest {
         var transitionRunCount = 0
         var flakyTestRuns = 0
 
-        private fun createRunner(baseTest: TestWithParameters) =
-            FlickerParametersRunnerFactory().createRunnerForTestWithParameters(baseTest)
+        private fun createRunner(
+            baseTest: TestWithParameters,
+            arguments: Bundle = InstrumentationRegistry.getArguments()
+        ) =
+            FlickerParametersRunnerFactory()
+                .createRunnerForTestWithParameters(baseTest, arguments = arguments)
                 as LegacyFlickerJUnit4ClassRunner
 
         @ClassRule @JvmField val ENV_CLEANUP = CleanFlickerEnvironmentRule()

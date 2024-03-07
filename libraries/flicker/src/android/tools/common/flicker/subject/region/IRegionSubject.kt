@@ -215,4 +215,36 @@ interface IRegionSubject {
      * @throws AssertionError
      */
     fun isSameAspectRatio(other: Region, threshold: Double): IRegionSubject
+
+    /**
+     * Asserts that region has the same top coordinates as [displayRect]
+     *
+     * @param displayRect Display area
+     * @throws AssertionError
+     */
+    fun hasSameTopPosition(displayRect: Rect): IRegionSubject
+
+    /**
+     * Asserts that region has the same bottom coordinates as [displayRect]
+     *
+     * @param displayRect Display area
+     * @throws AssertionError
+     */
+    fun hasSameBottomPosition(displayRect: Rect): IRegionSubject
+
+    /**
+     * Asserts that region has the same right coordinates as [displayRect]
+     *
+     * @param displayRect Display area
+     * @throws AssertionError
+     */
+    fun hasSameRightPosition(displayRect: Rect): IRegionSubject
+
+    /**
+     * Asserts that region has the same left coordinates as [displayRect]
+     *
+     * @param displayRect Display area
+     * @throws AssertionError
+     */
+    fun hasSameLeftPosition(displayRect: Rect): IRegionSubject
 }

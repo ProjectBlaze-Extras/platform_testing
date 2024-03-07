@@ -60,14 +60,17 @@ public class GarbageCollectRuleTest {
     @Test
     public void testCallsGcBeforeTest() throws Throwable {
         GarbageCollectRule rule = new TestableGarbageCollectRule("package.name1");
-        Statement testStatement = new Statement() {
-            @Override
-            public void evaluate() throws Throwable {
-                // Assert that garbage collection was called before the test.
-                verify(mGcHelper).setUp("package.name1");
-                verify(mGcHelper).garbageCollect();
-            }
-        };
+        Statement testStatement =
+                new Statement() {
+                    @Override
+                    public void evaluate() throws Throwable {
+                        // Assert that garbage collection was called before the test.
+                        verify(mGcHelper).setUp("package.name1");
+                        verify(mGcHelper)
+                                .garbageCollect(
+                                        GarbageCollectionHelper.DEFAULT_POST_GC_WAIT_TIME_MS);
+                    }
+                };
 
         rule.apply(testStatement,
                 Description.createTestDescription("clzz", "mthd")).evaluate();
@@ -91,7 +94,8 @@ public class GarbageCollectRuleTest {
 
         rule.apply(testStatement,
                 Description.createTestDescription("clzz", "mthd")).evaluate();
-        verify(mGcHelper, times(2)).garbageCollect();
+        verify(mGcHelper, times(2))
+                .garbageCollect(GarbageCollectionHelper.DEFAULT_POST_GC_WAIT_TIME_MS);
     }
 
     /**
@@ -112,7 +116,28 @@ public class GarbageCollectRuleTest {
 
         rule.apply(testStatement,
                 Description.createTestDescription("clzz", "mthd")).evaluate();
-        verify(mGcHelper, times(1)).garbageCollect();
+        verify(mGcHelper, times(1))
+                .garbageCollect(GarbageCollectionHelper.DEFAULT_POST_GC_WAIT_TIME_MS);
+    }
+
+    /** Tests that this rule will gc only before the test if an app is supplied. */
+    @Test
+    public void testExtendWaitTime() throws Throwable {
+        Bundle gcEndBundle = new Bundle();
+        gcEndBundle.putString(GarbageCollectRule.GC_RULE_END, "false");
+        gcEndBundle.putString(GarbageCollectRule.GC_WAIT_TIME_MS, "5000");
+        GarbageCollectRule rule = new TestableGarbageCollectRule(gcEndBundle, "package.name1");
+        Statement testStatement =
+                new Statement() {
+                    @Override
+                    public void evaluate() throws Throwable {
+                        // Assert that garbage collection was called before the test.
+                        verify(mGcHelper).setUp("package.name1");
+                    }
+                };
+
+        rule.apply(testStatement, Description.createTestDescription("clzz", "mthd")).evaluate();
+        verify(mGcHelper, times(1)).garbageCollect(5000L);
     }
 
     private class TestableGarbageCollectRule extends GarbageCollectRule {

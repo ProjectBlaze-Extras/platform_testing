@@ -25,13 +25,13 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.SystemClock;
-import android.support.test.uiautomator.UiDevice;
 import android.test.AndroidTestRunner;
 import android.test.InstrumentationTestCase;
 import android.test.InstrumentationTestRunner;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.uiautomator.UiDevice;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;

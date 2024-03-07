@@ -105,8 +105,11 @@ object Utils {
             systemUptimeNanos = sfEntryAtTransitionFinished.timestamp.systemUptimeNanos
         } else {
             elapsedNanos =
-                wmTrace.entries
-                    .first { it.timestamp >= finishTransactionAppliedTimestamp }
+                (wmTrace.entries.firstOrNull { it.timestamp >= finishTransactionAppliedTimestamp }
+                        ?: error(
+                            "No WM trace entry with timestamp greater than or equal to the " +
+                                "layers trace the finish transaction was applied in"
+                        ))
                     .timestamp
                     .elapsedNanos
             systemUptimeNanos =
@@ -117,6 +120,20 @@ object Utils {
             unixNanos =
                 layersTrace.getEntryAt(finishTransactionAppliedTimestamp).timestamp.unixNanos
         }
+
+        return Timestamps.from(elapsedNanos, systemUptimeNanos, unixNanos)
+    }
+
+    fun getFullTimestampAt(layersTraceEntry: LayerTraceEntry, reader: Reader): Timestamp {
+        val wmTrace = reader.readWmTrace() ?: error("Missing WM trace")
+
+        val elapsedNanos =
+            (wmTrace.entries.firstOrNull { it.timestamp >= layersTraceEntry.timestamp }
+                    ?: wmTrace.entries.last())
+                .timestamp
+                .elapsedNanos
+        val systemUptimeNanos = layersTraceEntry.timestamp.systemUptimeNanos
+        val unixNanos = layersTraceEntry.timestamp.unixNanos
 
         return Timestamps.from(elapsedNanos, systemUptimeNanos, unixNanos)
     }

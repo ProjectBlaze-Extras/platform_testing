@@ -16,11 +16,11 @@
 
 package android.tools.common.flicker.subject.region
 
-import android.tools.assertFail
 import android.tools.common.Timestamps
 import android.tools.common.datatypes.Rect
 import android.tools.common.datatypes.Region
-import android.tools.rules.CleanFlickerEnvironmentRule
+import android.tools.utils.CleanFlickerEnvironmentRule
+import android.tools.utils.assertFail
 import org.junit.ClassRule
 import org.junit.FixMethodOrder
 import org.junit.Test

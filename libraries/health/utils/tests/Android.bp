@@ -25,7 +25,7 @@ android_test {
     static_libs: [
         "androidx.test.runner",
         "health-testing-utils",
-        "truth-prebuilt",
+        "truth",
     ],
     srcs: ["src/**/*.java"],
     test_suites: ["device-tests"],

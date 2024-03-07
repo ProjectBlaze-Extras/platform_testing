@@ -16,10 +16,6 @@
 
 package android.tools.common.flicker.subject.wm
 
-import android.tools.TestComponents
-import android.tools.assertFail
-import android.tools.assertThatErrorContainsDebugInfo
-import android.tools.assertThrows
 import android.tools.common.Cache
 import android.tools.common.datatypes.Region
 import android.tools.common.traces.component.ComponentNameMatcher
@@ -28,9 +24,13 @@ import android.tools.common.traces.wm.KeyguardControllerState
 import android.tools.common.traces.wm.RootWindowContainer
 import android.tools.common.traces.wm.WindowContainer
 import android.tools.common.traces.wm.WindowManagerState
-import android.tools.getWmDumpReaderFromAsset
-import android.tools.getWmTraceReaderFromAsset
-import android.tools.rules.CleanFlickerEnvironmentRule
+import android.tools.utils.CleanFlickerEnvironmentRule
+import android.tools.utils.TestComponents
+import android.tools.utils.assertFail
+import android.tools.utils.assertThatErrorContainsDebugInfo
+import android.tools.utils.assertThrows
+import android.tools.utils.getWmDumpReaderFromAsset
+import android.tools.utils.getWmTraceReaderFromAsset
 import com.google.common.truth.Truth
 import org.junit.Before
 import org.junit.ClassRule

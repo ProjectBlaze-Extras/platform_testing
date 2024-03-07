@@ -25,11 +25,11 @@ import androidx.core.content.getSystemService
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.gson.stream.JsonReader
-import org.junit.runner.Description
 import java.io.InputStreamReader
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import org.junit.runner.Description
 
 /**
  * This rule allows end-to-end tests to add input devices through Uinput more easily. Additionally
@@ -122,19 +122,23 @@ class InputDeviceRule : TestWatcher(), UInputDevice.EventInjector {
 
     /** Send the [keycode] event, both key down and key up events, for the provided [deviceId]. */
     override fun sendKeyEvent(deviceId: Int, keycode: Int) {
-        injectEvdevEvents(deviceId, listOf(EV_KEY, keycode, KEY_DOWN, EV_SYN, SYN_REPORT, 0))
-        injectEvdevEvents(deviceId, listOf(EV_KEY, keycode, KEY_UP, EV_SYN, SYN_REPORT, 0))
+        sendEventWithValues(deviceId, EV_KEY, keycode, KEY_DOWN)
+        sendEventWithValues(deviceId, EV_KEY, keycode, KEY_UP)
     }
 
-    /** The provided file should contain Uinput events in json format.
-     * The file path should be relative to the assets root.
+    /** Send the [eventType], [keycode], [value] for the provided [deviceId]. */
+    override fun sendEventWithValues(deviceId: Int, eventType: Int, keycode: Int, value: Int) {
+        injectEvdevEvents(deviceId, listOf(eventType, keycode, value, EV_SYN, SYN_REPORT, 0))
+    }
+
+    /**
+     * The provided file should contain Uinput events in json format. The file path should be
+     * relative to the assets root.
      */
     override fun sendEventsFromInputFile(deviceId: Int, inputFile: String) {
-        InstrumentationRegistry.getInstrumentation()
-                .context
-                .assets
-                .open(inputFile)
-                .use { writeCommand(it.readBytes()) }
+        InstrumentationRegistry.getInstrumentation().context.assets.open(inputFile).use {
+            writeCommand(it.readBytes())
+        }
 
         val executor = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
         val future = executor.submit { waitForEmptyUinputEventQueue() }
@@ -156,8 +160,7 @@ class InputDeviceRule : TestWatcher(), UInputDevice.EventInjector {
     private fun injectEvdevEvents(deviceId: Int, evdevEvents: List<Int>) {
         assert(evdevEvents.size % 3 == 0) { "Number of injected events should be a multiple of 3" }
 
-        val command = """{"command": "inject","id": $deviceId,"events": $evdevEvents}"""
-        writeCommand(command)
+        writeCommand("""{"command": "inject","id": $deviceId,"events": $evdevEvents}""")
     }
 
     private fun writeCommand(command: String) {
@@ -180,7 +183,10 @@ class InputDeviceRule : TestWatcher(), UInputDevice.EventInjector {
     private fun waitForEmptyUinputEventQueue() {
         writeCommand(EVENT_REPLAY_COMPLETE_SYNC_TOKEN_EVENT)
 
-        Log.d("InputDeviceRule", "'$EVENT_REPLAY_COMPLETE_SYNC_TOKEN' sync token sent, waiting for it to be processed...")
+        Log.d(
+            "InputDeviceRule",
+            "'$EVENT_REPLAY_COMPLETE_SYNC_TOKEN' sync token sent, waiting for it to be processed..."
+        )
         var nextSyncToken: String? = null
         while (nextSyncToken != EVENT_REPLAY_COMPLETE_SYNC_TOKEN) {
             nextSyncToken = readSyncTokenFromInputStream()
@@ -188,7 +194,8 @@ class InputDeviceRule : TestWatcher(), UInputDevice.EventInjector {
         Log.d("InputDeviceRule", "'$EVENT_REPLAY_COMPLETE_SYNC_TOKEN' sync token processed")
     }
 
-    /** Returns the syncToken from the inputStream or null if the inputStream contains content other
+    /**
+     * Returns the syncToken from the inputStream or null if the inputStream contains content other
      * than a syncToken.
      */
     private fun readSyncTokenFromInputStream(): String? {
@@ -224,7 +231,8 @@ class InputDeviceRule : TestWatcher(), UInputDevice.EventInjector {
         const val KEY_DOWN = 1
 
         const val EVENT_REPLAY_COMPLETE_SYNC_TOKEN = "event_replay_complete"
-        val EVENT_REPLAY_COMPLETE_SYNC_TOKEN_EVENT = """
+        val EVENT_REPLAY_COMPLETE_SYNC_TOKEN_EVENT =
+            """
             {
                 "id": 1,
                 "command": "sync",
@@ -236,7 +244,8 @@ class InputDeviceRule : TestWatcher(), UInputDevice.EventInjector {
               "command": "delay",
               "duration": 100
             }
-            """.trimIndent()
+            """
+                .trimIndent()
         const val waitForSyncTokenDurationSeconds = 20L
     }
 }

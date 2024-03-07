@@ -17,10 +17,10 @@
 package android.tools.device.flicker.legacy.runner
 
 import android.app.Instrumentation
-import android.platform.test.rule.ArtifactSaver
 import android.tools.common.FLICKER_TAG
 import android.tools.common.Logger
 import android.tools.common.Scenario
+import android.tools.device.flicker.junit.Utils
 import android.tools.device.traces.io.ResultWriter
 import android.tools.device.traces.monitors.ITransitionMonitor
 import android.tools.device.traces.parsers.WindowManagerStateHelper
@@ -49,6 +49,17 @@ class TraceMonitorRule(
             override fun evaluate() {
                 try {
                     doStartMonitors(description)
+                } catch (e: Throwable) {
+                    Logger.e(
+                        FLICKER_TAG,
+                        "Failed to start trace monitors" +
+                            " - stopping all trace monitors to recover a clean state"
+                    )
+                    runCatching { doStopMonitors(description) }
+                    throw e
+                }
+
+                try {
                     base?.evaluate()
                 } finally {
                     doStopMonitors(description)
@@ -64,7 +75,7 @@ class TraceMonitorRule(
                 try {
                     it.start()
                 } catch (e: Throwable) {
-                    ArtifactSaver.onError(Utils.expandDescription(description, "startTrace"), e)
+                    Logger.e(FLICKER_TAG, "Unable to start $it", e)
                     throw e
                 }
             }
@@ -80,10 +91,6 @@ class TraceMonitorRule(
                         try {
                             it.stop(resultWriter)
                         } catch (e: Throwable) {
-                            ArtifactSaver.onError(
-                                Utils.expandDescription(description, "stopTrace"),
-                                e
-                            )
                             Logger.e(FLICKER_TAG, "Unable to stop $it", e)
                             throw e
                         }

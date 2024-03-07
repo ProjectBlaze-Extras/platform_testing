@@ -17,10 +17,10 @@
 package com.android.helpers;
 
 import android.os.SystemClock;
+import android.system.Os;
+import android.system.OsConstants;
 
 import androidx.annotation.VisibleForTesting;
-import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.test.uiautomator.UiDevice;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -45,17 +45,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class SlabinfoHelper implements ICollectorHelper<Double> {
     private static final String SLABINFO_PATH = "/proc/slabinfo";
-    private static final long PAGE_SIZE;
-
-    static {
-        try {
-            UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
-            String pageSize = uiDevice.executeShellCommand("getconf PAGE_SIZE").trim();
-            PAGE_SIZE = Long.parseLong(pageSize);
-        } catch (IOException ex) {
-            throw new ExceptionInInitializerError(ex);
-        }
-    }
+    private static final long PAGE_SIZE = Os.sysconf(OsConstants._SC_PAGESIZE);
 
     private final ScheduledExecutorService mScheduler = Executors.newScheduledThreadPool(1);
 

@@ -62,8 +62,7 @@ public class StsHostSideTestCase extends NonRootSecurityTestCase {
      * A native PoC test, which uses this host Java test to push an executable with resources and
      * execute with environment variables and more. This API uses a "NativePocAsserter" that handles
      * the most common ways to retrieve data from the native PoC. It can be overloaded to handle the
-     * specific side-effect that your PoC generates. It also demonstrates how to add extra memory
-     * checking with Malloc Debug.
+     * specific side-effect that your PoC generates.
      */
     @Test
     public void testWithNativePoc() throws Exception {
@@ -73,7 +72,7 @@ public class StsHostSideTestCase extends NonRootSecurityTestCase {
                 // extra files pushed to the device
                 .resources("res.txt")
                 // command-line arguments for the PoC
-                .args("res.txt", "arg2")
+                .args("res.txt", "vulnerable")
                 // other options allow different linker paths for library shims
                 .useDefaultLdLibraryPath(true)
                 // test ends with ASSUMPTION_FAILURE if not EXIT_OK
@@ -92,15 +91,20 @@ public class StsHostSideTestCase extends NonRootSecurityTestCase {
         // Set up Malloc Debug for this test, which may be required if the vulnerability needs
         // memory checking to crash. This is useful when an ASan/HWASan/MTE build is not available.
         // https://android.googlesource.com/platform/bionic/+/master/libc/malloc_debug/README.md
+        // Note: enabling malloc debug requires root but it can be turned off after
+        assumeTrue("could not enable root for malloc debug", getDevice().enableAdbRoot());
         try (AutoCloseable mallocDebug =
                 MallocDebug.withLibcMallocDebugOnNewProcess(
                         getDevice(),
                         "backtrace guard", // malloc debug options
                         "native-poc" // process name
                         )) {
+            assumeTrue("could not disable root", getDevice().disableAdbRoot());
+
             // run a native PoC
             NativePoc.builder()
                     .pocName("native-poc")
+                    .args("memory_corrupt")
                     .build() // add more as needed
                     .run(this);
         }
@@ -122,16 +126,21 @@ public class StsHostSideTestCase extends NonRootSecurityTestCase {
     @Test
     public void testWithVulnerableLibrary() throws Exception {
         // get the path of the vulnerable library
+        assumeTrue("could not enable root to find library path", getDevice().enableAdbRoot());
         Optional<IFileEntry> libFileEntry =
                 ProcessUtil.findFileLoadedByProcess(
-                        getDevice(), "media.metrics", Pattern.quote("libmediametrics.so"));
+                        getDevice(),
+                        "mediaserver",
+                        Pattern.compile(Pattern.quote("libmediaplayerservice.so")));
         assumeTrue("shared library not loaded by target process", libFileEntry.isPresent());
+        assumeTrue("could not disable root", getDevice().disableAdbRoot());
 
         // attack the service
         NativePoc.builder()
                 .pocName("native-poc")
                 // pass the library path to the PoC
                 .args(libFileEntry.get().getFullPath())
+                .assumePocExitSuccess(false) // example returns EXIT_FAILURE if not enough args
                 .asserter(
                         NativePocCrashAsserter.assertNoCrash(
                                 new TombstoneUtils.Config()
@@ -150,10 +159,13 @@ public class StsHostSideTestCase extends NonRootSecurityTestCase {
         // attack the device, which can be native poc, echo to socket, send intent, app, etc
         NativePoc.builder()
                 .pocName("native-poc")
+                .assumePocExitSuccess(false) // example returns EXIT_FAILURE if no args
                 .build() // add more as needed
                 .run(this);
 
+        assumeTrue("could not enable root to collect dmesg", getDevice().enableAdbRoot());
         String dmesg = CommandUtil.runAndCheck(getDevice(), "dmesg -c").getStdout();
+        assumeTrue("could not disable root", getDevice().disableAdbRoot());
 
         // It's preferred to use this for matching text because the regex has a timeout to
         // protect against catastrophic backtracking. It also formats the test assert message.
@@ -164,7 +176,7 @@ public class StsHostSideTestCase extends NonRootSecurityTestCase {
     /** Install and run an app as a secondary user */
     @Test
     public void testWithSecondaryUser() throws Exception {
-        try (AutoCloseable su = new UserUtils.SecondaryUser(getDevice()).restricted().withUser()) {
+        try (AutoCloseable su = new UserUtils.SecondaryUser(getDevice()).withUser()) {
             installPackage(TEST_APP);
             runDeviceTests(TEST_PKG, TEST_CLASS, "testDeviceSideMethod");
         }

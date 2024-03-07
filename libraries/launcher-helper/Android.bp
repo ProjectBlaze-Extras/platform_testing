@@ -31,6 +31,7 @@ java_library {
         "dpad-util",
         "commands-helper",
         "activity-helper",
+        "//frameworks/base/packages/SystemUI/aconfig:com_android_systemui_flags_lib",
         "launcher-aosp-tapl",
     ],
     sdk_version: "test_current",

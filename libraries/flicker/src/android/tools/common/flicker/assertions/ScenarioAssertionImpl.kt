@@ -19,25 +19,41 @@ package android.tools.common.flicker.assertions
 import android.tools.common.FLICKER_TAG
 import android.tools.common.Logger
 import android.tools.common.flicker.AssertionInvocationGroup
+import android.tools.common.flicker.subject.exceptions.FlickerAssertionError
 import android.tools.common.io.Reader
 
-internal data class ScenarioAssertionImpl(
+// internal data class but visible for testing
+data class ScenarioAssertionImpl(
     private val name: String,
     private val reader: Reader,
     private val assertionData: Collection<AssertionData>,
     override val stabilityGroup: AssertionInvocationGroup,
+    private val assertionExtraData: Map<String, String>,
     private val assertionRunner: AssertionRunner = ReaderAssertionRunner(reader)
 ) : ScenarioAssertion {
     init {
         require(assertionData.isNotEmpty()) { "Expected at least one assertion data object." }
     }
 
-    override fun execute() =
+    override fun execute(): AssertionResult =
         Logger.withTracing("executeAssertion") {
             AssertionResultImpl(
                     name,
                     assertionData.toTypedArray(),
-                    assertionData.mapNotNull { assertionRunner.runAssertion(it) }.toTypedArray(),
+                    assertionData
+                        .mapNotNull {
+                            val exception =
+                                assertionRunner.runAssertion(it) ?: return@mapNotNull null
+                            if (exception !is FlickerAssertionError) {
+                                throw exception
+                            } else {
+                                assertionExtraData.forEach { (key, value) ->
+                                    exception.messageBuilder.addExtraDescription(key, value)
+                                }
+                            }
+                            exception
+                        }
+                        .toTypedArray(),
                     stabilityGroup
                 )
                 .also { log(it) }

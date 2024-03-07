@@ -18,20 +18,51 @@ package com.google.android.mobly.snippet.bundled;
 
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoBluetoothSettingsHelper;
+import android.platform.helpers.IAutoDateTimeSettingsHelper;
 import android.platform.helpers.IAutoSettingHelper;
 import android.platform.helpers.SettingsConstants;
 
 import com.google.android.mobly.snippet.Snippet;
 import com.google.android.mobly.snippet.rpc.Rpc;
 
+/** Snippet class for exposing Settings APIs. */
 public class SettingsSnippet implements Snippet {
 
     private HelperAccessor<IAutoSettingHelper> mSettingsHelper;
     private HelperAccessor<IAutoBluetoothSettingsHelper> mBluetoothSettingsHelper;
 
+    private static String sBluetoothSettings = "OPEN_BLUETOOTH_SETTINGS_WORKFLOW";
+    private HelperAccessor<IAutoDateTimeSettingsHelper> mDateTimeSettingsHelper;
+
     public SettingsSnippet() {
         mSettingsHelper = new HelperAccessor<>(IAutoSettingHelper.class);
         mBluetoothSettingsHelper = new HelperAccessor<>(IAutoBluetoothSettingsHelper.class);
+        mDateTimeSettingsHelper = new HelperAccessor<>(IAutoDateTimeSettingsHelper.class);
+    }
+
+    @Rpc(description = "Return whether the bluetooth preference button is checked")
+    public boolean isBluetoothPreferenceChecked() {
+        return mBluetoothSettingsHelper.get().isBluetoothPreferenceChecked();
+    }
+
+    @Rpc(description = "Return whether the media preference button is checked")
+    public boolean isMediaPreferenceChecked() {
+        return mBluetoothSettingsHelper.get().isMediaPreferenceChecked();
+    }
+
+    @Rpc(description = "Return whether the media preference button is enabled")
+    public boolean isMediaPreferenceEnabled() {
+        return mBluetoothSettingsHelper.get().isMediaPreferenceEnabled();
+    }
+
+    @Rpc(description = "Return whether the phone preference button is checked.")
+    public boolean isPhonePreferenceChecked() {
+        return mBluetoothSettingsHelper.get().isPhonePreferenceChecked();
+    }
+
+    @Rpc(description = "Return whether the phone preference button is enabled")
+    public boolean isPhonePreferenceEnabled() {
+        return mBluetoothSettingsHelper.get().isPhonePreferenceEnabled();
     }
 
     @Rpc(
@@ -49,12 +80,19 @@ public class SettingsSnippet implements Snippet {
 
     @Rpc(description = "Open the bluetooth settings (from home screen)")
     public void openBluetoothSettings() {
-        mSettingsHelper.get().openSetting(SettingsConstants.BLUETOOTH_SETTINGS);
+        mSettingsHelper.get().openSetting(sBluetoothSettings);
     }
+
+
 
     @Rpc(description = "Press the bluetooth toggle on a entry under 'Paired Devices'")
     public void pressBluetoothToggleOnDevice(String deviceName) {
         mBluetoothSettingsHelper.get().pressBluetoothToggleOnDevice(deviceName);
+    }
+
+    @Rpc(description = "Press device on device list.")
+    public void pressDeviceInBluetoothSettings(String deviceName) {
+        mBluetoothSettingsHelper.get().pressDevice(deviceName);
     }
 
     @Rpc(description = "Press an entry listed under 'Paired Devices'")
@@ -74,4 +112,18 @@ public class SettingsSnippet implements Snippet {
     public void pressForget() {
         mBluetoothSettingsHelper.get().pressForget();
     }
+
+    @Rpc(description = "Get the device timezone")
+    public String getTimeZone() {
+        return mDateTimeSettingsHelper.get().getTimeZone();
+    }
+
+    @Rpc(description = "Open Date time Setting")
+    public void setTimeZone(String timezone) {
+        mSettingsHelper.get().openSetting(SettingsConstants.DATE_AND_TIME_SETTINGS);
+        mDateTimeSettingsHelper.get().setTimeZone(timezone);
+    }
+
+    @Override
+    public void shutdown() {}
 }

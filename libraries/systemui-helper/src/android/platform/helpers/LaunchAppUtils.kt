@@ -57,7 +57,10 @@ object LaunchAppUtils {
 
 /** Describes an app that can be launched with [LaunchAppUtils]. */
 enum class App(internal val packageName: String) {
-    CALCULATOR("com.google.android.calculator")
+    CALCULATOR("com.google.android.calculator"),
+    MAPS("com.google.android.apps.maps"),
+    CAMERA("com.google.android.GoogleCamera"),
+    SETTINGS("com.android.settings")
 }
 
 private val MAX_TIMEOUT = Duration.ofSeconds(10)

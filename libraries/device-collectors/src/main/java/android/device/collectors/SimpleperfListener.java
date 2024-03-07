@@ -18,8 +18,14 @@ package android.device.collectors;
 import android.device.collectors.annotations.OptionClass;
 import android.os.Bundle;
 import android.util.Log;
+
 import androidx.annotation.VisibleForTesting;
+
 import com.android.helpers.SimpleperfHelper;
+
+import org.junit.runner.Description;
+import org.junit.runner.Result;
+import org.junit.runner.notification.Failure;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -27,9 +33,6 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.junit.runner.Description;
-import org.junit.runner.Result;
-import org.junit.runner.notification.Failure;
 
 /**
  * A {@link SimpleperfListener} that captures simpleperf samples for a test run or per test method
@@ -76,6 +79,10 @@ public class SimpleperfListener extends BaseMetricListener {
     // Test iterations used to divide any reported event counts.
     public static final String TEST_ITERATIONS = "test_iterations";
 
+    // Skips recording simpleperf. If this is set, then the test is responsible for starting and
+    // stopping simpleperf. The listener can still be used for reporting metrics.
+    public static final String RECORD = "record";
+
     // Simpleperf samples collected during the test will be saved under this root folder.
     private String mTestOutputRoot;
     // Store the method name and invocation count to create a unique filename for each trace.
@@ -90,6 +97,7 @@ public class SimpleperfListener extends BaseMetricListener {
     private boolean mReport;
     private Map<String, String> mSymbolToMetricKey = new HashMap<>();
     private int mTestIterations;
+    private boolean mRecord;
 
     private SimpleperfHelper mSimpleperfHelper = new SimpleperfHelper();
 
@@ -160,6 +168,7 @@ public class SimpleperfListener extends BaseMetricListener {
 
         mTestIterations = Integer.parseInt(args.getString(TEST_ITERATIONS, "1"));
         Log.i(getTag(), "onTestRunStart arguments mTestIterations=" + mTestIterations);
+        mRecord = Boolean.parseBoolean(args.getString(RECORD, "true"));
 
         if (!mIsCollectPerRun) {
             return;
@@ -258,7 +267,8 @@ public class SimpleperfListener extends BaseMetricListener {
 
     /** Start simpleperf sampling. */
     public void startSimpleperf(String subcommand, String arguments) {
-        mSimpleperfStartSuccess = mSimpleperfHelper.startCollecting(subcommand, arguments);
+        mSimpleperfStartSuccess =
+                !mRecord || mSimpleperfHelper.startCollecting(subcommand, arguments);
         if (!mSimpleperfStartSuccess) {
             Log.e(getTag(), "Simpleperf did not start successfully.");
         }
@@ -266,7 +276,13 @@ public class SimpleperfListener extends BaseMetricListener {
 
     /** Stop simpleperf sampling and dump the collected file into the given path. */
     private void stopSimpleperf(Path path, DataRecord record) {
-        if (!mSimpleperfHelper.stopCollecting(path.toString())) {
+        boolean status = false;
+        if (mRecord) {
+            status = mSimpleperfHelper.stopCollecting(path.toString());
+        } else {
+            status = mSimpleperfHelper.copyFileOutput(path.toString());
+        }
+        if (!status) {
             Log.e(getTag(), "Failed to collect the simpleperf output.");
         } else {
             record.addStringMetric(SIMPLEPERF_FILE_PATH, path.toString());

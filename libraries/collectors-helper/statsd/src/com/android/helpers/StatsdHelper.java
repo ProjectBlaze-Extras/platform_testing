@@ -178,7 +178,7 @@ public class StatsdHelper {
                     "AID_BLUETOOTH",
                     "AID_GRAPHICS",
                     "AID_STATSD",
-                    "AID_INCIENTD"
+                    "AID_INCIDENTD"
                 };
         String[] defaultPullPackages =
                 new String[] {"AID_SYSTEM", "AID_RADIO", "AID_STATSD", "AID_GPU_SERVICE"};

@@ -21,8 +21,13 @@ import static com.android.helpers.MetricUtility.constructKey;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.matches;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -70,6 +75,15 @@ public class ShowmapSnapshotHelperTest {
     };
     private static final String[] TWO_PROCESS_LIST = {
             "com.android.systemui", "system_server"
+    };
+    private static final String[] MIXED_PROCESS_LIST = {
+        "com.android.systemui",
+        "system_server",
+        "com.google.android.googlequicksearchbox:search",
+        "com.google.android.connectivitymonitor"
+    };
+    private static final String[] CACHED_PROCESS_LIST = {
+        "com.google.android.googlequicksearchbox:search", "com.google.android.connectivitymonitor"
     };
     private static final String[] NO_PROCESS_LIST = {
             null
@@ -155,6 +169,81 @@ public class ShowmapSnapshotHelperTest {
         testProcessList(METRIC_INDEX_STR, TWO_PROCESS_LIST);
     }
 
+    /** Test that cached processes are skipped for showmap metrics. */
+    @Test
+    public void testGetMetrics_MixedProcess() {
+        doReturn(true)
+                .when(mShowmapSnapshotHelper)
+                .isProcessOomScoreAbove(
+                        eq("com.google.android.googlequicksearchbox:search"), anyLong(), anyInt());
+        doReturn(true)
+                .when(mShowmapSnapshotHelper)
+                .isProcessOomScoreAbove(
+                        eq("com.google.android.connectivitymonitor"), anyLong(), anyInt());
+        doReturn(false)
+                .when(mShowmapSnapshotHelper)
+                .isProcessOomScoreAbove(eq("com.android.systemui"), anyLong(), anyInt());
+        doReturn(false)
+                .when(mShowmapSnapshotHelper)
+                .isProcessOomScoreAbove(eq("system_server"), anyLong(), anyInt());
+        mShowmapSnapshotHelper.setUp(VALID_OUTPUT_DIR, MIXED_PROCESS_LIST);
+        mShowmapSnapshotHelper.setMetricNameIndex(METRIC_INDEX_STR);
+        assertTrue(mShowmapSnapshotHelper.startCollecting());
+        Map<String, String> metrics = mShowmapSnapshotHelper.getMetrics();
+        assertFalse(metrics.isEmpty());
+        for (String processName : CACHED_PROCESS_LIST) {
+            assertTrue(
+                    metrics.containsKey(
+                            constructKey(
+                                    String.format(
+                                            ShowmapSnapshotHelper
+                                                    .OUTPUT_IMPERCEPTIBLE_METRIC_PATTERN,
+                                            "rss"),
+                                    processName)));
+            assertTrue(
+                    metrics.containsKey(
+                            constructKey(
+                                    String.format(
+                                            ShowmapSnapshotHelper
+                                                    .OUTPUT_IMPERCEPTIBLE_METRIC_PATTERN,
+                                            "pss"),
+                                    processName)));
+        }
+        assertTrue(metrics.containsKey(ShowmapSnapshotHelper.OUTPUT_FILE_PATH_KEY));
+    }
+
+    /** Test isProcessOomScoreAbove() from cached process only. */
+    @Test
+    public void testGetMetrics_CachedProcess() throws IOException {
+        doReturn("1000")
+                .when(mShowmapSnapshotHelper)
+                .executeShellCommand(contains("oom_score_adj"));
+        mShowmapSnapshotHelper.setUp(VALID_OUTPUT_DIR, CACHED_PROCESS_LIST);
+        mShowmapSnapshotHelper.setMetricNameIndex(METRIC_INDEX_STR);
+        assertTrue(mShowmapSnapshotHelper.startCollecting());
+        Map<String, String> metrics = mShowmapSnapshotHelper.getMetrics();
+        assertFalse(metrics.isEmpty());
+        for (String processName : CACHED_PROCESS_LIST) {
+            assertTrue(
+                    metrics.containsKey(
+                            constructKey(
+                                    String.format(
+                                            ShowmapSnapshotHelper
+                                                    .OUTPUT_IMPERCEPTIBLE_METRIC_PATTERN,
+                                            "rss"),
+                                    processName)));
+            assertTrue(
+                    metrics.containsKey(
+                            constructKey(
+                                    String.format(
+                                            ShowmapSnapshotHelper
+                                                    .OUTPUT_IMPERCEPTIBLE_METRIC_PATTERN,
+                                            "pss"),
+                                    processName)));
+        }
+        assertTrue(metrics.containsKey(ShowmapSnapshotHelper.OUTPUT_FILE_PATH_KEY));
+    }
+
     /**
      * Test all process flag return more than 2 processes metrics at least.
      */
@@ -167,7 +256,6 @@ public class ShowmapSnapshotHelperTest {
         Map<String, String> metrics = mShowmapSnapshotHelper.getMetrics();
         assertTrue(metrics.size() > 2);
         assertTrue(metrics.containsKey(ShowmapSnapshotHelper.OUTPUT_FILE_PATH_KEY));
-
     }
 
     @Test
@@ -220,7 +308,6 @@ public class ShowmapSnapshotHelperTest {
         mShowmapSnapshotHelper.setAllProcesses();
         assertTrue(mShowmapSnapshotHelper.startCollecting());
         Map<String, String> metrics = mShowmapSnapshotHelper.getMetrics();
-
         assertTrue(metrics.size() != 0);
 
         // process count, process with child process count and path to snapshot file in the output
@@ -235,6 +322,19 @@ public class ShowmapSnapshotHelperTest {
         // At least one process (i.e init) will have child process
         assertTrue(parentWithChildProcessSet.size() > 0);
         assertTrue(metrics.containsKey(ShowmapSnapshotHelper.CHILD_PROCESS_COUNT_PREFIX + "_init"));
+        // These assertions are for checking SKIP_PROCESS
+        assertFalse(
+                metrics.containsKey(
+                        ShowmapSnapshotHelper.PARENT_PROCESS_STRING
+                                + "_init_"
+                                + ShowmapSnapshotHelper.CHILD_PROCESS_STRING
+                                + "_logcat"));
+        assertFalse(
+                metrics.containsKey(
+                        ShowmapSnapshotHelper.PARENT_PROCESS_STRING
+                                + "_init_"
+                                + ShowmapSnapshotHelper.CHILD_PROCESS_STRING
+                                + "_sh"));
     }
 
     @Test
@@ -274,6 +374,9 @@ public class ShowmapSnapshotHelperTest {
     }
 
     private void testProcessList(String metricIndexStr, String... processNames) {
+        doReturn(false)
+                .when(mShowmapSnapshotHelper)
+                .isProcessOomScoreAbove(anyString(), anyLong(), anyInt());
         mShowmapSnapshotHelper.setUp(VALID_OUTPUT_DIR, processNames);
         mShowmapSnapshotHelper.setMetricNameIndex(metricIndexStr);
         assertTrue(mShowmapSnapshotHelper.startCollecting());

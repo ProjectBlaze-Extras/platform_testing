@@ -16,14 +16,13 @@
 
 package platform.test.screenshot.matchers
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.Rect
 import kotlin.collections.List
 import platform.test.screenshot.proto.ScreenshotResultProto.DiffResult.ComparisonStatistics
 
-/**
- * The abstract class to implement to provide custom bitmap matchers.
- */
+/** The abstract class to implement to provide custom bitmap matchers. */
 abstract class BitmapMatcher {
     /**
      * Compares the given bitmaps and returns result of the operation.
@@ -41,22 +40,29 @@ abstract class BitmapMatcher {
         given: IntArray,
         width: Int,
         height: Int,
-        regions: List<Rect> = emptyList<Rect>()
+        regions: List<Rect> = emptyList()
     ): MatchResult
 
-    protected fun getFilter(width: Int, height: Int, regions: List<Rect>): IntArray {
-        if (regions.isEmpty()) { return IntArray(width * height) { 1 } }
-        val bitmapArray = IntArray(width * height) { 0 }
-        for (region in regions) {
-            for (i in region.top..region.bottom) {
-                if (i >= height) { break }
-                for (j in region.left..region.right) {
-                    if (j >= width) { break }
-                    bitmapArray[j + i * width] = 1
+    @SuppressLint("CheckResult")
+    protected fun getFilter(width: Int, height: Int, regions: List<Rect>): BooleanArray {
+        return if (regions.isEmpty()) {
+            BooleanArray(width * height) { true }
+        } else {
+            val regionsSanitised = regions.map { Rect(it).apply { intersect(0, 0, width, height) } }
+            BooleanArray(width * height).also { filterArr ->
+                regionsSanitised.forEach { region ->
+                    val startX = region.left.coerceIn(0, width - 1)
+                    val endX = region.right.coerceIn(0, width - 1)
+                    val startY = region.top.coerceIn(0, height - 1)
+                    val endY = region.bottom.coerceIn(0, height - 1)
+                    for (x in startX..endX) {
+                        for (y in startY..endY) {
+                            filterArr[y * width + x] = true
+                        }
+                    }
                 }
             }
         }
-        return bitmapArray
     }
 }
 
@@ -65,9 +71,9 @@ abstract class BitmapMatcher {
  *
  * @param matches True if bitmaps match.
  * @param comparisonStatistics Matching statistics provided by this matcher that performed the
- * comparison.
+ *   comparison.
  * @param diff Diff bitmap that highlights the differences between the images. Can be null if match
- * was found.
+ *   was found.
  */
 class MatchResult(
     val matches: Boolean,

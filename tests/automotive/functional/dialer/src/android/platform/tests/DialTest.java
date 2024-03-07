@@ -124,7 +124,7 @@ public class DialTest {
     public void testDeleteDialedNumber() {
         mDialerHelper.get().dialANumber(mSmallPhoneNumber.get());
         mDialerHelper.get().deleteDialedNumber();
-        String numberAfterDelete = mDialerHelper.get().getDialInNumber();
+        String numberAfterDelete = mDialerHelper.get().getNumberInDialPad();
         assertTrue(DIAL_A_NUMBER.equals(numberAfterDelete));
     }
 

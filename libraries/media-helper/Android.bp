@@ -23,7 +23,7 @@ java_library {
     sdk_version: "test_current",
     srcs: ["src/**/*.java"],
     static_libs: [
-        "truth-prebuilt",
+        "truth",
         "guava",
     ],
 }

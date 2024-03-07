@@ -24,7 +24,7 @@ java_library_static {
     libs: [
         "guava",
         "test-composers",
-        "truth-prebuilt",
+        "truth",
     ],
     target: {
         android: {
@@ -52,7 +52,7 @@ java_test_host {
         "junit-host",
         "test-composers",
         "test-composers-tests",
-        "truth-host-prebuilt",
+        "truth",
         "mockito",
         "objenesis",
     ],

@@ -21,7 +21,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/** Marks a test that takes long time to execute. */
+/**
+ * Marks a test that takes long time to execute.
+ *
+ * <p>As a rule of thumb, tests that take 1 second or more fit this category.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
 public @interface LargeTest {}

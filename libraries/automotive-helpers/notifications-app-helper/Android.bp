@@ -21,7 +21,7 @@ package {
 java_library {
     name: "automotive-notifications-app-helper",
     static_libs: [
-        "truth-prebuilt",
+        "truth",
         "spectatio-lib",
         "app-helpers-auto-interfaces",
         "android-support-annotations",

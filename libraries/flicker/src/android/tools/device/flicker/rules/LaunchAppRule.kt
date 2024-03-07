@@ -42,7 +42,7 @@ class LaunchAppRule
 @JvmOverloads
 constructor(
     private val appHelper: StandardAppHelper,
-    private val instrumentation: Instrumentation = appHelper.mInstrumentation,
+    private val instrumentation: Instrumentation = appHelper.instrumentation,
     private val clearCacheAfterParsing: Boolean = true,
     private val wmHelper: WindowManagerStateHelper =
         WindowManagerStateHelper(clearCacheAfterParsing = clearCacheAfterParsing)
@@ -63,7 +63,7 @@ constructor(
     )
 
     override fun starting(description: Description?) {
-        Logger.withTracing("LaunchAppRule:finished") {
+        Logger.withTracing("LaunchAppRule:starting") {
             Logger.v(FLICKER_TAG, "Launching app $appHelper")
             appHelper.launchViaIntent()
             appHelper.exit(wmHelper)

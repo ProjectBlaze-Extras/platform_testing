@@ -292,6 +292,64 @@ public class BackupUtilsTest {
     }
 
     @Test
+    public void waitForNonGmsTransportInitialization_whenEnabled() throws Exception {
+        BackupUtils backupUtils =
+                new BackupUtils() {
+                    @Override
+                    protected InputStream executeShellCommand(String command) throws IOException {
+                        String output = "";
+                        if (command.equals("dumpsys backup")) {
+                            output = "Backup Manager is enabled / provisioned / not pending init";
+                            mIsDumpsysCommandCalled = true;
+                        }
+                        return new ByteArrayInputStream(output.getBytes("UTF-8"));
+                    }
+                };
+        backupUtils.waitForNonGmsTransportInitialization();
+        assertTrue(mIsDumpsysCommandCalled);
+    }
+
+    @Test
+    public void waitForNonGmsTransportInitialization_whenPendingInitForGmsTransportOnly()
+            throws Exception {
+        BackupUtils backupUtils =
+                new BackupUtils() {
+                    @Override
+                    protected InputStream executeShellCommand(String command) throws IOException {
+                        String output = "";
+                        if (command.equals("dumpsys backup")) {
+                            output =
+                                    "Backup Manager is enabled / setup complete / pending init\n"
+                                            + "Pending init: 1\n    com.google.android.gms/.backup"
+                                            + ".BackupTransportService";
+                            mIsDumpsysCommandCalled = true;
+                        }
+                        return new ByteArrayInputStream(output.getBytes("UTF-8"));
+                    }
+                };
+        backupUtils.waitForNonGmsTransportInitialization();
+        assertTrue(mIsDumpsysCommandCalled);
+    }
+
+    @Test
+    public void waitForNonGmsTransportInitialization_whenDisabled() throws Exception {
+        BackupUtils backupUtils =
+                new BackupUtils() {
+                    @Override
+                    protected InputStream executeShellCommand(String command) throws IOException {
+                        String output = "";
+                        if (command.equals("dumpsys backup")) {
+                            output = "Backup Manager is disabled / provisioned / not pending init";
+                            mIsDumpsysCommandCalled = true;
+                        }
+                        return new ByteArrayInputStream(output.getBytes("UTF-8"));
+                    }
+                };
+        backupUtils.waitForNonGmsTransportInitialization();
+        assertTrue(mIsDumpsysCommandCalled);
+    }
+
+    @Test
     public void testWaitUntilBackupServiceIsRunning_whenRunning_doesntThrow() throws Exception {
         BackupUtils backupUtils = constructDumpsysForBackupUsers(TEST_USER_ID);
 

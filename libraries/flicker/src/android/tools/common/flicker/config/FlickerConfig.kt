@@ -26,25 +26,25 @@ interface FlickerConfig {
         scenario: ScenarioId,
         extractor: ScenarioExtractor,
         assertions: Map<AssertionTemplate, AssertionInvocationGroup>? = null
-    )
+    ): FlickerConfig
 
-    fun registerAssertion(
+    fun registerAssertions(
         scenario: ScenarioId,
-        assertion: AssertionTemplate,
+        vararg assertions: AssertionTemplate,
         stabilityGroup: AssertionInvocationGroup = AssertionInvocationGroup.BLOCKING
-    )
+    ): FlickerConfig
 
     fun getEntries(): Collection<FlickerConfigEntry>
 
-    fun unregisterScenario(scenario: ScenarioId)
+    fun unregisterScenario(scenario: ScenarioId): FlickerConfig
 
     fun overrideAssertionStabilityGroup(
         scenario: ScenarioId,
         assertionId: AssertionId,
         stabilityGroup: AssertionInvocationGroup
-    )
+    ): FlickerConfig
 
-    fun unregisterAssertion(scenario: ScenarioId, assertionId: AssertionId)
+    fun unregisterAssertion(scenario: ScenarioId, assertionId: AssertionId): FlickerConfig
 
     fun use(flickerConfigEntries: Collection<FlickerConfigEntry>): FlickerConfig
 

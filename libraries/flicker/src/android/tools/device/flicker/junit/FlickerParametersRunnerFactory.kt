@@ -16,11 +16,14 @@
 
 package android.tools.device.flicker.junit
 
+import android.os.Bundle
 import android.tools.common.CrossPlatform
 import android.tools.common.TimestampFactory
 import android.tools.device.AndroidLogger
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.traces.formatRealTimestamp
+import androidx.test.platform.app.InstrumentationRegistry
+import com.android.internal.annotations.VisibleForTesting
 import org.junit.runner.Runner
 import org.junit.runners.parameterized.ParametersRunnerFactory
 import org.junit.runners.parameterized.TestWithParameters
@@ -35,7 +38,8 @@ class FlickerParametersRunnerFactory : ParametersRunnerFactory {
             .setTimestampFactory(TimestampFactory { formatRealTimestamp(it) })
     }
 
-    override fun createRunnerForTestWithParameters(test: TestWithParameters): Runner {
+    @VisibleForTesting
+    fun createRunnerForTestWithParameters(test: TestWithParameters, arguments: Bundle): Runner {
         val simpleClassName = test.testClass.javaClass.simpleName
         val flickerTest =
             test.parameters.filterIsInstance<LegacyFlickerTest>().firstOrNull()
@@ -50,6 +54,9 @@ class FlickerParametersRunnerFactory : ParametersRunnerFactory {
                 /* testClass */ test.testClass,
                 /* parameters */ test.parameters
             )
-        return LegacyFlickerJUnit4ClassRunner(newTest, scenario)
+        return LegacyFlickerJUnit4ClassRunner(newTest, scenario, arguments)
     }
+
+    override fun createRunnerForTestWithParameters(test: TestWithParameters) =
+        createRunnerForTestWithParameters(test, arguments = InstrumentationRegistry.getArguments())
 }

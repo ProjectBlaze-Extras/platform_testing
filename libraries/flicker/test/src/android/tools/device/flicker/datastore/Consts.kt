@@ -18,22 +18,22 @@ package android.tools.device.flicker.datastore
 
 import android.tools.common.Timestamps
 import android.tools.common.io.TransitionTimeRange
-import android.tools.device.traces.io.InMemoryArtifact
 import android.tools.device.traces.io.ResultData
+import android.tools.utils.TestArtifact
 
 object Consts {
     internal const val FAILURE = "Expected failure"
 
     internal val TEST_RESULT =
         ResultData(
-            _artifact = InMemoryArtifact("TEST_RESULT"),
+            _artifact = TestArtifact("TEST_RESULT"),
             _transitionTimeRange = TransitionTimeRange(Timestamps.empty(), Timestamps.empty()),
             _executionError = null
         )
 
     internal val RESULT_FAILURE =
         ResultData(
-            _artifact = InMemoryArtifact("RESULT_FAILURE"),
+            _artifact = TestArtifact("RESULT_FAILURE"),
             _transitionTimeRange = TransitionTimeRange(Timestamps.empty(), Timestamps.empty()),
             _executionError = null
         )

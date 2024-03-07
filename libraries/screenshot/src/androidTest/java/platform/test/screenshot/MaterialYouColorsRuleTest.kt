@@ -9,7 +9,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class MaterialYouColorsRuleTest {
-    private val colors = MaterialYouColors.Orange
+    private val colors = MaterialYouColors.GreenBlue
 
     @get:Rule val colorsRule = MaterialYouColorsRule(colors)
 

@@ -23,10 +23,9 @@ import org.junit.runners.model.TestClass
 
 abstract class AbstractFlickerRunnerDecorator(
     protected val testClass: TestClass,
-    protected val inner: IFlickerJUnitDecorator?
-) : IFlickerJUnitDecorator {
+    protected val inner: IFlickerJUnitDecorator?,
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-
+) : IFlickerJUnitDecorator {
     override fun doValidateConstructor(): List<Throwable> {
         val errors = mutableListOf<Throwable>()
         inner?.doValidateConstructor()?.let { errors.addAll(it) }

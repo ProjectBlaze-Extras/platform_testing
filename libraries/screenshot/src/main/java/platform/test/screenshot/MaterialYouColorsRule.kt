@@ -32,7 +32,7 @@ import org.junit.runners.model.Statement
  * [ActivityScenarioRule] or any other rule, given that the colors must be [applied]
  * [MaterialYouColors.apply] *before* doing any resource resolution.
  */
-class MaterialYouColorsRule(private val colors: MaterialYouColors = MaterialYouColors.Orange) :
+class MaterialYouColorsRule(private val colors: MaterialYouColors = MaterialYouColors.GreenBlue) :
     TestRule {
     override fun apply(base: Statement, description: Description): Statement {
         return object : Statement() {
@@ -59,7 +59,7 @@ class MaterialYouColors(
      * Important: No resource resolution must have be done on the context given to that method.
      */
     fun apply(context: Context) {
-        RemoteViews.ColorResources.create(context, colors).apply(context)
+        RemoteViews.ColorResources.create(context, colors)?.apply(context)
     }
 
     companion object {
@@ -67,9 +67,10 @@ class MaterialYouColors(
         private const val LAST_RESOURCE_COLOR_ID = android.R.color.system_accent3_1000
 
         /**
-         * An instance of [MaterialYouColors] with orange seed, that can be used directly by tests.
+         * An instance of [MaterialYouColors] with green/blue colors seed, that can be used directly
+         * by tests.
          */
-        val Orange = fromColors(ORANGE)
+        val GreenBlue = fromColors(GREEN_BLUE)
 
         /**
          * Create a [MaterialYouColors] from [colors], where:
@@ -93,72 +94,75 @@ class MaterialYouColors(
     }
 }
 
-/** Some orange colors, extracted using 0xA66800 as seed color. */
-private val ORANGE =
+/**
+ * Some green/blue colors, from system_neutral1_0 to system_accent3_1000, extracted using 0xB1EBFF
+ * as seed color and "FRUIT_SALAD" as theme style.
+ */
+private val GREEN_BLUE =
     intArrayOf(
         -1,
-        -1025,
-        -397337,
-        -1318439,
-        -3226179,
-        -5068125,
-        -6844535,
-        -8620690,
-        -10199721,
-        -11778496,
-        -13291734,
-        -14738666,
+        -393729,
+        -1641480,
+        -2562838,
+        -4405043,
+        -6181454,
+        -7892073,
+        -9668483,
+        -11181979,
+        -12760755,
+        -14208458,
+        -15590111,
         -16777216,
         -1,
-        -1025,
-        -4386,
-        -925488,
-        -2833227,
-        -4675174,
-        -6451583,
-        -8293273,
-        -9937840,
-        -11516615,
-        -13095132,
-        -14542319,
+        -393729,
+        -2296322,
+        -3217680,
+        -4994349,
+        -6770760,
+        -8547171,
+        -10257790,
+        -11836822,
+        -13350318,
+        -14863301,
+        -16376283,
         -16777216,
         -1,
-        -1025,
-        -4386,
-        -8775,
-        -476303,
-        -2449319,
-        -4422078,
-        -6394838,
-        -8235756,
-        -10076672,
-        -12113408,
-        -13953280,
+        -720905,
+        -4456478,
+        -8128307,
+        -10036302,
+        -12075112,
+        -14638210,
+        -16742810,
+        -16749487,
+        -16756420,
+        -16762839,
+        -16768746,
         -16777216,
         -1,
-        -1025,
-        -4386,
-        -139843,
-        -2113118,
-        -4020599,
-        -5862288,
-        -7703977,
-        -9348543,
-        -11058389,
-        -12636905,
-        -14149627,
+        -720905,
+        -4456478,
+        -5901613,
+        -7678281,
+        -9454947,
+        -11231613,
+        -13139095,
+        -15111342,
+        -16756420,
+        -16762839,
+        -16768746,
         -16777216,
         -1,
-        -393241,
-        -1640507,
-        -2561608,
-        -4403810,
-        -6180476,
-        -7956885,
-        -9667501,
-        -11246787,
-        -12760281,
-        -14207725,
-        -15524094,
+        -393729,
+        -2361857,
+        -5051393,
+        -7941655,
+        -9783603,
+        -11625551,
+        -13729642,
+        -16750723,
+        -16757153,
+        -16763326,
+        -16769241,
         -16777216,
     )

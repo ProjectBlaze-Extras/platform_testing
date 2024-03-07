@@ -224,4 +224,33 @@ public interface IAutoPrivacySettingsHelper extends IAppHelper {
      * <p>To verify if microphone manage permissions page is displayed
      */
     boolean verifyMicrophoneManagePermissionsPage();
+
+    /**
+     * Setup expectation: Start Android Auto pop-up displayed
+     *
+     * <p>To verify if Start Android Auto pop-up displayed
+     */
+    boolean isStartAndroidAutoPopUpPresent();
+
+    /**
+     * Setup expectation: Assistant improvement pop-up displayed
+     *
+     * <p>To verify if Assistant improvement pop-up displayed
+     */
+    boolean isAssistantImprovementPopUpPresent();
+
+    /**
+     * Setup expectation: Start Android Auto pop-up displayed
+     *
+     * <p>This method will click on Not Now button
+     */
+    void skipStartAndroidAutoPopUp();
+
+    /**
+     * Setup expectation: Use contact names pop-uo displayed
+     *
+     * <p>This method will click on Not Now button
+     */
+    void skipImprovementCallingAndTextingPopUp();
+
 }

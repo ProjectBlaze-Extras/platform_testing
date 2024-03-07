@@ -27,7 +27,6 @@ internal object Notification {
             NotificationClearAll,
             NotificationDialogOpen,
             NotificationExpandCollapse,
-            NotificationExpandCollapseLockscreen,
             NotificationHeadsUpAppear,
             NotificationHeadsUpDisappear,
             NotificationQsExpandCollapse,

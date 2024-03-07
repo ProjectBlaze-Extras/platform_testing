@@ -23,6 +23,46 @@ package android.platform.helpers;
 public interface IAutoBluetoothSettingsHelper extends IAppHelper, Scrollable {
 
     /**
+     * Setup Expectations: The bluetooth settings view is open, and at least one device is listed
+     * under "Paired devices"
+     *
+     * @return - Whether the audio preference button is currently checked
+     */
+    boolean isMediaPreferenceChecked();
+
+    /**
+     * Setup Expectations: The bluetooth settings view is open, and at least one device is listed
+     * under "Paired devices"
+     *
+     * @return - Whether the bluetooth preference button is currently checked
+     */
+    boolean isBluetoothPreferenceChecked();
+
+    /**
+     * Setup Expectations: The bluetooth settings view is open, and at least one device is listed
+     * under "Paired devices"
+     *
+     * @return - Whether the phone preference button is currently checked
+     */
+    boolean isPhonePreferenceChecked();
+
+    /**
+     * Setup Expectations: The bluetooth settings view is open, and at least one device is listed
+     * under "Paired devices"
+     *
+     * @return - Whether the audio preference button is currently checked
+     */
+    boolean isMediaPreferenceEnabled();
+
+    /**
+     * Setup Expectations: The bluetooth settings view is open, and at least one device is listed
+     * under "Paired devices"
+     *
+     * @return - Whether the phone preference button is currently checked
+     */
+    boolean isPhonePreferenceEnabled();
+
+    /**
      * Setup Expectations: The bluetooth settings view is open, and the looked-for device is present
      * under "paired devices"
      *

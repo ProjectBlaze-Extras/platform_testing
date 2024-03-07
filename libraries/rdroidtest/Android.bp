@@ -1,0 +1,37 @@
+rust_library {
+    name: "librdroidtest",
+    host_supported: true,
+    crate_name: "rdroidtest",
+    cargo_env_compat: true,
+    cargo_pkg_version: "0.1.0",
+    srcs: ["src/lib.rs"],
+    edition: "2021",
+    rustlibs: [
+        "liblibtest_mimic",
+        "liblinkme",
+        "liblog_rust",
+        "liblogger",
+    ],
+    proc_macros: ["libpaste"],
+    apex_available: [
+        "//apex_available:platform",
+        "//apex_available:anyapex",
+    ],
+    vendor_available: true,
+}
+
+rust_defaults {
+    name: "rdroidtest.defaults",
+    test_harness: false,
+    cfgs: ["test"],
+    rustlibs: [
+        "librdroidtest",
+        "liblinkme",
+    ],
+    // Without this flag we get linker errors saying to add it. See
+    // https://github.com/dtolnay/linkme/issues/49 and related issues.
+    ld_flags: [
+        "-z",
+        "nostart-stop-gc",
+    ],
+}

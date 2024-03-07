@@ -27,6 +27,8 @@ java_library {
     static_libs: [
         "ub-uiautomator",
         "spectatio-util-lib",
+        "compatibility-device-util-axt",
+        "//frameworks/base/packages/SystemUI/aconfig:com_android_systemui_flags_lib",
     ],
     srcs: ["src/**/*.java"],
 }

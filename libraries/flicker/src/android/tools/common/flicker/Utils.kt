@@ -16,6 +16,10 @@
 
 package android.tools.common.flicker
 
+import android.tools.common.traces.surfaceflinger.LayersTrace
+import android.tools.common.traces.wm.TransitionChange
+import android.tools.common.traces.wm.WindowManagerTrace
+
 fun String.camelToSnakeCase(): String {
     return this.fold(StringBuilder()) { acc, c ->
             acc.let {
@@ -24,4 +28,26 @@ fun String.camelToSnakeCase(): String {
             }
         }
         .toString()
+}
+
+fun isAppTransitionChange(
+    transitionChange: TransitionChange,
+    layersTrace: LayersTrace?,
+    wmTrace: WindowManagerTrace?
+): Boolean {
+    require(layersTrace != null || wmTrace != null) {
+        "Requires at least one of wm of layers trace to not be null"
+    }
+
+    val layerDescriptors =
+        layersTrace?.let {
+            it.getLayerDescriptorById(transitionChange.layerId)
+                ?: error("Failed to find layer with id ${transitionChange.layerId}")
+        }
+    val windowDescriptor =
+        wmTrace?.let {
+            it.getWindowDescriptorById(transitionChange.windowId)
+                ?: error("Failed to find layer with id ${transitionChange.windowId}")
+        }
+    return (layerDescriptors?.isAppLayer ?: true) && (windowDescriptor?.isAppWindow ?: true)
 }

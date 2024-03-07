@@ -298,11 +298,11 @@ public class LatencyTests extends Instrumentation {
             }
 
             IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
-            wm.freezeRotation(Surface.ROTATION_0);
+            wm.freezeRotation(Surface.ROTATION_0, /* caller= */ "LatencyTests");
             mDevice.waitForIdle();
-            wm.freezeRotation(Surface.ROTATION_90);
+            wm.freezeRotation(Surface.ROTATION_90, /* caller= */ "LatencyTests");
             mDevice.waitForIdle();
-            wm.thawRotation();
+            wm.thawRotation(/* caller= */ "LatencyTests");
             mDevice.waitForIdle();
 
             if (null != mAtraceLogger) {

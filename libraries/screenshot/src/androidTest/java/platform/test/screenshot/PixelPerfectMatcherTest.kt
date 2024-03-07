@@ -35,12 +35,90 @@ class PixelPerfectMatcherTest {
         val second = loadBitmap("round_rect_gray")
 
         val matcher = PixelPerfectMatcher()
-        val result = matcher.compareBitmaps(
-            first.toIntArray(), second.toIntArray(),
-            first.width, first.height
-        )
+        val result =
+            matcher.compareBitmaps(
+                first.toIntArray(),
+                second.toIntArray(),
+                first.width,
+                first.height
+            )
 
         assertThat(result.matches).isTrue()
+    }
+
+    @Test
+    fun performDiff_sameSize_partialCompare_topLeftOutOfBoundaries_diff() {
+        val first = loadBitmap("round_rect_gray")
+        val second = loadBitmap("round_rect_gray_green_bounds")
+
+        val matcher = PixelPerfectMatcher()
+        val result =
+            matcher.compareBitmaps(
+                expected = first.toIntArray(),
+                given = second.toIntArray(),
+                width = first.width,
+                height = first.height,
+                regions = listOf(Rect(-10, -10, 0, 0))
+            )
+
+        assertThat(result.matches).isFalse()
+    }
+
+    @Test
+    fun performDiff_sameSize_partialCompare_topLeft_diffBoundaries() {
+        val first = loadBitmap("round_rect_gray")
+        val second = loadBitmap("round_rect_gray_green_bounds")
+
+        val matcher = PixelPerfectMatcher()
+        val result =
+            matcher.compareBitmaps(
+                expected = first.toIntArray(),
+                given = second.toIntArray(),
+                width = first.width,
+                height = first.height,
+                regions = listOf(Rect(0, 0, first.width / 2, first.height / 2))
+            )
+
+        assertThat(result.matches).isFalse()
+    }
+
+    @Test
+    fun performDiff_sameSize_partialCompare_bottomRight() {
+        val first = loadBitmap("round_rect_gray")
+        val second = loadBitmap("round_rect_gray_green_bounds")
+
+        val matcher = PixelPerfectMatcher()
+        val result =
+            matcher.compareBitmaps(
+                expected = first.toIntArray(),
+                given = second.toIntArray(),
+                width = first.width,
+                height = first.height,
+                regions = listOf(Rect(first.width / 2, first.height / 2, first.width, first.height))
+            )
+
+        assertThat(result.matches).isFalse()
+    }
+
+    @Test
+    fun performDiff_sameSize_partialCompare_bottomRightOutOfBoundaries_diff() {
+        val first = loadBitmap("round_rect_gray")
+        val second = loadBitmap("round_rect_gray_green_bounds")
+
+        val matcher = PixelPerfectMatcher()
+        val result =
+            matcher.compareBitmaps(
+                expected = first.toIntArray(),
+                given = second.toIntArray(),
+                width = first.width,
+                height = first.height,
+                regions =
+                    listOf(
+                        Rect(first.width / 2, first.height / 2, first.width + 10, first.height + 10)
+                    )
+            )
+
+        assertThat(result.matches).isFalse()
     }
 
     @Test
@@ -49,10 +127,13 @@ class PixelPerfectMatcherTest {
         val second = loadBitmap("round_rect_green")
 
         val matcher = PixelPerfectMatcher()
-        val result = matcher.compareBitmaps(
-            first.toIntArray(), second.toIntArray(),
-            first.width, first.height
-        )
+        val result =
+            matcher.compareBitmaps(
+                first.toIntArray(),
+                second.toIntArray(),
+                first.width,
+                first.height
+            )
 
         assertThat(result.matches).isFalse()
     }
@@ -63,11 +144,14 @@ class PixelPerfectMatcherTest {
         val second = loadBitmap("round_rect_green")
 
         val matcher = PixelPerfectMatcher()
-        val result = matcher.compareBitmaps(
-            first.toIntArray(), second.toIntArray(),
-            first.width, first.height,
-            listOf(Rect(/* left= */1, /* top= */1, /* right= */4, /* bottom= */4))
-        )
+        val result =
+            matcher.compareBitmaps(
+                first.toIntArray(),
+                second.toIntArray(),
+                first.width,
+                first.height,
+                listOf(Rect(/* left= */ 1, /* top= */ 1, /* right= */ 4, /* bottom= */ 4))
+            )
 
         assertThat(result.matches).isTrue()
     }
@@ -77,16 +161,21 @@ class PixelPerfectMatcherTest {
         val first = loadBitmap("qmc-folder1")
         val second = loadBitmap("qmc-folder2")
         val matcher = PixelPerfectMatcher()
-        val interestingRegion = Rect(/* left= */10, /* top= */15, /* right= */70, /* bottom= */50)
-        val result = matcher.compareBitmaps(
-            first.toIntArray(), second.toIntArray(),
-            first.width, first.height, listOf(interestingRegion)
-        )
+        val interestingRegion =
+            Rect(/* left= */ 10, /* top= */ 15, /* right= */ 70, /* bottom= */ 50)
+        val result =
+            matcher.compareBitmaps(
+                first.toIntArray(),
+                second.toIntArray(),
+                first.width,
+                first.height,
+                listOf(interestingRegion)
+            )
         val diffImage = result.diff!!.toIntArray()
 
         assertThat(result.matches).isFalse()
-        for (i in 0..first.height - 1) {
-            for (j in 0..first.width - 1) {
+        for (i in 0 until first.height) {
+            for (j in 0 until first.width) {
                 val rowInRange = i >= interestingRegion.top && i <= interestingRegion.bottom
                 val colInRange = j >= interestingRegion.left && j <= interestingRegion.right
                 if (!(rowInRange && colInRange)) {

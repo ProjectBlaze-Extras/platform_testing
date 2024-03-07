@@ -13,19 +13,18 @@
 #  limitations under the License.
 
 
-import sys
 import logging
-import pprint
 
 from bluetooth_test import bluetooth_base_test
+from utilities.main_utils import common_main
 
 from mobly import asserts
 from mobly import test_runner
 from mobly.controllers import android_device
 
-from mbs_utils import constants
-from mbs_utils import spectatio_utils
-from mbs_utils import bt_utils
+from utilities import constants
+from utilities import spectatio_utils
+from utilities import bt_utils
 
 
 
@@ -46,7 +45,7 @@ class CallContactTest(bluetooth_base_test.BluetoothBaseTest):
         # Navigate to the Contacts page
         self.call_utils.open_phone_app()
         self.call_utils.open_contacts()
-        self.call_utils.wait_with_log(constants.DEFAULT_WAIT_TIME_FIVE_SECS)
+        self.call_utils.wait_with_log(5)
 
         contactToCall = super.discoverer.mbs.getFirstContactFromContactList()
         logging.info("Attempting to call contact: %s", contactToCall)
@@ -56,8 +55,8 @@ class CallContactTest(bluetooth_base_test.BluetoothBaseTest):
         # end_call() acts as an automatic verifying that a call is underway
         # since end_call() will throw an exception if no end_call button is available.
         self.call_utils.end_call()
-        self.call_utils.wait_with_log(constants.WAIT_TWO_SECONDS)
+        self.call_utils.wait_with_log(2)
+
 
 if __name__ == '__main__':
-    # Take test args
-    test_runner.main()
+    common_main()

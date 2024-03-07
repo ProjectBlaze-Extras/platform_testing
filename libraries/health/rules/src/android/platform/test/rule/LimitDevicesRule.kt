@@ -94,21 +94,23 @@ class LimitDevicesRule(private val thisDevice: String = Build.PRODUCT) : TestRul
             )
             .flatMap { devices -> devices.map { it.product } }
 
-    private fun Description.limitDevicesAnnotation(): List<Annotation> =
+    private fun Description.limitDevicesAnnotation(): Set<Annotation> =
         listOfNotNull(
-            getAnnotation(AllowedDevices::class.java),
-            getAnnotation(DeniedDevices::class.java),
-            getAnnotation(ScreenshotTestDevices::class.java),
-            testClass?.getAnnotation(AllowedDevices::class.java),
-            testClass?.getAnnotation(DeniedDevices::class.java),
-            testClass?.getAnnotation(ScreenshotTestDevices::class.java)
-        )
+                getAnnotation(AllowedDevices::class.java),
+                getAnnotation(DeniedDevices::class.java),
+                getAnnotation(ScreenshotTestDevices::class.java),
+                testClass?.getAnnotation(AllowedDevices::class.java),
+                testClass?.getAnnotation(DeniedDevices::class.java),
+                testClass?.getAnnotation(ScreenshotTestDevices::class.java)
+            )
+            .toSet()
 }
 
 enum class DeviceProduct(val product: String) {
     CF_PHONE("cf_x86_64_phone"),
     CF_TABLET("cf_x86_64_tablet"),
     CF_FOLDABLE("cf_x86_64_foldable"),
+    CF_AUTO("cf_x86_64_auto"),
     TANGORPRO("tangorpro"),
     FELIX("felix"),
 }

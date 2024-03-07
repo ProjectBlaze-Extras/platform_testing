@@ -18,4 +18,4 @@ package android.tools.common.flicker.subject.exceptions
 
 /** Exception thrown when a property has an unexpected value */
 class InvalidPropertyException(override val messageBuilder: ExceptionMessageBuilder) :
-    BaseException()
+    FlickerAssertionError()

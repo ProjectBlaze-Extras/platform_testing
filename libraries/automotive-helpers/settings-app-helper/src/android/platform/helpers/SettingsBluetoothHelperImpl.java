@@ -17,7 +17,9 @@
 package android.platform.helpers;
 
 import android.app.Instrumentation;
+import android.content.Context;
 
+import androidx.test.InstrumentationRegistry;
 import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.BySelector;
 import androidx.test.uiautomator.UiObject2;
@@ -28,8 +30,73 @@ public class SettingsBluetoothHelperImpl extends AbstractStandardAppHelper
 
     private static final String LOG_TAG = SettingHelperImpl.class.getSimpleName();
 
+    private final ScrollUtility mScrollUtility;
+    private final SeekUtility mSeekUtility;
+    private Context mContext;
+
     public SettingsBluetoothHelperImpl(Instrumentation instr) {
         super(instr);
+        mContext = InstrumentationRegistry.getContext();
+        mScrollUtility = ScrollUtility.getInstance(getSpectatioUiUtil());
+        mSeekUtility = SeekUtility.getInstance(getSpectatioUiUtil());
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isBluetoothPreferenceChecked() {
+        return buttonChecked(AutomotiveConfigConstants.TOGGLE_DEVICE_BLUETOOTH);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isMediaPreferenceChecked() {
+        return buttonChecked(AutomotiveConfigConstants.MEDIA_BUTTON);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isPhonePreferenceChecked() {
+        return buttonChecked(AutomotiveConfigConstants.PHONE_BUTTON);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isMediaPreferenceEnabled() {
+        return buttonEnabled(AutomotiveConfigConstants.MEDIA_BUTTON);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isPhonePreferenceEnabled() {
+        return buttonEnabled(AutomotiveConfigConstants.PHONE_BUTTON);
+    }
+
+    /**
+     * Assumes passed in BySelector title is a checkable button that is currently onscreen
+     *
+     * @param buttonName - The button whose status is to be checked.
+     * @return - Whether or not the button element with the given name as a descriptor is checked.
+     */
+    public boolean buttonChecked(String buttonName) {
+        BySelector toggleSelector = getUiElementFromConfig(buttonName);
+        UiObject2 toggleButton = getSpectatioUiUtil().findUiObject(toggleSelector);
+        getSpectatioUiUtil().validateUiObject(toggleButton, buttonName);
+
+        return toggleButton.isChecked();
+    }
+
+    /**
+     * Assumes passed in BySelector title is a button that is currently onscreen
+     *
+     * @param buttonName - The button whose enabled status is to be checked.
+     * @return - Whether or not the button element with the given name as a descriptor is enabled.
+     */
+    public boolean buttonEnabled(String buttonName) {
+        BySelector toggleSelector = getUiElementFromConfig(buttonName);
+        UiObject2 toggleButton = getSpectatioUiUtil().findUiObject(toggleSelector);
+        getSpectatioUiUtil().validateUiObject(toggleButton, buttonName);
+
+        return toggleButton.isEnabled();
     }
 
     /** {@inheritDoc} */

@@ -52,12 +52,21 @@ data class ScenarioInstanceImpl(
 
     override fun generateAssertions(): Collection<ScenarioAssertion> =
         Logger.withTracing("generateAssertions") {
+            val assertionExtraData =
+                mutableMapOf<String, String>().apply {
+                    this["Scenario Start"] = startTimestamp.toString()
+                    this["Scenario End"] = endTimestamp.toString()
+                    this["Associated CUJ"] = associatedCuj.toString()
+                    this["Associated Transition"] = associatedTransition.toString()
+                }
+
             config.assertions.map { (template, stabilityGroup) ->
                 ScenarioAssertionImpl(
                     template.qualifiedAssertionName(this),
                     reader,
                     template.createAssertions(this),
-                    stabilityGroup
+                    stabilityGroup,
+                    assertionExtraData
                 )
             }
         }

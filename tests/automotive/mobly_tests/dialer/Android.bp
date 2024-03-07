@@ -22,8 +22,8 @@ python_test_host {
     srcs: ["bt_utility_test.py"],
     libs: [
         "mobly",
-        "mbs_utils",
-        "BluetoothTestLibrary"
+        "utilities",
+        "bluetooth_test"
     ],
     test_suites: [
         "catbox",
@@ -44,13 +44,66 @@ python_test_host {
 }
 
 python_test_host {
+    name: "BluetoothDialTest",
+    main: "dialer_test_dial_test.py",
+    srcs: ["dialer_test_dial_test.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test"
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+python_test_host {
     name: "BTContactSortTest",
     main: "dialer_test_sort_contacts_by_last_name.py",
     srcs: ["dialer_test_sort_contacts_by_last_name.py"],
     libs: [
         "mobly",
-        "mbs_utils",
-        "BluetoothTestLibrary"
+        "utilities",
+        "bluetooth_test"
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_test_host {
+    name: "BTAddRemoveFavoriteContactTest",
+    main: "dialer_test_add_remove_favorite_contact.py",
+    srcs: ["dialer_test_add_remove_favorite_contact.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test"
     ],
     test_suites: [
         "catbox",
@@ -76,8 +129,8 @@ python_test_host {
     srcs: ["dialer_test_contact_test.py"],
     libs: [
         "mobly",
-        "mbs_utils",
-        "BluetoothTestLibrary"
+        "utilities",
+        "bluetooth_test"
     ],
     test_suites: [
         "catbox",
@@ -103,7 +156,389 @@ python_test_host {
     srcs: ["dialer_test_import_address_details.py"],
     libs: [
         "mobly",
-        "mbs_utils"
+        "utilities",
+        "bluetooth_test",
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_test_host {
+    name: "DialerHFPErrorTest",
+    main: "dialer_hfp_error_test.py",
+    srcs: ["dialer_hfp_error_test.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test",
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_test_host {
+    name: "BTContactSortByFirstNameTest",
+    main: "dialer_test_sort_contacts_by_first_name.py",
+    srcs: ["dialer_test_sort_contacts_by_first_name.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test"
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_test_host {
+    name: "SearchContactByPhoneNumberTest",
+    main: "dialer_test_search_contact_by_phone_number.py",
+    srcs: ["dialer_test_search_contact_by_phone_number.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test",
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_test_host {
+    name: "SearchShowingFoundContact",
+    main: "dialer_test_search_showing_found_contacts.py",
+    srcs: ["dialer_test_search_showing_found_contacts.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test",
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+python_test_host {
+    name: "CallingDeclineBtTest",
+    main: "dialer_test_basic_calling_test_with_reject_call.py",
+    srcs: ["dialer_test_basic_calling_test_with_reject_call.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "BluetoothSMSTestLibrary"
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+        "bt_3device_config.yaml"
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+
+python_test_host {
+    name: "BluetoothMuteUnmuteCallTest",
+    main: "dialer_test_mute_unmute_call.py",
+    srcs: ["dialer_test_mute_unmute_call.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test",
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_test_host {
+    name: "DeleteDialedNumberTest",
+    main: "dialer_test_delete_dialed_number.py",
+    srcs: ["dialer_test_delete_dialed_number.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test",
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_test_host {
+       name: "DialerCallFromHistoryTest",
+       main: "dialer_test_call_from_history.py",
+       srcs: ["dialer_test_call_from_history.py"],
+       libs: [
+           "mobly",
+           "utilities",
+           "bluetooth_test",
+       ],
+       test_suites: [
+           "catbox",
+       ],
+       test_options: {
+           unit_test: false,
+       },
+       data: [
+           // Package the snippet with the mobly test
+           ":AutomotiveSnippet",
+           ":PhoneSnippet",
+       ],
+       version: {
+           py3: {
+               embedded_launcher: true,
+           },
+       }
+}
+
+python_test_host {
+    name: "BTCallAudioSourceTransferringTest",
+    main: "dialer_test_call_audio_source_transferring.py",
+    srcs: ["dialer_test_call_audio_source_transferring.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test"
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_test_host {
+    name: "BTContactSearchByLastNameTest",
+    main: "dialer_test_search_contacts_by_last_name.py",
+    srcs: ["dialer_test_search_contacts_by_last_name.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test"
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+
+python_test_host {
+    name: "BTContactSearchByFirstNameTest",
+    main: "dialer_test_search_contacts_by_first_name.py",
+    srcs: ["dialer_test_search_contacts_by_first_name.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test"
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_test_host {
+    name: "BTDialerVerifyCallHistoryTest",
+    main: "dialer_test_verify_call_history.py",
+    srcs: ["dialer_test_verify_call_history.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test"
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_test_host {
+    name: "BTDialerSearchAndCall",
+    main: "dialer_test_search_contacts_and_call.py",
+    srcs: ["dialer_test_search_contacts_and_call.py"],
+    libs: [
+            "mobly",
+            "utilities",
+            "bluetooth_test"
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_test_host {
+    name: "BTDialerPageRefresh",
+    main: "dialer_test_page_refresh.py",
+    srcs: ["dialer_test_page_refresh.py"],
+
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test"
     ],
     test_suites: [
         "catbox",

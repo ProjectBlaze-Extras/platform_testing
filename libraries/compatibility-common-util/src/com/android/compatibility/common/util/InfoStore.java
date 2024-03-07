@@ -16,7 +16,6 @@
 package com.android.compatibility.common.util;
 
 import java.io.IOException;
-import java.lang.AutoCloseable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -126,6 +125,13 @@ public abstract class InfoStore implements AutoCloseable {
      * Adds a List of String to the InfoStore
      */
     abstract void addListResult(String name, List<String> list) throws IOException;
+
+    /**
+     * Adds some bytes to the InfoStore
+     */
+    void addBytesResult(String name, byte[] bytes) throws IOException {
+        throw new UnsupportedOperationException();
+    }
 
     protected static int[] checkArray(int[] values) {
         if (values.length > MAX_ARRAY_LENGTH) {

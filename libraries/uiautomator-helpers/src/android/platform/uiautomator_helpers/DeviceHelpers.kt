@@ -16,6 +16,7 @@
 
 package android.platform.uiautomator_helpers
 
+import android.os.SystemClock.uptimeMillis
 import android.animation.TimeInterpolator
 import android.app.Instrumentation
 import android.content.Context
@@ -281,7 +282,7 @@ object DeviceHelpers {
     @JvmStatic
     fun shell(command: String): String {
         trace("Executing shell command: $command") {
-            Log.d(TAG, "Executing Shell Command: $command")
+            Log.d(TAG, "Executing Shell Command: $command at ${uptimeMillis()}ms")
             return try {
                 uiDevice.executeShellCommand(command)
             } catch (e: IOException) {

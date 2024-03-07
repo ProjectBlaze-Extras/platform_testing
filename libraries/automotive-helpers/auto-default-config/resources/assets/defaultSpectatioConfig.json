@@ -68,6 +68,7 @@
     "STOP_SETTING_APP_COMMAND": "am force-stop com.android.car.settings",
     "OPEN_SETTINGS_COMMAND": "am start -a android.settings.SETTINGS",
     "MEDIA_LAUNCH_COMMAND": "am start -a android.car.intent.action.MEDIA_TEMPLATE -e android.car.intent.extra.MEDIA_COMPONENT com.android.bluetooth/com.android.bluetooth.avrcpcontroller.BluetoothMediaBrowserService",
+    "MEDIA_LAUNCH_BLUETOOTH_AUDIO_COMMAND": "am start -a android.car.intent.action.MEDIA_TEMPLATE -e android.car.intent.extra.MEDIA_COMPONENT com.google.android.bluetooth/com.android.bluetooth.avrcpcontroller.BluetoothMediaBrowserService",
     "NIGHT_MODE_COMMAND": "dumpsys activity service com.android.car/.CarService day-night-mode  night",
     "DAY_MODE_COMMAND": "dumpsys activity service com.android.car/.CarService day-night-mode  day",
     "OPEN_SYSTEM_UI": "am crash com.android.systemui",
@@ -119,13 +120,11 @@
     },
     "CONTACT_LIST_SCROLL_FORWARD": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_scrollbar_page_down",
-      "PACKAGE": "com.chassis.car.ui.plugin"
+      "VALUE": "car_ui_scrollbar_page_down"
     },
     "CONTACT_LIST_SCROLL_BACKWARD": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_scrollbar_page_up",
-      "PACKAGE": "com.chassis.car.ui.plugin"
+      "VALUE": "car_ui_scrollbar_page_up"
     },
     "CONTACT_LIST_SCROLL_ELEMENT": {
       "TYPE": "RESOURCE_ID",
@@ -150,20 +149,28 @@
       "VALUE": "user_profile_phone_label",
       "PACKAGE": "com.android.car.dialer"
     },
-    "CONTACT_SEARCH_BAR": {
+    "DIALING_NUMBER": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_toolbar_search_bar",
+      "VALUE": "user_profile_phone_number",
       "PACKAGE": "com.android.car.dialer"
     },
-    "SEARCH_RESULT": {
+    "CONTACT_SEARCH_BAR": {
+      "TYPE": "CLASS",
+      "VALUE": "android.widget.EditText"
+    },
+    "CONTACT_SEARCH_RESULT": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "contact_result",
+      "PACKAGE": "com.android.car.dialer"
+    },
+    "CONTACT_SEARCH_RESULT_NAME": {
       "TYPE": "RESOURCE_ID",
       "VALUE": "contact_name",
       "PACKAGE": "com.android.car.dialer"
     },
     "SEARCH_BACK_BUTTON": {
-      "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_toolbar_nav_icon_container",
-      "PACKAGE": "com.android.car.dialer"
+      "TYPE": "DESCRIPTION",
+      "VALUE": "Back"
     },
     "CONTACT_SETTING_SCROLL_FORWARD": {
       "TYPE": "RESOURCE_ID",
@@ -249,8 +256,24 @@
     },
     "SEARCH_CONTACT": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "menu_item_search",
-      "PACKAGE": "com.android.car.dialer"
+      "VALUE": "car_ui_toolbar_menu_item_icon_container"
+    },
+    "CALL_MOBILE_BUTTON": {
+      "TYPE": "MULTIPLE",
+      "SPECIFIERS": [
+        {
+          "TYPE": "CLASS",
+          "VALUE": "android.view.ViewGroup"
+        },
+        {
+          "TYPE": "HAS_DESCENDANT",
+          "MAX_DEPTH": 1,
+          "DESCENDANT": {
+            "TYPE": "TEXT",
+            "VALUE": "Mobile"
+          }
+        }
+      ]
     },
     "CONTACT_SETTINGS": {
       "TYPE": "RESOURCE_ID",
@@ -360,6 +383,23 @@
     "DIAL_PAD_MENU": {
       "TYPE": "TEXT",
       "VALUE": "Dial.?pad"
+    },
+    "DIAL_PAD_BUTTON": {
+      "TYPE": "MULTIPLE",
+      "SPECIFIERS": [
+        {
+          "TYPE": "CLASS",
+          "VALUE": "android.widget.LinearLayout"
+        },
+        {
+          "TYPE": "HAS_DESCENDANT",
+          "MAX_DEPTH": 2,
+          "DESCENDANT": {
+            "TYPE": "TEXT",
+            "VALUE": "Dialpad"
+          }
+        }
+      ]
     },
     "FAVORITES_MENU": {
       "TYPE": "TEXT",
@@ -509,8 +549,7 @@
     },
     "SECURITY_SETTINGS_TITLE": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_toolbar_title",
-      "PACKAGE": "com.android.car.settings"
+      "VALUE": "car_ui_toolbar_title"
     },
     "SECURITY_SETTINGS_LOCK_TYPE_PASSWORD": {
       "TYPE": "TEXT",
@@ -780,8 +819,7 @@
     },
     "NOTIFICATION_SETTINGS_LAYOUT": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_base_layout_content_container",
-      "PACKAGE": "com.android.car.settings"
+      "VALUE": "car_ui_base_layout_content_container"
     },
     "NOTIFICATION_SETTINGS_TITLE": {
       "TYPE": "TEXT",
@@ -836,7 +874,7 @@
     },
     "STATUS_BAR_BLUETOOTH_SETTINGS_PAGE_TITLE": {
       "TYPE": "TEXT",
-      "VALUE": "Bluetooth"
+      "VALUE": "Connected devices"
     },
     "BT_CONNECTED_STATUS": {
       "TYPE": "TEXT",
@@ -845,6 +883,15 @@
     "BT_DISCONNECTED_STATUS": {
       "TYPE": "TEXT",
       "VALUE": "Disconnected"
+    },
+    "ENABLE_DISABLE_BT_TOGGLE": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "switch_widget",
+      "PACKAGE": "android"
+    },
+    "CANCEL_BT_AUDIO_CONNECTION_BUTTON": {
+      "TYPE": "TEXT",
+      "VALUE": "Cancel"
     },
     "DEVICE_MODEL": {
       "TYPE": "TEXT",
@@ -1081,6 +1128,117 @@
       "TYPE": "TEXT",
       "VALUE": "Yes, make admin"
     },
+    "USER_SETTINGS_TOGGLE_BUTTON": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "android:id/switch_widget",
+      "PACKAGE": "com.android.car.settings"
+    },
+    "CREATE_NEW_PROFILE_SWITCH": {
+      "TYPE": "MULTIPLE",
+      "SPECIFIERS": [
+        {
+          "TYPE": "CLASS",
+          "VALUE": "android.widget.Switch"
+        },
+        {
+          "TYPE": "HAS_ANCESTOR",
+          "MAX_DEPTH": 3,
+          "ANCESTOR": {
+            "TYPE": "HAS_DESCENDANT",
+            "MAX_DEPTH": 2,
+            "DESCENDANT": {
+              "TYPE": "TEXT",
+              "VALUE": "Create new profiles"
+            }
+          }
+        }
+      ]
+    },
+    "MAKE_PHONE_CALLS_SWITCH": {
+      "TYPE": "MULTIPLE",
+      "SPECIFIERS": [
+        {
+          "TYPE": "CLASS",
+          "VALUE": "android.widget.Switch"
+        },
+        {
+          "TYPE": "HAS_ANCESTOR",
+          "MAX_DEPTH": 3,
+          "ANCESTOR": {
+            "TYPE": "HAS_DESCENDANT",
+            "MAX_DEPTH": 2,
+            "DESCENDANT": {
+              "TYPE": "TEXT",
+              "VALUE": "Make phone calls"
+            }
+          }
+        }
+      ]
+    },
+    "MESSAGING_VIA_CARS_MOBILE_DATA_SWITCH": {
+      "TYPE": "MULTIPLE",
+      "SPECIFIERS": [
+        {
+          "TYPE": "CLASS",
+          "VALUE": "android.widget.Switch"
+        },
+        {
+          "TYPE": "HAS_ANCESTOR",
+          "MAX_DEPTH": 3,
+          "ANCESTOR": {
+            "TYPE": "HAS_DESCENDANT",
+            "MAX_DEPTH": 2,
+            "DESCENDANT": {
+              "TYPE": "TEXT",
+              "VALUE": "Messaging via car's mobile data"
+            }
+          }
+        }
+      ]
+    },
+    "INSTALL_NEW_APPS_SWITCH": {
+      "TYPE": "MULTIPLE",
+      "SPECIFIERS": [
+        {
+          "TYPE": "CLASS",
+          "VALUE": "android.widget.Switch"
+        },
+        {
+          "TYPE": "HAS_ANCESTOR",
+          "MAX_DEPTH": 3,
+          "ANCESTOR": {
+            "TYPE": "HAS_DESCENDANT",
+            "MAX_DEPTH": 2,
+            "DESCENDANT": {
+              "TYPE": "TEXT",
+              "VALUE": "Install new apps"
+            }
+          }
+        }
+      ]
+    },
+    "UNINSTALL_APPS_SWITCH": {
+      "TYPE": "MULTIPLE",
+      "SPECIFIERS": [
+        {
+          "TYPE": "CLASS",
+          "VALUE": "android.widget.Switch"
+        },
+        {
+          "TYPE": "HAS_ANCESTOR",
+          "MAX_DEPTH": 3,
+          "ANCESTOR": {
+            "TYPE": "HAS_DESCENDANT",
+            "MAX_DEPTH": 2,
+            "DESCENDANT": {
+              "TYPE": "TEXT",
+              "VALUE": "Uninstall apps"
+            }
+          }
+        }
+      ]
+    },
+
     "USER_SETTINGS_MAKE_TIME_PATTERN": {
       "TYPE": "TEXT",
       "VALUE": "(1[012]|[1-9]):[0-5][0-9](\\s)?.*"
@@ -1152,6 +1310,25 @@
       "VALUE": "fragment_container",
       "PACKAGE": "com.android.car.settings"
     },
+    "START_ANDROID_AUTO_POPUP": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "startup_prompt_dialog_title",
+      "PACKAGE": "com.google.android.embedded.projection"
+    },
+    "NOT_NOW_START_ANDROID_AUTO_POPUP_BUTTON": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "startup_prompt_dialog_not_now_button",
+      "PACKAGE": "com.google.android.embedded.projection"
+    },
+    "SKIP_ASSISTANT_IMPROVEMENT_PAGE_BUTTON": {
+      "TYPE": "TEXT",
+      "VALUE": "Continue"
+    },
+    "ASSISTANT_IMPROVEMENT_POPUP": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "car_ui_alert_title",
+      "PACKAGE": "com.google.android.carassistant"
+    },
     "PLAY_PAUSE_BUTTON": {
       "TYPE": "RESOURCE_ID",
       "VALUE": "play_pause_stop",
@@ -1177,6 +1354,26 @@
       "VALUE": "minimized_playback_controls",
       "PACKAGE": "com.android.car.media"
     },
+    "ARTIST_TITLE": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "artist",
+      "PACKAGE": "com.android.car.media"
+    },
+    "ALBUM_TITLE": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "album_title",
+      "PACKAGE": "com.android.car.media"
+    },
+    "CURRENT_SONG_TIME": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "current_time",
+      "PACKAGE": "com.android.car.media"
+    },
+    "MAX_SONG_TIME": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "max_time",
+      "PACKAGE": "com.android.car.media"
+    },
     "TRACK_NAME": {
       "TYPE": "RESOURCE_ID",
       "VALUE": "title",
@@ -1197,6 +1394,10 @@
       "VALUE": "car_ui_toolbar_title",
       "PACKAGE": "com.android.car.media"
     },
+    "MOW_PLAYING_LABEL": {
+      "TYPE": "TEXT",
+      "VALUE": "Now Playing"
+    },
     "MEDIA_APP_DROP_DOWN_MENU": {
       "TYPE": "RESOURCE_ID",
       "VALUE": "car_ui_toolbar_menu_item_icon",
@@ -1216,6 +1417,26 @@
       "TYPE": "RESOURCE_ID",
       "VALUE": "car_ui_toolbar_title",
       "PACKAGE": "com.android.car.carlauncher"
+    },
+    "MEDIA_SCROLL_DOWN_BUTTON": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "car_ui_scrollbar_page_down",
+      "PACKAGE": "com.chassis.car.ui.plugin"
+    },
+    "MEDIA_SCROLL_UP_BUTTON": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "car_ui_scrollbar_page_up",
+      "PACKAGE": "com.android.car.media"
+    },
+    "MEDIA_SONG_IN_PLAYLIST": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "item_container",
+      "PACKAGE": "com.android.car.media"
+    },
+    "MEDIA_PLAYLIST_ICON": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "car_ui_toolbar_menu_item_icon",
+      "PACKAGE": "com.chassis.car.ui.plugin"
     },
     "PREVIOUS_BUTTON_HOME_SCREEN": {
       "TYPE": "RESOURCE_ID",
@@ -1339,13 +1560,11 @@
     },
     "PAGE_TITLE": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_toolbar_title",
-      "PACKAGE": "com.android.car.settings"
+      "VALUE": "car_ui_toolbar_title"
     },
     "PERMISSIONS_PAGE_TITLE": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_toolbar_title",
-      "PACKAGE": "com.android.permissioncontroller"
+      "VALUE": "car_ui_toolbar_title"
     },
     "SETTINGS_TITLE_TEXT": {
       "TYPE": "TEXT",
@@ -1627,6 +1846,26 @@
       "VALUE": "error_message",
       "PACKAGE": "com.android.car.messenger"
     },
+    "SMS_UNREAD_BADGE": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "unread_badge",
+      "PACKAGE": "com.android.car.messenger"
+    },
+    "SMS_PREVIEW_TEXT": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "preview",
+      "PACKAGE": "com.android.car.messenger"
+    },
+    "SMS_PREVIEW_TIMESTAMP": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "date_time_view",
+      "PACKAGE": "com.android.car.messenger"
+    },
+    "SMS_EMPTY_MESSAGE": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "empty_message",
+      "PACKAGE": "com.android.car.messenger"
+    },
     "BLUETOOTH_BUTTON": {
       "TYPE": "RESOURCE_ID",
       "VALUE": "qc_toggle_button"
@@ -1846,8 +2085,7 @@
           "SCROLL_DIRECTION": "VERTICAL",
           "SCROLL_ELEMENT": {
             "TYPE": "RESOURCE_ID",
-            "VALUE": "top_level_menu_container",
-            "PACKAGE": "com.android.car.settings"
+            "VALUE": "car_ui_internal_recycler_view"
           }
         }
       }
@@ -1881,8 +2119,7 @@
           "SCROLL_DIRECTION": "VERTICAL",
           "SCROLL_ELEMENT": {
             "TYPE": "RESOURCE_ID",
-            "VALUE": "top_level_menu_container",
-            "PACKAGE": "com.android.car.settings"
+            "VALUE": "car_ui_internal_recycler_view"
           }
         }
       }
@@ -1916,8 +2153,7 @@
           "SCROLL_DIRECTION": "VERTICAL",
           "SCROLL_ELEMENT": {
             "TYPE": "RESOURCE_ID",
-            "VALUE": "top_level_menu_container",
-            "PACKAGE": "com.android.car.settings"
+            "VALUE": "car_ui_internal_recycler_view"
           }
         }
       }
@@ -1943,7 +2179,7 @@
         "CONFIG": {
           "UI_ELEMENT": {
             "TYPE": "TEXT",
-            "VALUE": "Bluetooth"
+            "VALUE": "Connected devices"
           }
         },
         "SCROLL_CONFIG": {
@@ -1951,8 +2187,7 @@
           "SCROLL_DIRECTION": "VERTICAL",
           "SCROLL_ELEMENT": {
             "TYPE": "RESOURCE_ID",
-            "VALUE": "top_level_menu_container",
-            "PACKAGE": "com.android.car.settings"
+            "VALUE": "car_ui_internal_recycler_view"
           }
         }
       }
@@ -1986,8 +2221,7 @@
           "SCROLL_DIRECTION": "VERTICAL",
           "SCROLL_ELEMENT": {
             "TYPE": "RESOURCE_ID",
-            "VALUE": "top_level_menu_container",
-            "PACKAGE": "com.android.car.settings"
+            "VALUE": "car_ui_internal_recycler_view"
           }
         }
       }
@@ -2021,8 +2255,7 @@
           "SCROLL_DIRECTION": "VERTICAL",
           "SCROLL_ELEMENT": {
             "TYPE": "RESOURCE_ID",
-            "VALUE": "top_level_menu_container",
-            "PACKAGE": "com.android.car.settings"
+            "VALUE": "car_ui_internal_recycler_view"
           }
         }
       }
@@ -2056,8 +2289,7 @@
           "SCROLL_DIRECTION": "VERTICAL",
           "SCROLL_ELEMENT": {
             "TYPE": "RESOURCE_ID",
-            "VALUE": "top_level_menu_container",
-            "PACKAGE": "com.android.car.settings"
+            "VALUE": "car_ui_internal_recycler_view"
           },
           "SCROLL_MARGIN": "8",
           "SCROLL_WAIT_TIME": "3"
@@ -2093,8 +2325,7 @@
           "SCROLL_DIRECTION": "VERTICAL",
           "SCROLL_ELEMENT": {
             "TYPE": "RESOURCE_ID",
-            "VALUE": "top_level_menu_container",
-            "PACKAGE": "com.android.car.settings"
+            "VALUE": "car_ui_internal_recycler_view"
           }
         }
       }
@@ -2128,8 +2359,7 @@
           "SCROLL_DIRECTION": "VERTICAL",
           "SCROLL_ELEMENT": {
             "TYPE": "RESOURCE_ID",
-            "VALUE": "top_level_menu_container",
-            "PACKAGE": "com.android.car.settings"
+            "VALUE": "car_ui_internal_recycler_view"
           },
           "SCROLL_MARGIN": "8",
           "SCROLL_WAIT_TIME": "3"
@@ -2165,8 +2395,7 @@
           "SCROLL_DIRECTION": "VERTICAL",
           "SCROLL_ELEMENT": {
             "TYPE": "RESOURCE_ID",
-            "VALUE": "top_level_menu_container",
-            "PACKAGE": "com.android.car.settings"
+            "VALUE": "car_ui_internal_recycler_view"
           }
         }
       },
@@ -2219,8 +2448,7 @@
           "SCROLL_DIRECTION": "VERTICAL",
           "SCROLL_ELEMENT": {
             "TYPE": "RESOURCE_ID",
-            "VALUE": "top_level_menu_container",
-            "PACKAGE": "com.android.car.settings"
+            "VALUE": "car_ui_internal_recycler_view"
           }
         }
       }
@@ -2278,26 +2506,26 @@
       }
     ],
     "PERMISSION_ALLOW_ALL_TIME": [
-        {
-          "NAME": "Click on allow",
-          "TYPE": "SCROLL_TO_FIND_AND_CLICK",
-          "CONFIG": {
-            "UI_ELEMENT": {
-              "TYPE": "TEXT",
-              "VALUE": "Allow all the time"
-            }
-          },
-          "SCROLL_CONFIG": {
-            "SCROLL_ACTION": "USE_GESTURE",
-            "SCROLL_DIRECTION": "VERTICAL",
-            "SCROLL_ELEMENT": {
-              "TYPE": "RESOURCE_ID",
-              "VALUE": "recycler_view",
-              "PACKAGE": "com.android.permissioncontroller"
-            }
+      {
+        "NAME": "Click on allow",
+        "TYPE": "SCROLL_TO_FIND_AND_CLICK",
+        "CONFIG": {
+          "UI_ELEMENT": {
+            "TYPE": "TEXT",
+            "VALUE": "Allow all the time"
+          }
+        },
+        "SCROLL_CONFIG": {
+          "SCROLL_ACTION": "USE_GESTURE",
+          "SCROLL_DIRECTION": "VERTICAL",
+          "SCROLL_ELEMENT": {
+            "TYPE": "RESOURCE_ID",
+            "VALUE": "recycler_view",
+            "PACKAGE": "com.android.permissioncontroller"
           }
         }
-      ],
+      }
+    ],
     "PERMISSION_ALLOW_WHILE_USING_APP": [
       {
         "NAME": "Click on allow",

@@ -52,6 +52,7 @@ public class JsonConfigConstants {
     public static final String CONFIG = "CONFIG";
     public static final String REPEAT_COUNT = "REPEAT_COUNT";
     public static final String SCROLL_CONFIG = "SCROLL_CONFIG";
+    public static final String SWIPE_CONFIG = "SWIPE_CONFIG";
 
     // Supported Workflow Tasks
     public static enum SupportedWorkFlowTasks {
@@ -78,6 +79,14 @@ public class JsonConfigConstants {
         // Finds the given UI Element by Scrolling and Click on it if found ( i.e. No Exception
         // even if UI Element is missing )
         SCROLL_TO_FIND_AND_CLICK_IF_EXIST,
+        // Swipes once
+        SWIPE,
+        // Finds the given UI Element by Swiping and Click on it ( Throws an exception if
+        // UI Element not found )
+        SWIPE_TO_FIND_AND_CLICK,
+        // Finds the given UI Element by Swiping and Click on it if found ( i.e. No Exception
+        // even if UI Element is missing )
+        SWIPE_TO_FIND_AND_CLICK_IF_EXIST,
         // Wait For Given Time in milliseconds
         WAIT_MS;
     }
@@ -96,14 +105,20 @@ public class JsonConfigConstants {
     public static final String SCROLL_MARGIN = "SCROLL_MARGIN";
     public static final String SCROLL_WAIT_TIME = "SCROLL_WAIT_TIME";
 
+    public enum FindType {
+        NONE,
+        SCROLL,
+        SWIPE,
+    }
+
     // Scroll Action
-    public static enum ScrollActions {
+    public enum ScrollActions {
         USE_BUTTON,
         USE_GESTURE;
     }
 
     // Scroll Direction
-    public static enum ScrollDirection {
+    public enum ScrollDirection {
         VERTICAL,
         HORIZONTAL;
     }

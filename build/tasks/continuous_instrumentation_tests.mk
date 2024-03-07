@@ -29,7 +29,7 @@ include $(BUILD_SYSTEM)/tasks/tools/package-modules.mk
 .PHONY: continuous_instrumentation_tests
 continuous_instrumentation_tests : $(my_package_zip)
 
-name := $(TARGET_PRODUCT)-continuous_instrumentation_tests-$(FILE_NAME_TAG)
+name := $(TARGET_PRODUCT)-continuous_instrumentation_tests-FILE_NAME_TAG_PLACEHOLDER
 $(call dist-for-goals, continuous_instrumentation_tests, $(my_package_zip):$(name).zip)
 
 # Also build this when you run "make tests".
@@ -52,7 +52,7 @@ api_xml := $(coverage_out)/api.xml
 $(api_xml) : $(api_text) $(APICHECK)
 	$(hide) echo "Converting API file to XML: $@"
 	$(hide) mkdir -p $(dir $@)
-	$(hide) $(APICHECK_COMMAND) -convert2xml $< $@
+	$(hide) $(APICHECK_COMMAND) signature-to-jdiff --strip $< $@
 
 # CTS API coverage tool
 api_coverage_exe := $(HOST_OUT_EXECUTABLES)/cts-api-coverage

@@ -20,6 +20,7 @@ import android.os.Trace
 import android.platform.uiautomator_helpers.TracingUtils.trace
 import android.platform.uiautomator_helpers.WaitUtils.LoggerImpl.Companion.withEventualLogging
 import android.util.Log
+import androidx.test.uiautomator.StaleObjectException
 import java.io.Closeable
 import java.time.Duration
 import java.time.Instant.now
@@ -275,6 +276,28 @@ object WaitUtils {
         },
         supplier: () -> T?
     ): T = waitForNullable(description, timeout, supplier) ?: error(errorProvider())
+
+    /**
+     * Retry a block of code [times] times, if it throws a StaleObjectException.
+     *
+     * This can be used to reduce flakiness in cases where waitForObj throws although the object
+     * does seem to be present.
+     */
+    fun retryIfStale(description: String, times: Int, block: () -> Unit) {
+        trace("retryIfStale: $description") {
+            repeat(times) {
+                trace("attempt #$it") {
+                    try {
+                        return block()
+                    } catch (e: StaleObjectException) {
+                        Log.w(TAG, "Caught a StaleObjectException ($e). Retrying.")
+                    }
+                }
+            }
+            // Run the block once without catching
+            trace("final attempt") { block() }
+        }
+    }
 
     /** Generic logging interface. */
     private interface Logger {

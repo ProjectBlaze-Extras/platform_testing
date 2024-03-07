@@ -26,9 +26,9 @@ import android.tools.device.traces.TRACE_CONFIG_REQUIRE_CHANGES
 import android.tools.device.traces.deleteIfExists
 import android.tools.device.traces.io.ResultReader
 import android.tools.device.traces.io.ResultWriter
-import android.tools.newTestResultWriter
-import android.tools.outputFileName
-import android.tools.rules.CleanFlickerEnvironmentRule
+import android.tools.utils.CleanFlickerEnvironmentRule
+import android.tools.utils.newTestResultWriter
+import android.tools.utils.outputFileName
 import com.google.common.truth.Truth
 import java.io.File
 import org.junit.Before

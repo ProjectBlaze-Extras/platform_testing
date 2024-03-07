@@ -30,7 +30,7 @@ import org.junit.runner.Description
 class FlickerServiceCachedTestCase(
     private val assertion: ScenarioAssertion,
     method: Method,
-    private val onlyBlocking: Boolean,
+    private val skipNonBlocking: Boolean,
     private val isLast: Boolean,
     injectedBy: IFlickerJUnitDecorator,
     private val instrumentation: Instrumentation,
@@ -48,7 +48,8 @@ class FlickerServiceCachedTestCase(
             SendToInstrumentation.sendBundle(instrumentation, metricBundle)
 
             Assume.assumeTrue(
-                !onlyBlocking || result.stabilityGroup == AssertionInvocationGroup.BLOCKING
+                "FaaS Test was non blocking - skipped",
+                !skipNonBlocking || result.stabilityGroup == AssertionInvocationGroup.BLOCKING
             )
             result.assertionErrors.firstOrNull()?.let { throw it }
         } catch (e: Throwable) {

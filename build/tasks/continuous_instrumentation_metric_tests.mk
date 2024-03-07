@@ -29,7 +29,7 @@ include $(BUILD_SYSTEM)/tasks/tools/package-modules.mk
 .PHONY: continuous_instrumentation_metric_tests
 continuous_instrumentation_metric_tests : $(my_package_zip)
 
-name := $(TARGET_PRODUCT)-continuous_instrumentation_metric_tests-$(FILE_NAME_TAG)
+name := $(TARGET_PRODUCT)-continuous_instrumentation_metric_tests-FILE_NAME_TAG_PLACEHOLDER
 $(call dist-for-goals, continuous_instrumentation_metric_tests, $(my_package_zip):$(name).zip)
 
 # Also build this when you run "make tests".

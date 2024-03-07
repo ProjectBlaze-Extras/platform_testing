@@ -29,5 +29,5 @@ include $(BUILD_SYSTEM)/tasks/tools/package-modules.mk
 .PHONY: platform_tests
 platform_tests : $(my_package_zip)
 
-name := $(TARGET_PRODUCT)-tests-$(FILE_NAME_TAG)
+name := $(TARGET_PRODUCT)-tests-FILE_NAME_TAG_PLACEHOLDER
 $(call dist-for-goals, platform_tests, $(my_package_zip):$(name).zip)

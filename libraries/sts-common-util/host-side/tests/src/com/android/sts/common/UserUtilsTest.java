@@ -29,6 +29,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Map;
+
 /** Unit tests for {@link UserUtils}. */
 @RunWith(DeviceJUnit4ClassRunner.class)
 public class UserUtilsTest extends BaseHostJUnit4Test {
@@ -74,6 +76,21 @@ public class UserUtilsTest extends BaseHostJUnit4Test {
             assertWithMessage("did not create the test user")
                     .that(CommandUtil.runAndCheck(getDevice(), CMD_PM_LIST_USERS).getStdout())
                     .contains(TEST_USER_NAME);
+        }
+        assertTrue(
+                "device should still be root after cleanup if started with root",
+                getDevice().isAdbRoot());
+    }
+
+    @Test
+    public void testUserUtilsUserRestriction() throws Exception {
+        assertTrue("must test with rootable device", getDevice().enableAdbRoot());
+        try (AutoCloseable user =
+                new UserUtils.SecondaryUser(getDevice())
+                    .name(TEST_USER_NAME)
+                    .withUserRestrictions(Map.of("test_restriction", "1"))
+                    .withUser()) {
+            // Exception is thrown if any error occurs while setting user restriction above
         }
         assertTrue(
                 "device should still be root after cleanup if started with root",

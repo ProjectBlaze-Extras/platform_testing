@@ -17,12 +17,12 @@ package {
 }
 
 python_library {
-    name: "mbs_utils",
+    name: "utilities",
     host_supported: true,
     srcs: [
         "**/*.py",
     ],
     libs: [
     ],
-    pkg_path: "mbs_utils",
+    pkg_path: "utilities",
 }

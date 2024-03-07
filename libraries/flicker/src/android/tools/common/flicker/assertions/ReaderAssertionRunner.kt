@@ -16,6 +16,8 @@
 
 package android.tools.common.flicker.assertions
 
+import android.tools.common.Logger
+import android.tools.common.flicker.subject.exceptions.FlickerAssertionError
 import android.tools.common.io.Reader
 
 class ReaderAssertionRunner(
@@ -23,14 +25,18 @@ class ReaderAssertionRunner(
     private val subjectsParser: SubjectsParser = SubjectsParser(resultReader)
 ) : AssertionRunner {
     override fun runAssertion(assertion: AssertionData): Throwable? =
-        resultReader.executionError ?: doRunAssertion(assertion)
+        Logger.withTracing("ReaderAssertionRunner#runAssertion") {
+            resultReader.executionError ?: doRunAssertion(assertion)
+        }
 
-    private fun doRunAssertion(assertion: AssertionData): Throwable? {
-        return try {
-            assertion.checkAssertion(subjectsParser)
-            null
-        } catch (error: Throwable) {
-            error
+    private fun doRunAssertion(assertion: AssertionData): FlickerAssertionError? {
+        return Logger.withTracing("ReaderAssertionRunner#doRunAssertion") {
+            try {
+                assertion.checkAssertion(subjectsParser)
+                null
+            } catch (error: FlickerAssertionError) {
+                error
+            }
         }
     }
 }

@@ -23,6 +23,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
 
 import java.io.IOException;
+
 /**
  * GarbageCollectionHelper is a helper for triggerring garbage collection for a list of processes.
  * It should be used before memory metric collectors to reduce noise.
@@ -34,7 +35,7 @@ public class GarbageCollectionHelper {
     // Default time in ms to wait after GC in order for memory to stabilize. The number is
     // somewhat arbitrary but should be a reasonable wait time to reduce noise from the GC
     // finishing up.
-    private static final int DEFAULT_POST_GC_WAIT_TIME_MS = 3000;
+    public static final long DEFAULT_POST_GC_WAIT_TIME_MS = 3000L;
 
     private String[] mProcessNames;
     private UiDevice mUiDevice;
@@ -92,6 +93,11 @@ public class GarbageCollectionHelper {
         // goal is to reduce noise, and currently there is no easy way of determining when a GC is
         // finished other than a wait. The wait can be tuned based off test noisiness (i.e. if a
         // a test's memory metrics are noisy, try a longer sleep time).
+        Log.i(
+                TAG,
+                String.format(
+                        "Wait %d ms for memory numbers to stabilize after garbage collect.",
+                        waitTime));
         SystemClock.sleep(waitTime);
     }
 }

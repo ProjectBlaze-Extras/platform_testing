@@ -16,12 +16,13 @@
 package android.platform.test.rule;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.fail;
+import static org.junit.runner.Description.createTestDescription;
 
 import android.os.Bundle;
 
 import org.junit.Test;
-import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.junit.runners.model.InitializationError;
@@ -54,10 +55,24 @@ public class KillAppsRuleTest {
     @Test
     public void testOneAppToKill() throws Throwable {
         TestableKillAppsRule rule = new TestableKillAppsRule(new Bundle(), "example.package.name");
-        rule.apply(rule.getTestStatement(), Description.createTestDescription("clzz", "mthd"))
+        rule.apply(rule.getTestStatement(), createTestDescription("clzz", "mthd"))
                 .evaluate();
         assertThat(rule.getOperations()).containsExactly(
                 "am force-stop example.package.name", "test")
+                .inOrder();
+    }
+
+    /**
+     * Tests that this rule will kill one app before the test, if supplied.
+     */
+    @Test
+    public void testOneAppToKillAfterTestRun() throws Throwable {
+        TestableKillAppsRule rule = new TestableKillAppsRule(new Bundle(), false,
+                "example.package.name");
+        rule.apply(rule.getTestStatement(), createTestDescription("clzz", "mthd"))
+                .evaluate();
+        assertThat(rule.getOperations()).containsExactly(
+                        "test", "am force-stop example.package.name")
                 .inOrder();
     }
 
@@ -70,13 +85,33 @@ public class KillAppsRuleTest {
                 "package.name1",
                 "package.name2",
                 "package.name3");
-        rule.apply(rule.getTestStatement(), Description.createTestDescription("clzz", "mthd"))
+        rule.apply(rule.getTestStatement(), createTestDescription("clzz", "mthd"))
                 .evaluate();
         assertThat(rule.getOperations()).containsExactly(
                 "am force-stop package.name1",
                 "am force-stop package.name2",
                 "am force-stop package.name3",
                 "test")
+                .inOrder();
+    }
+
+    /**
+     * Tests that this rule will kill multiple apps before the test, if supplied.
+     */
+    @Test
+    public void testMultipleAppsToKillAfterTestRun() throws Throwable {
+        TestableKillAppsRule rule = new TestableKillAppsRule(new Bundle(), false,
+                "package.name1",
+                "package.name2",
+                "package.name3");
+        rule.apply(rule.getTestStatement(), createTestDescription("clzz", "mthd"))
+                .evaluate();
+        assertThat(rule.getOperations()).containsExactly(
+                        "test",
+                        "am force-stop package.name1",
+                        "am force-stop package.name2",
+                        "am force-stop package.name3"
+                )
                 .inOrder();
     }
 
@@ -90,7 +125,7 @@ public class KillAppsRuleTest {
         TestableKillAppsRule rule = new TestableKillAppsRule(noKillAppsBundle,
                 "example.package.name");
 
-        rule.apply(rule.getTestStatement(), Description.createTestDescription("clzz", "mthd"))
+        rule.apply(rule.getTestStatement(), createTestDescription("clzz", "mthd"))
                 .evaluate();
         assertThat(rule.getOperations()).containsExactly("test")
                 .inOrder();
@@ -100,13 +135,12 @@ public class KillAppsRuleTest {
         private List<String> mOperations = new ArrayList<>();
         private Bundle mBundle;
 
-        public TestableKillAppsRule(Bundle bundle, String app) {
-            super(app);
-            mBundle = bundle;
+        TestableKillAppsRule(Bundle bundle, String... apps) {
+            this(bundle, true, apps);
         }
 
-        public TestableKillAppsRule(Bundle bundle, String... apps) {
-            super(apps);
+        TestableKillAppsRule(Bundle bundle, boolean shouldKillAppsBefore, String... apps) {
+            super(shouldKillAppsBefore, apps);
             mBundle = bundle;
         }
 

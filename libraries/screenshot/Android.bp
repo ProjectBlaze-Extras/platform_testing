@@ -33,11 +33,12 @@ android_test {
         "androidx.test.ext.junit",
         "androidx.test.runner",
         "androidx.test.rules",
+        "androidx.test.uiautomator_uiautomator",
         "launcher-helper-lib",
         "metrics-helper-lib",
         "platform-screenshot-diff-core",
         "platform-test-annotations",
-        "truth-prebuilt",
+        "truth",
         "ub-uiautomator",
     ],
     asset_dirs: ["src/androidTest/assets"],
@@ -64,6 +65,7 @@ android_library {
         "androidx.test.espresso.core",
         "androidx.appcompat_appcompat",
         "guava",
+        "uiautomator-helpers",
     ],
 }
 

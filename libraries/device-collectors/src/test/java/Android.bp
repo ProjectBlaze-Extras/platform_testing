@@ -32,7 +32,7 @@ android_test {
         "junit",
         "mockito-target-minus-junit4",
         "perfetto-helper",
-        "truth-prebuilt",
+        "truth",
     ],
 
     sdk_version: "current",

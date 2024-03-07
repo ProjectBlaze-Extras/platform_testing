@@ -9,7 +9,7 @@ android_test {
     static_libs: [
         "PowerTestHelper-src",
         "android.test.runner.stubs",
-        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
         "android.test.base.stubs",
         "junit",
     ],

@@ -154,6 +154,23 @@ public class PerfettoListener extends BaseMetricListener {
 
     @Override
     public void onTestRunStart(DataRecord runData, Description description) {
+
+        // Clean up any perfetto process from previous test runs.
+        if (!mPerfettoHelper.getPerfettoPids().isEmpty()) {
+            try {
+                if (mPerfettoHelper.stopPerfettoProcesses(mPerfettoHelper.getPerfettoPids())) {
+                    Log.i(
+                            getTag(),
+                            "Stopped the already running perfetto tracing before the new test run"
+                                    + " start.");
+                }
+            } catch (IOException e) {
+                Log.e(getTag(), "Failed to stop the perfetto.", e);
+            }
+        } else {
+            Log.i(getTag(), "No perfetto process running before the test run starts.");
+        }
+
         if (!mIsCollectPerRun) {
             return;
         }
@@ -220,7 +237,7 @@ public class PerfettoListener extends BaseMetricListener {
             Log.i(getTag(), "Skipping the metric collection due to test failure.");
             // Stop the existing perfetto trace collection.
             try {
-                if (!mPerfettoHelper.stopPerfetto()) {
+                if (!mPerfettoHelper.stopPerfetto(mPerfettoHelper.getPerfettoPid())) {
                     Log.e(getTag(), "Failed to stop the perfetto process.");
                 }
             } catch (IOException e) {

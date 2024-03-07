@@ -17,13 +17,14 @@
 package android.platform.spectatio.configs.validators;
 
 import android.platform.spectatio.configs.ScrollConfig;
+import android.platform.spectatio.configs.SwipeConfig;
 import android.platform.spectatio.configs.WorkflowTask;
 import android.platform.spectatio.configs.WorkflowTaskConfig;
 import android.platform.spectatio.constants.JsonConfigConstants;
 import android.platform.spectatio.constants.JsonConfigConstants.SupportedWorkFlowTasks;
 
-import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -43,13 +44,14 @@ import java.util.stream.Collectors;
  * For the type that needs scrolling, a valid Scroll Config is provided.
  */
 public class ValidateWorkflowTask implements JsonDeserializer<WorkflowTask> {
-    private Set<String> mSupportedProperties =
+    private final Set<String> mSupportedProperties =
             Set.of(
                     JsonConfigConstants.NAME,
                     JsonConfigConstants.WORKFLOW_TYPE,
                     JsonConfigConstants.CONFIG,
                     JsonConfigConstants.REPEAT_COUNT,
-                    JsonConfigConstants.SCROLL_CONFIG);
+                    JsonConfigConstants.SCROLL_CONFIG,
+                    JsonConfigConstants.SWIPE_CONFIG);
 
     @Override
     public WorkflowTask deserialize(
@@ -66,22 +68,20 @@ public class ValidateWorkflowTask implements JsonDeserializer<WorkflowTask> {
         String type =
                 validateAndGetStringValue(
                         JsonConfigConstants.WORKFLOW_TYPE, jsonObject, /*isOptional= */ false);
-
-        validateNotNull(JsonConfigConstants.CONFIG, jsonObject);
-
-        WorkflowTaskConfig config =
-                (WorkflowTaskConfig)
-                        context.deserialize(
-                                jsonObject.get(JsonConfigConstants.CONFIG),
-                                WorkflowTaskConfig.class);
-
         SupportedWorkFlowTasks workflowTaskType = null;
-
         try {
             workflowTaskType = SupportedWorkFlowTasks.valueOf(type);
         } catch (IllegalArgumentException ex) {
             throwRuntimeException("Workflow Task Type", type, jsonObject, "Not Supported");
         }
+
+        if (workflowTaskType != SupportedWorkFlowTasks.SWIPE) {
+            validateNotNull(JsonConfigConstants.CONFIG, jsonObject);
+        }
+
+        WorkflowTaskConfig config =
+                context.deserialize(
+                        jsonObject.get(JsonConfigConstants.CONFIG), WorkflowTaskConfig.class);
 
         // Check valid config is provided based on the type of workflow
         switch (workflowTaskType) {
@@ -104,6 +104,8 @@ public class ValidateWorkflowTask implements JsonDeserializer<WorkflowTask> {
             case HAS_UI_ELEMENT_IN_FOREGROUND:
             case SCROLL_TO_FIND_AND_CLICK:
             case SCROLL_TO_FIND_AND_CLICK_IF_EXIST:
+            case SWIPE_TO_FIND_AND_CLICK:
+            case SWIPE_TO_FIND_AND_CLICK_IF_EXIST:
                 if (config.getUiElement() == null) {
                     throwRuntimeException(
                             "Config UI_ELEMENT for Workflow Task Type",
@@ -112,21 +114,33 @@ public class ValidateWorkflowTask implements JsonDeserializer<WorkflowTask> {
                             "Missing or Invalid");
                 }
                 break;
+            case SWIPE:
+                // the SWIPE task type only has type-specific config, handled below
+                break;
             default:
                 throwRuntimeException("Workflow Task Type", type, jsonObject, "Not Supported");
         }
 
-        // Check if a valid scroll config is provided when scrolling is required
+        // Check if a valid type-specific config is provided when e.g. scrolling/swiping is required
         ScrollConfig scrollConfig = null;
+        SwipeConfig swipeConfig = null;
         switch (workflowTaskType) {
             case SCROLL_TO_FIND_AND_CLICK:
             case SCROLL_TO_FIND_AND_CLICK_IF_EXIST:
                 validateNotNull(JsonConfigConstants.SCROLL_CONFIG, jsonObject);
                 scrollConfig =
-                        (ScrollConfig)
-                                context.deserialize(
-                                        jsonObject.get(JsonConfigConstants.SCROLL_CONFIG),
-                                        ScrollConfig.class);
+                        context.deserialize(
+                                jsonObject.get(JsonConfigConstants.SCROLL_CONFIG),
+                                ScrollConfig.class);
+                break;
+            case SWIPE:
+            case SWIPE_TO_FIND_AND_CLICK:
+            case SWIPE_TO_FIND_AND_CLICK_IF_EXIST:
+                validateNotNull(JsonConfigConstants.SWIPE_CONFIG, jsonObject);
+                swipeConfig =
+                        context.deserialize(
+                                jsonObject.get(JsonConfigConstants.SWIPE_CONFIG),
+                                SwipeConfig.class);
                 break;
             default:
                 // Nothing To Do
@@ -135,7 +149,7 @@ public class ValidateWorkflowTask implements JsonDeserializer<WorkflowTask> {
 
         int repeatCount = validateAndGetIntValue(JsonConfigConstants.REPEAT_COUNT, jsonObject);
 
-        return new WorkflowTask(name, type, config, repeatCount, scrollConfig);
+        return new WorkflowTask(name, type, config, repeatCount, scrollConfig, swipeConfig);
     }
 
     private int validateAndGetIntValue(String key, JsonObject jsonObject) {
@@ -179,8 +193,7 @@ public class ValidateWorkflowTask implements JsonDeserializer<WorkflowTask> {
             throw new RuntimeException(
                     String.format(
                             "Unknown properties: [ %s ] for %s in Spectatio JSON Config",
-                            unknownProperties.stream().collect(Collectors.joining(", ")),
-                            jsonObject));
+                            String.join(", ", unknownProperties), jsonObject));
         }
     }
 

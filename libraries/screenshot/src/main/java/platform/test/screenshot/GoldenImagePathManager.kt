@@ -179,7 +179,7 @@ public fun getDeviceOutputDirectory(context: Context) =
 /* Standard implementations for the usual list of dimensions that affect a golden image. */
 public fun getDeviceModel(): String {
     var model = Build.MODEL.lowercase()
-    arrayOf("phone", "x86_64", "x86", "x64", "gms").forEach {
+    arrayOf("phone", "x86_64", "x86", "x64", "gms", "wear").forEach {
         model = model.replace(it, "")
     }
     return model.trim().replace(" ", "_")
@@ -187,7 +187,7 @@ public fun getDeviceModel(): String {
 
 public fun getDeviceBrand(): String {
     var brand = Build.BRAND.lowercase()
-    arrayOf("phone", "x86_64", "x86", "x64", "gms").forEach {
+    arrayOf("phone", "x86_64", "x86", "x64", "gms", "wear").forEach {
         brand = brand.replace(it, "")
     }
     return brand.trim().replace(" ", "_")

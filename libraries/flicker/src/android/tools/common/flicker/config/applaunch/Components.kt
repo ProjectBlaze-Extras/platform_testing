@@ -18,37 +18,41 @@ package android.tools.common.flicker.config.applaunch
 
 import android.tools.common.flicker.ScenarioInstance
 import android.tools.common.flicker.assertors.ComponentTemplate
+import android.tools.common.flicker.isAppTransitionChange
 import android.tools.common.traces.component.FullComponentIdMatcher
 import android.tools.common.traces.component.IComponentMatcher
+import android.tools.common.traces.surfaceflinger.LayersTrace
 import android.tools.common.traces.wm.Transition
 import android.tools.common.traces.wm.TransitionType
+import android.tools.common.traces.wm.WindowManagerTrace
 
 object Components {
-    val OPENING_APP =
-        ComponentTemplate("OPENING_APP") { scenarioInstance: ScenarioInstance ->
-            Components.openingAppFrom(
-                scenarioInstance.associatedTransition ?: error("Missing associated transition")
+    val OPENING_APPS =
+        ComponentTemplate("OPENING_APP(S)") { scenarioInstance: ScenarioInstance ->
+            openingAppFrom(
+                scenarioInstance.associatedTransition ?: error("Missing associated transition"),
+                scenarioInstance.reader.readLayersTrace(),
+                scenarioInstance.reader.readWmTrace()
             )
         }
 
-    private fun openingAppFrom(transition: Transition): IComponentMatcher {
+    private fun openingAppFrom(
+        transition: Transition,
+        layersTrace: LayersTrace?,
+        wmTrace: WindowManagerTrace?
+    ): IComponentMatcher {
         val targetChanges =
             transition.changes.filter {
-                it.transitMode == TransitionType.OPEN || it.transitMode == TransitionType.TO_FRONT
+                (it.transitMode == TransitionType.OPEN ||
+                    it.transitMode == TransitionType.TO_FRONT) &&
+                    isAppTransitionChange(it, layersTrace, wmTrace)
             }
 
-        val openingLayerIds = targetChanges.map { it.layerId }
-        require(openingLayerIds.size == 1) {
-            "Expected 1 opening layer but got ${openingLayerIds.size}"
-        }
+        val openingAppMatchers =
+            targetChanges.map { FullComponentIdMatcher(it.windowId, it.layerId) }
 
-        val openingWindowIds = targetChanges.map { it.windowId }
-        require(openingWindowIds.size == 1) {
-            "Expected 1 opening window but got ${openingWindowIds.size}"
+        return openingAppMatchers.reduce<IComponentMatcher, IComponentMatcher> { acc, matcher ->
+            acc.or(matcher)
         }
-
-        val windowId = openingWindowIds.first()
-        val layerId = openingLayerIds.first()
-        return FullComponentIdMatcher(windowId, layerId)
     }
 }

@@ -37,6 +37,26 @@ public class PrivacySettingsSnippet implements Snippet {
         return mPrivacySettingsHelper.get().isMicChipPresentOnStatusBar();
     }
 
+    @Rpc(description = "Start Android Auto pop-up displayed")
+    public boolean isStartAndroidAutoPopUpPresent() {
+        return mPrivacySettingsHelper.get().isStartAndroidAutoPopUpPresent();
+    }
+
+    @Rpc(description = "Skip Start Android Auto pop-up")
+    public void skipStartAndroidAutoPopUp() {
+        mPrivacySettingsHelper.get().skipStartAndroidAutoPopUp();
+    }
+
+    @Rpc(description = "Assistant improvement pop-up displayed")
+    public boolean isAssistantImprovementPopUpPresent() {
+        return mPrivacySettingsHelper.get().isAssistantImprovementPopUpPresent();
+    }
+
+    @Rpc(description = "Skip Improvement calling and texting pop-up")
+    public void skipImprovementCallingAndTextingPopUp() {
+        mPrivacySettingsHelper.get().skipImprovementCallingAndTextingPopUp();
+    }
+
     @Override
     public void shutdown() {}
 }

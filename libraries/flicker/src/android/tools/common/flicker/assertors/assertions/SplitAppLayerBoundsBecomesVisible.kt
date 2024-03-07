@@ -91,20 +91,23 @@ class SplitAppLayerBoundsBecomesVisible(
                         ?: error("$splitScreenDivider component not found")
                 visibleRegion(component)
                     .coversAtMost(
-                        if (activeDisplay.bounds.width > activeDisplay.bounds.height) {
+                        if (
+                            activeDisplay.layerStackSpace.width >
+                                activeDisplay.layerStackSpace.height
+                        ) {
                             if (landscapePosLeft) {
                                 Region.from(
                                     0,
                                     0,
                                     (dividerRegion.bounds.left + dividerRegion.bounds.right) / 2,
-                                    activeDisplay.bounds.bottom
+                                    activeDisplay.layerStackSpace.bottom
                                 )
                             } else {
                                 Region.from(
                                     (dividerRegion.bounds.left + dividerRegion.bounds.right) / 2,
                                     0,
-                                    activeDisplay.bounds.right,
-                                    activeDisplay.bounds.bottom
+                                    activeDisplay.layerStackSpace.right,
+                                    activeDisplay.layerStackSpace.bottom
                                 )
                             }
                         } else {
@@ -112,15 +115,15 @@ class SplitAppLayerBoundsBecomesVisible(
                                 Region.from(
                                     0,
                                     0,
-                                    activeDisplay.bounds.right,
+                                    activeDisplay.layerStackSpace.right,
                                     (dividerRegion.bounds.top + dividerRegion.bounds.bottom) / 2
                                 )
                             } else {
                                 Region.from(
                                     0,
                                     (dividerRegion.bounds.top + dividerRegion.bounds.bottom) / 2,
-                                    activeDisplay.bounds.right,
-                                    activeDisplay.bounds.bottom
+                                    activeDisplay.layerStackSpace.right,
+                                    activeDisplay.layerStackSpace.bottom
                                 )
                             }
                         }

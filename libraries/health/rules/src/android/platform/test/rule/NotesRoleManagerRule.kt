@@ -36,7 +36,12 @@ constructor(
     private val requiredNotesRoleHolderPackage: String,
 ) : TestWatcher() {
 
-    private val notesRoleUtil = NotesRoleUtil(context)
+    /**
+     * A [NotesRoleUtil] helper instance. Should be used in E2E tests for changing and asserting the
+     * current [RoleManager.ROLE_NOTES].
+     */
+    val utils = NotesRoleUtil(context)
+
     private var prevNotesRoleHolder: String? = null
 
     override fun starting(description: Description?) {
@@ -46,23 +51,23 @@ constructor(
         // assertion because not all devices have the Notes role or the required app installed.
         // So this rule takes care of skipping the test on incompatible devices. This is a
         // workaround to run the test on select few devices.
-        notesRoleUtil.checkAndroidRolePackageAssumptions(
+        utils.checkAndroidRolePackageAssumptions(
             requiredAndroidVersion,
             requiredNotesRoleHolderPackage
         )
 
-        prevNotesRoleHolder = notesRoleUtil.getRoleHolderPackageName()
-        notesRoleUtil.setRoleHolder(requiredNotesRoleHolderPackage)
+        prevNotesRoleHolder = utils.getRoleHolderPackageName()
+        utils.setRoleHolder(requiredNotesRoleHolderPackage)
 
         // Kill the supplied Notes role holder app to avoid issues during verification in test.
-        notesRoleUtil.forceStopPackage(requiredNotesRoleHolderPackage)
+        utils.forceStopPackage(requiredNotesRoleHolderPackage)
     }
 
     override fun finished(description: Description?) {
         super.finished(description)
 
-        notesRoleUtil.forceStopPackage(requiredNotesRoleHolderPackage)
+        utils.forceStopPackage(requiredNotesRoleHolderPackage)
 
-        prevNotesRoleHolder?.let { notesRoleUtil.setRoleHolder(it) }
+        prevNotesRoleHolder?.let { utils.setRoleHolder(it) }
     }
 }

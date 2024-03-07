@@ -19,7 +19,6 @@ package android.platform.helpers;
 import android.app.Instrumentation;
 import android.platform.helpers.ScrollUtility.ScrollActions;
 import android.platform.helpers.ScrollUtility.ScrollDirection;
-import android.util.Log;
 
 import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.BySelector;
@@ -37,6 +36,7 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
     private BySelector mForwardButtonSelector;
     private BySelector mScrollableElementSelector;
     private ScrollDirection mScrollDirection;
+    private UiObject2 mEnableOption;
 
     public SettingUserHelperImpl(Instrumentation instr) {
         super(instr);
@@ -88,6 +88,16 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
         clickbutton(AutomotiveConfigConstants.USER_SETTINGS_OK);
         getSpectatioUiUtil().wait5Seconds();
     }
+    // opens permission page of a user
+    @Override
+    public void openPermissionsPage(String user) {
+        if (isUserPresent(user)) {
+            BySelector userSelector = By.text(user);
+            UiObject2 userObject = getSpectatioUiUtil().findUiObject(userSelector);
+            getSpectatioUiUtil().validateUiObject(userObject, String.format("User %s", user));
+            getSpectatioUiUtil().clickAndWait(userObject);
+        }
+    }
 
     // delete an existing user
     @Override
@@ -126,11 +136,11 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
                         mScrollableElementSelector,
                         buttonSelector,
                         String.format("Scroll to find %s", user));
-        Log.v(
-                TAG,
-                String.format(
-                        "AddProfileButton = %s ; UI_Obj = %s",
-                        AutomotiveConfigConstants.USER_SETTINGS_ADD_PROFILE, addUserButton));
+        // Log.v(
+        //         TAG,
+        //        String.format(
+        //              "AddProfileButton = %s ; UI_Obj = %s",
+        //             AutomotiveConfigConstants.USER_SETTINGS_ADD_PROFILE, addUserButton));
         if (addUserButton == null) {
             clickbutton(AutomotiveConfigConstants.USER_SETTINGS_MANAGE_OTHER_PROFILES);
             getSpectatioUiUtil().wait5Seconds();
@@ -189,8 +199,8 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
     }
 
     // click an on-screen element if expected text for that element is present
-    private void clickbutton(String button_text) {
-        BySelector buttonSelector = getUiElementFromConfig(button_text);
+    private void clickbutton(String buttonText) {
+        BySelector buttonSelector = getUiElementFromConfig(buttonText);
         UiObject2 buttonObject =
                 mScrollUtility.scrollAndFindUiObject(
                         mScrollAction,
@@ -199,10 +209,9 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
                         mBackwardButtonSelector,
                         mScrollableElementSelector,
                         buttonSelector,
-                        String.format("Scroll to find %s", button_text));
-        Log.v(TAG, String.format("button =  %s ; UI_Obj = %s", button_text, buttonObject));
-        getSpectatioUiUtil()
-                .validateUiObject(buttonObject, String.format("button %s", button_text));
+                        String.format("Scroll to find %s", buttonText));
+        // Log.v(TAG, String.format("button =  %s ; UI_Obj = %s", buttonText, buttonObject));
+        getSpectatioUiUtil().validateUiObject(buttonObject, String.format("button %s", buttonText));
         getSpectatioUiUtil().clickAndWait(buttonObject);
         getSpectatioUiUtil().wait1Second();
     }
@@ -236,5 +245,40 @@ public class SettingUserHelperImpl extends AbstractStandardAppHelper implements 
     private void goToQuickSettings() {
         clickbutton(AutomotiveConfigConstants.USER_SETTINGS_MAKE_TIME_PATTERN);
     }
+    // checks whether the Add profile button is visible
+    @Override
+    public boolean isVisibleAddProfile() {
+        boolean isVisibleAddProfile = true;
+        if (getSpectatioUiUtil()
+                .hasUiElement(
+                        getUiElementFromConfig(
+                                AutomotiveConfigConstants.USER_SETTINGS_ADD_PROFILE))) {
+            return isVisibleAddProfile;
+        }
+        return !isVisibleAddProfile;
+    }
 
+    @Override
+    public boolean isToggleOn(String buttonText) {
+        BySelector mEnableOptionSelector = getUiElementFromConfig(buttonText);
+        mEnableOption =
+                mScrollUtility.scrollAndFindUiObject(
+                        mScrollAction,
+                        mScrollDirection,
+                        mForwardButtonSelector,
+                        mBackwardButtonSelector,
+                        mScrollableElementSelector,
+                        mEnableOptionSelector,
+                        String.format("Scroll to find %s", buttonText));
+        getSpectatioUiUtil().validateUiObject(mEnableOption, buttonText);
+        return mEnableOption.isChecked();
+    }
+    // Toggles the switch from one mode to the other
+    @Override
+    public boolean toggle(String buttonText) {
+        boolean currentStatus = isToggleOn(buttonText);
+        getSpectatioUiUtil().clickAndWait(mEnableOption);
+        boolean finalStatus = isToggleOn(buttonText);
+        return finalStatus != currentStatus;
+    }
 }

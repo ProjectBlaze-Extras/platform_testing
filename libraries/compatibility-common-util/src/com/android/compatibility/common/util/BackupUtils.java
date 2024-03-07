@@ -19,6 +19,8 @@ package com.android.compatibility.common.util;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import static java.util.stream.Collectors.joining;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.Closeables;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -52,6 +54,8 @@ public abstract class BackupUtils {
             Pattern.compile("^Backup Manager currently (enabled|disabled)$");
     private static final String MATCH_LINE_BACKUP_MANAGER_IS_NOT_PENDING_INIT =
             "(?s)" + "^Backup Manager is .* not pending init.*";  // DOTALL
+    private static final String MATCH_LINE_ONLY_GMS_BACKUP_TRANSPORT_PENDING_INIT =
+            "(?s)" + ".*Pending init: 1.*com.google.android.gms/.backup.BackupTransportService.*";
 
     private static final String BACKUP_DUMPSYS_CURRENT_TOKEN_FIELD = "Current:";
 
@@ -330,12 +334,44 @@ public abstract class BackupUtils {
         return str;
     }
 
+    private String getAllLinesString(InputStream inputStream) {
+        BufferedReader reader =
+                new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        return reader.lines().collect(joining());
+    }
+
+    /** Blocks until all backup transports has initialised */
     public void waitForBackupInitialization() throws IOException {
         long tryUntilNanos = System.nanoTime()
                 + TimeUnit.SECONDS.toNanos(BACKUP_PROVISIONING_TIMEOUT_SECONDS);
         while (System.nanoTime() < tryUntilNanos) {
             String output = getLineString(executeShellCommand("dumpsys backup"));
             if (output.matches(MATCH_LINE_BACKUP_MANAGER_IS_NOT_PENDING_INIT)) {
+                return;
+            }
+            try {
+                Thread.sleep(TimeUnit.SECONDS.toMillis(BACKUP_PROVISIONING_POLL_INTERVAL_SECONDS));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+        throw new IOException("Timed out waiting for backup initialization");
+    }
+
+    /**
+     * Blocks until all backup transports has initialised, or only GmsBackupTransport has not
+     * initialised yet.
+     */
+    public void waitForNonGmsTransportInitialization() throws IOException {
+        long tryUntilNanos =
+                System.nanoTime() + TimeUnit.SECONDS.toNanos(BACKUP_PROVISIONING_TIMEOUT_SECONDS);
+        while (System.nanoTime() < tryUntilNanos) {
+            String output = getAllLinesString(executeShellCommand("dumpsys backup"));
+            if (output.matches(MATCH_LINE_BACKUP_MANAGER_IS_NOT_PENDING_INIT)) {
+                return;
+            }
+            if (output.matches(MATCH_LINE_ONLY_GMS_BACKUP_TRANSPORT_PENDING_INIT)) {
                 return;
             }
             try {

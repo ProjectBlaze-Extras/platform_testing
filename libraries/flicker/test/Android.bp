@@ -19,22 +19,53 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-android_test {
-    name: "FlickerLibTest",
+java_defaults {
+    name: "FlickerLibTestDefault",
+    manifest: "manifests/AndroidManifest.xml",
+    test_config_template: "AndroidTestTemplate.xml",
     // sign this with platform cert, so this test is allowed to call private platform apis
-    manifest: "AndroidManifest.xml",
-    test_config: "AndroidTest.xml",
     certificate: "platform",
     platform_apis: true,
     test_suites: ["device-tests"],
-    srcs: ["src/**/*.kt"],
     libs: ["android.test.runner"],
     optimize: {
         enabled: false
     },
     static_libs: [
         "flickerlib",
+        "flickerlib-trace_processor_shell",
+        "FlickerLibTest-Utils",
         "launcher-aosp-tapl",
         "mockito-target-extended-minus-junit4"
+    ],
+    data: [
+        "trace_config/*",
+    ]
+}
+
+android_test {
+    name: "FlickerLibTest",
+    defaults: ["FlickerLibTestDefault"],
+    additional_manifests: ["manifests/AndroidManifestUnit.xml"],
+    package_name: "android.tools",
+    instrumentation_target_package: "android.tools",
+    srcs: [
+        "src/**/*.kt",
+    ],
+    exclude_srcs: [
+        "src/android/tools/integration/**/*.kt",
+    ]
+}
+
+android_test {
+    name: "FlickerLibTestE2e",
+    defaults: ["FlickerLibTestDefault"],
+    additional_manifests: ["manifests/AndroidManifestIntegration.xml"],
+    package_name: "android.tools.integration",
+    instrumentation_target_package: "android.tools.integration",
+    srcs: [
+        "src/android/tools/integration/**/*.kt",
+        "src/android/tools/rules/**/*.kt",
+        "src/android/tools/Utils.kt",
     ],
 }

@@ -25,4 +25,32 @@ public interface IAutoCarSmsMessengerHelper extends IAppHelper, Scrollable {
      * <p>This method is used checking if the error is displayed when bluetooth is off
      */
     boolean isSmsBluetoothErrorDisplayed();
+
+    /**
+     * Setup expectations: bluetooth on and phone is paired, SMS app is open
+     *
+     * <p>This method is used checking unread text badge is displayed
+     */
+    boolean isUnreadSmsDisplayed();
+
+    /**
+     * Setup expectations: bluetooth on and phone is paired, SMS app is open
+     *
+     * <p>This method is used checking if sms text is displaye
+     */
+    boolean isSmsPreviewDisplayed(String text);
+
+    /**
+     * Setup expectations: bluetooth on and phone is paired, SMS app is open
+     *
+     * <p>This method is used checking if sms timestamp is displayed
+     */
+    boolean isSmsTimeStampDisplayed();
+
+    /**
+     * Setup expectations: bluetooth on and phone is paired, SMS app is open
+     *
+     * <p>This method is used checking if sms timestamp is displayed
+     */
+    boolean isNoMessagesDisplayed();
 }

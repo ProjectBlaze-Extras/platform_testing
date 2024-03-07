@@ -20,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -175,7 +176,7 @@ public class PerfettoListenerTest {
         mListener = initListener(b);
 
         doReturn(true).when(mPerfettoHelper).startCollecting(anyString(), anyBoolean());
-        doReturn(true).when(mPerfettoHelper).stopPerfetto();
+        doReturn(true).when(mPerfettoHelper).stopPerfetto(anyInt());
         // Test run start behavior
         mListener.testRunStarted(mRunDesc);
 
@@ -188,7 +189,7 @@ public class PerfettoListenerTest {
                 new Exception());
         mListener.onTestFail(mDataRecord, mTest1Desc, failureDesc);
         mListener.onTestEnd(mDataRecord, mTest1Desc);
-        verify(mPerfettoHelper, times(1)).stopPerfetto();
+        verify(mPerfettoHelper, times(1)).stopPerfetto(anyInt());
 
     }
 

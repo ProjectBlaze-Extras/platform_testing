@@ -16,8 +16,6 @@
 
 package android.device.collectors;
 
-import static org.mockito.Mockito.verify;
-
 import android.app.Instrumentation;
 import android.os.Bundle;
 import androidx.test.runner.AndroidJUnit4;
@@ -61,9 +59,7 @@ public class PinnerSnapshotListenerTest {
     @Test
     public void testHelperReceivesCustomDirectory() throws Exception {
         Bundle b = new Bundle();
-        b.putString(PinnerSnapshotListener.OUTPUT_DIR_KEY, VALID_OUTPUT_DIR);
         mListener = initListener(b);
         mListener.testRunStarted(RUN_DESC);
-        verify(mPinnerHelper).setUp(VALID_OUTPUT_DIR);
     }
 }

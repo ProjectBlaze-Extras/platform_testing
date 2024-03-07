@@ -17,6 +17,8 @@
 package android.tools.device.flicker.junit
 
 import android.app.Instrumentation
+import android.os.Bundle
+import android.tools.common.Scenario
 import android.tools.common.Timestamps
 import android.tools.common.flicker.AssertionInvocationGroup
 import android.tools.common.flicker.FlickerConfig
@@ -39,6 +41,8 @@ import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.junit.runner.notification.RunNotifier
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito
 
 class FlickerServiceJUnit4ClassRunnerTest {
     @Test
@@ -50,6 +54,43 @@ class FlickerServiceJUnit4ClassRunnerTest {
         Truth.assertThat(testRuleRunCount).isEqualTo(1)
     }
 
+    @Test
+    fun skipsNonBlockingTestsIfRequested() {
+        val arguments = Bundle()
+        arguments.putString(Scenario.FAAS_BLOCKING, "true")
+        val runner = FlickerServiceJUnit4ClassRunner(SimpleTest::class.java, arguments = arguments)
+        val notifier = Mockito.mock(RunNotifier::class.java)
+        runner.run(notifier)
+
+        Truth.assertThat(runner.testCount()).isAtLeast(2)
+        Mockito.verify(notifier, Mockito.atLeast(1))
+            .fireTestStarted(ArgumentMatchers.argThat { it.methodName.contains("FaaS") })
+        Mockito.verify(notifier, Mockito.atLeast(1))
+            .fireTestAssumptionFailed(
+                ArgumentMatchers.argThat { it.description.methodName.contains("FaaS") }
+            )
+        Mockito.verify(notifier, Mockito.atLeast(1))
+            .fireTestFinished(ArgumentMatchers.argThat { it.methodName.contains("FaaS") })
+    }
+
+    @Test
+    fun runBlockingTestsIfRequested() {
+        val arguments = Bundle()
+        arguments.putString(Scenario.FAAS_BLOCKING, "false")
+        val runner = FlickerServiceJUnit4ClassRunner(SimpleTest::class.java, arguments = arguments)
+        val notifier = Mockito.mock(RunNotifier::class.java)
+        runner.run(notifier)
+
+        Truth.assertThat(runner.testCount()).isAtLeast(2)
+        Mockito.verify(notifier, Mockito.atLeast(2))
+            .fireTestStarted(ArgumentMatchers.argThat { it.methodName.contains("FaaS") })
+        Mockito.verify(notifier, Mockito.never())
+            .fireTestAssumptionFailed(
+                ArgumentMatchers.argThat { it.description.methodName.contains("FaaS") }
+            )
+        Mockito.verify(notifier, Mockito.atLeast(2))
+            .fireTestFinished(ArgumentMatchers.argThat { it.methodName.contains("FaaS") })
+    }
     /** Below are all the mock test classes uses for testing purposes */
     @RunWith(FlickerServiceJUnit4ClassRunner::class)
     open class SimpleTest {
@@ -86,7 +127,7 @@ class FlickerServiceJUnit4ClassRunnerTest {
                                 },
                             assertions =
                                 mapOf(
-                                    object : AssertionTemplate("myAssertion") {
+                                    object : AssertionTemplate("myBlockingAssertion") {
                                         override fun doEvaluate(
                                             scenarioInstance: ScenarioInstance,
                                             flicker: FlickerTest
@@ -96,7 +137,18 @@ class FlickerServiceJUnit4ClassRunnerTest {
                                                 visibleWindowsShownMoreThanOneConsecutiveEntry()
                                             }
                                         }
-                                    } to AssertionInvocationGroup.BLOCKING
+                                    } to AssertionInvocationGroup.BLOCKING,
+                                    object : AssertionTemplate("myNonBlockingAssertion") {
+                                        override fun doEvaluate(
+                                            scenarioInstance: ScenarioInstance,
+                                            flicker: FlickerTest
+                                        ) {
+                                            flicker.assertWm {
+                                                // Random test
+                                                visibleWindowsShownMoreThanOneConsecutiveEntry()
+                                            }
+                                        }
+                                    } to AssertionInvocationGroup.NON_BLOCKING
                                 ),
                             enabled = true
                         )

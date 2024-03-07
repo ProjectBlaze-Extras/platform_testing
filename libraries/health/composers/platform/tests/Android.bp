@@ -26,7 +26,7 @@ android_test {
         "junit",
         "platform-test-composers",
         "test-composers-tests",
-        "truth-prebuilt",
+        "truth",
         "guava",
         "mockito-target-minus-junit4",
     ],

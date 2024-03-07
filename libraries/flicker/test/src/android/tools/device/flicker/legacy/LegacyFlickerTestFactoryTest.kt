@@ -17,7 +17,7 @@
 package android.tools.device.flicker.legacy
 
 import android.tools.common.Rotation
-import android.tools.rules.CleanFlickerEnvironmentRule
+import android.tools.utils.CleanFlickerEnvironmentRule
 import com.google.common.truth.Truth
 import org.junit.ClassRule
 import org.junit.FixMethodOrder

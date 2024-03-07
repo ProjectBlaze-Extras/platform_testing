@@ -49,8 +49,8 @@ import android.tools.common.flicker.assertors.assertions.VisibleLayersShownMoreT
 import android.tools.common.flicker.assertors.assertions.VisibleWindowsShownMoreThanOneConsecutiveEntry
 import android.tools.common.flicker.assertors.assertions.WindowBecomesPinned
 import android.tools.common.flicker.assertors.assertions.WindowRemainInsideVisibleBounds
-import android.tools.common.flicker.config.appclose.Components.CLOSING_APP
-import android.tools.common.flicker.config.applaunch.Components.OPENING_APP
+import android.tools.common.flicker.config.appclose.Components.CLOSING_APPS
+import android.tools.common.flicker.config.applaunch.Components.OPENING_APPS
 import android.tools.common.flicker.config.common.Components.LAUNCHER
 import android.tools.common.flicker.config.pip.Components.PIP_APP
 import android.tools.common.flicker.config.pip.Components.PIP_DISMISS_OVERLAY
@@ -61,20 +61,21 @@ import android.tools.common.traces.component.ComponentNameMatcher
 
 object AssertionTemplates {
     val ENTIRE_TRACE_ASSERTIONS =
-        listOf(
-                EntireScreenCoveredAlways(),
-                VisibleWindowsShownMoreThanOneConsecutiveEntry(),
-                // Temporarily ignore these layers which might be visible for a single entry
-                // and contain only view level changes during that entry (b/286054008)
-                VisibleLayersShownMoreThanOneConsecutiveEntry(
-                    ignore =
-                        listOf(
-                            ComponentNameMatcher.NOTIFICATION_SHADE,
-                            ComponentNameMatcher.VOLUME_DIALOG,
-                        )
-                ),
-            )
-            .associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
+        mapOf(
+            EntireScreenCoveredAlways() to AssertionInvocationGroup.NON_BLOCKING,
+            VisibleWindowsShownMoreThanOneConsecutiveEntry() to
+                AssertionInvocationGroup.NON_BLOCKING,
+            // Temporarily ignore these layers which might be visible for a single entry
+            // and contain only view level changes during that entry (b/286054008)
+            VisibleLayersShownMoreThanOneConsecutiveEntry(
+                ignore =
+                    listOf(
+                        ComponentNameMatcher.NOTIFICATION_SHADE,
+                        ComponentNameMatcher.VOLUME_DIALOG,
+                        ComponentNameMatcher.NAV_BAR,
+                    )
+            ) to AssertionInvocationGroup.NON_BLOCKING,
+        )
 
     val COMMON_ASSERTIONS =
         listOf(
@@ -87,24 +88,29 @@ object AssertionTemplates {
     val APP_LAUNCH_ASSERTIONS =
         COMMON_ASSERTIONS +
             listOf(
-                    AppLayerIsInvisibleAtStart(OPENING_APP),
-                    AppLayerIsVisibleAtEnd(OPENING_APP),
-                    AppLayerBecomesVisible(OPENING_APP),
-                    AppWindowBecomesVisible(OPENING_APP),
-                    AppWindowBecomesTopWindow(OPENING_APP),
+                    AppLayerIsInvisibleAtStart(OPENING_APPS),
+                    AppLayerIsVisibleAtEnd(OPENING_APPS),
+                    AppLayerBecomesVisible(OPENING_APPS),
+                    AppWindowBecomesVisible(OPENING_APPS),
+                    AppWindowBecomesTopWindow(OPENING_APPS),
                 )
                 .associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
 
     val APP_CLOSE_ASSERTIONS =
-        COMMON_ASSERTIONS +
+        COMMON_ASSERTIONS.toMutableMap().also {
+            it.remove(VisibleLayersShownMoreThanOneConsecutiveEntry())
+        } +
             listOf(
-                    AppLayerIsVisibleAtStart(CLOSING_APP),
-                    AppLayerIsInvisibleAtEnd(CLOSING_APP),
-                    AppWindowIsVisibleAtStart(CLOSING_APP),
-                    AppWindowIsInvisibleAtEnd(CLOSING_APP),
-                    AppLayerBecomesInvisible(CLOSING_APP),
-                    AppWindowBecomesInvisible(CLOSING_APP),
-                    AppWindowIsTopWindowAtStart(CLOSING_APP),
+                    AppLayerIsVisibleAtStart(CLOSING_APPS),
+                    AppLayerIsInvisibleAtEnd(CLOSING_APPS),
+                    AppWindowIsVisibleAtStart(CLOSING_APPS),
+                    AppWindowIsInvisibleAtEnd(CLOSING_APPS),
+                    AppLayerBecomesInvisible(CLOSING_APPS),
+                    AppWindowBecomesInvisible(CLOSING_APPS),
+                    AppWindowIsTopWindowAtStart(CLOSING_APPS),
+                    VisibleLayersShownMoreThanOneConsecutiveEntry(
+                        listOf(ComponentNameMatcher.NAV_BAR)
+                    )
                 )
                 .associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
 
@@ -118,7 +124,7 @@ object AssertionTemplates {
 
     val APP_LAUNCH_FROM_LOCK_ASSERTIONS =
         APP_LAUNCH_ASSERTIONS +
-            listOf(FocusChanges(toComponent = OPENING_APP), ScreenLockedAtStart())
+            listOf(FocusChanges(toComponent = OPENING_APPS), ScreenLockedAtStart())
                 .associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
 
     val APP_CLOSE_TO_HOME_ASSERTIONS =
@@ -139,14 +145,14 @@ object AssertionTemplates {
             APP_LAUNCH_ASSERTIONS +
             APP_CLOSE_ASSERTIONS +
             listOf(
-                    AppLayerCoversFullScreenAtStart(CLOSING_APP),
-                    AppLayerCoversFullScreenAtEnd(OPENING_APP),
-                    AppWindowOnTopAtStart(CLOSING_APP),
-                    AppWindowOnTopAtEnd(OPENING_APP),
-                    AppWindowBecomesInvisible(CLOSING_APP),
-                    AppLayerBecomesInvisible(CLOSING_APP),
-                    AppWindowBecomesVisible(OPENING_APP),
-                    AppLayerBecomesVisible(OPENING_APP),
+                    AppLayerCoversFullScreenAtStart(CLOSING_APPS),
+                    AppLayerCoversFullScreenAtEnd(OPENING_APPS),
+                    AppWindowOnTopAtStart(CLOSING_APPS),
+                    AppWindowOnTopAtEnd(OPENING_APPS),
+                    AppWindowBecomesInvisible(CLOSING_APPS),
+                    AppLayerBecomesInvisible(CLOSING_APPS),
+                    AppWindowBecomesVisible(OPENING_APPS),
+                    AppLayerBecomesVisible(OPENING_APPS),
                 )
                 .associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
 

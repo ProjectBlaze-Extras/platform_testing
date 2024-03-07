@@ -25,7 +25,7 @@ java_library {
         "androidx.test.uiautomator_uiautomator",
         "androidx.test.runner",
         "androidx.test.rules",
-        "truth-prebuilt",
+        "truth",
         "junit",
     ],
     srcs: [

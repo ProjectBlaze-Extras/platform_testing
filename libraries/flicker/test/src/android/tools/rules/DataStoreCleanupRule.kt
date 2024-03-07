@@ -17,8 +17,8 @@
 package android.tools.rules
 
 import android.annotation.SuppressLint
-import android.tools.TEST_SCENARIO
 import android.tools.device.flicker.datastore.DataStore
+import android.tools.utils.TEST_SCENARIO
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
