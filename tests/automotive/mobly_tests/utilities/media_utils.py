@@ -13,13 +13,10 @@
 #  limitations under the License.
 
 import logging
-import pprint
-import time
 import re
-
+import time
 from utilities import constants
-from mobly import asserts
-from mobly.controllers import android_device
+from utilities.common_utils import CommonUtils
 
 
 class MediaUtils:
@@ -28,6 +25,7 @@ class MediaUtils:
     def __init__(self, target, discoverer):
         self.target = target
         self.discoverer = discoverer
+        self.common_utils = CommonUtils(self.target, self.discoverer)
 
     # Execute any shell command on phone device
     def execute_shell_on_device(self, shell_command):
@@ -246,3 +244,42 @@ class MediaUtils:
         logging.info("Click on Playlist icon on HU")
         self.discoverer.mbs.clickOnPlaylistIcon()
 
+    # Open Youtube Music app on HU
+    def open_youtube_music_app_on_hu(self):
+        logging.info("Open <%s> app on HU", constants.YOUTUBE_MUSIC_APP)
+        self.common_utils.click_on_ui_element_with_text(constants.YOUTUBE_MUSIC_APP)
+
+    # Open Bluetooth Audio app on HU
+    def open_bluetooth_audio_app_on_hu(self):
+        logging.info("Open <%s> app on HU", constants.BLUETOOTH_AUDIO_APP)
+        self.common_utils.click_on_ui_element_with_text(constants.BLUETOOTH_AUDIO_APP)
+
+    # Open Media Apps menu
+    def open_media_apps_menu(self):
+        logging.info("Open Media apps menu items on HU")
+        self.discoverer.mbs.openMediaAppMenuItems()
+
+    # Open Bluetooth player
+    def open_bluetooth_player(self):
+        logging.info("Open <%s> on HU", constants.BLUETOOTH_PLAYER)
+        self.common_utils.click_on_ui_element_with_text(constants.BLUETOOTH_PLAYER)
+
+    # Open Radio app
+    def open_radio_app(self):
+        logging.info("Open <%s> app on HU", constants.RADIO_APP)
+        self.common_utils.click_on_ui_element_with_text(constants.RADIO_APP)
+
+    # Tune FM Radio on HU
+    def tune_fm_radio_on_hu(self, fm_frequency):
+        if re.match(constants.FM_FREQUENCY_PATTERN, fm_frequency):
+            logging.info("Tune FM Radio on HU for frequency <%s>", fm_frequency)
+            logging.info("Select <%s> range for radio", constants.RADIO_FM_RANGE)
+            self.common_utils.click_on_ui_element_with_text(constants.RADIO_FM_RANGE)
+            for x in fm_frequency:
+                self.common_utils.click_on_ui_element_with_text(x)
+                time.sleep(constants.WAIT_ONE_SEC)
+            logging.info("Confirm selected %s frequency on HU", constants.RADIO_FM_RANGE)
+            self.common_utils.click_on_ui_element_with_text(constants.CONFIRM_RADIO_FREQUENCY)
+        else:
+            logging.error("Invalid FM Radio frequency. Expected pattern: <%s>",
+                          constants.FM_FREQUENCY_PATTERN)

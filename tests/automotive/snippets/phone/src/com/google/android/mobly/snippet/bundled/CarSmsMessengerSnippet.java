@@ -63,6 +63,18 @@ public class CarSmsMessengerSnippet implements Snippet {
         return mCarSmsMessengerHelper.get().isNoMessagesDisplayed();
     }
 
+    /** for tapping the sms received in order to read it aloud */
+    @Rpc(description = "Clicks on tap to read aloud text to tead out the message")
+    public void tapToReadAloud() {
+        mCarSmsMessengerHelper.get().tapToReadAloud();
+    }
+
+    /** checks whether the assistant transctption plate is displayed upon tapping received sms */
+    @Rpc(description = "Checks if assistant sms plate is displayed")
+    public boolean isAssistantSMSTranscriptionPlateDisplayed() {
+        return mCarSmsMessengerHelper.get().isAssistantSMSTranscriptionPlateDisplayed();
+    }
+
     @Override
     public void shutdown() {}
 }

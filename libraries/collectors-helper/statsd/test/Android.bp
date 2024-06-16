@@ -28,13 +28,10 @@ java_library {
         "statsd-helper",
         "app-helpers-handheld-interfaces",
         "junit",
-        "ub-uiautomator",
         "platformprotosnano",
         "platform-test-rules",
         "statsdprotonano",
         "mockito-target-minus-junit4",
         "launcher-aosp-tapl"
     ],
-
-    platform_apis: true,
 }

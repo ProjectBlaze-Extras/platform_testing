@@ -20,6 +20,7 @@ import android.content.Context;
 import android.os.Build;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoDialHelper;
+import android.platform.helpers.IAutoPhoneHelper;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 
@@ -35,6 +36,9 @@ public class PhoneSnippet implements Snippet {
     private final SubscriptionManager mSubscriptionManager;
     private final HelperAccessor<IAutoDialHelper> mDialerHelper =
             new HelperAccessor<>(IAutoDialHelper.class);
+
+    private final HelperAccessor<IAutoPhoneHelper> mPhoneHelper =
+            new HelperAccessor<>(IAutoPhoneHelper.class);
 
     public PhoneSnippet() {
         Context context = InstrumentationRegistry.getInstrumentation().getContext();
@@ -57,10 +61,36 @@ public class PhoneSnippet implements Snippet {
         }
     }
 
+
+
     /** Press the device prompt on screen */
     @Rpc(description = "Press 'Device' on a prompt, if present.")
     public void pressDevice() {
         mDialerHelper.get().pressDeviceOnPrompt();
+    }
+
+    /** Press the phone app icon on the mobile device home screen */
+    @Rpc(description = "Press phone icon")
+    public void pressPhoneIcon() {
+        mPhoneHelper.get().pressPhoneIcon();
+    }
+
+    /** Press dial pad icon in the mobile device's dialer app */
+    @Rpc(description = "Press dial pad icon on phone device.")
+    public void pressDialpadIcon() {
+        mPhoneHelper.get().pressDialpadIcon();
+    }
+
+    /** (Directly) enter a number into the dial pad) */
+    @Rpc(description = "Enter phone number on dial pad.")
+    public void enterNumberOnDialpad(String numberToDial) {
+        mPhoneHelper.get().enterNumberOnDialpad(numberToDial);
+    }
+
+    /** Press the call button on the dial pad. */
+    @Rpc(description = "Press the call button (to call the number on a dial pad.")
+    public void pressCallButton() {
+        mPhoneHelper.get().pressCallButton();
     }
 
     @Override

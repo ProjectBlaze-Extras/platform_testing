@@ -22,7 +22,7 @@ android_test {
 
     static_libs: [
         "collector-device-lib",
-        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
         "junit",
         "microbenchmark-device-lib",
         "launcher-helper-lib",
@@ -51,7 +51,7 @@ java_library {
 
     static_libs: [
         "collector-device-lib",
-        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
         "junit",
         "microbenchmark-device-lib",
         "launcher-helper-lib",

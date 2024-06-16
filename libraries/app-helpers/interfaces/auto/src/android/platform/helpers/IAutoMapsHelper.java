@@ -234,4 +234,52 @@ public interface IAutoMapsHelper extends IAppHelper {
      * <p>Returns true if Alert Message is displayed
      */
     boolean isAlertMessageDisplayed();
+
+    /**
+     * SetUp expectation : Maps is Open
+     *
+     * <p>Open settings in Maps UI
+     *
+     * <p>
+     */
+    void openMapsSettings();
+
+    /**
+     * SetUp expectation : Maps is Open
+     *
+     * <p>Click on Edit home Work address button in Maps Settings
+     *
+     * <p>
+     */
+    void clickOnEditHomeAndWorkAddress();
+
+    /**
+     * SetUp expectation : Maps is Open
+     *
+     * <p>Set home or Work address in Maps Settings
+     *
+     * <p>
+     *
+     * @param address -Address of the location
+     * @param target - Location of home target or work target
+     */
+    void setHomeOrWorkAddress(String address, String target);
+
+    /**
+     * SetUp expectation : Maps is Open
+     *
+     * <p>Delete home or Work address added for accounts in Maps
+     *
+     * <p>
+     */
+    void deleteAddressAdded(String target);
+
+    /**
+     * SetUp expectation : Maps is Open
+     *
+     * <p>Close the address diaglog opened
+     *
+     * <p>
+     */
+    void closeDialog();
 }

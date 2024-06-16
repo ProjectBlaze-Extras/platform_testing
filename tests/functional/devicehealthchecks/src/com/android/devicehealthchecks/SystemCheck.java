@@ -20,7 +20,6 @@ import android.platform.test.annotations.GlobalPresubmit;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
-import org.junit.Ignore;
 import org.junit.runner.RunWith;
 
 /**
@@ -52,5 +51,10 @@ public class SystemCheck extends CrashCheckBase {
     @Test
     public void system_tombstone() {
         checkCrash("SYSTEM_TOMBSTONE");
+    }
+
+    @Test
+    public void system_server_watchdog() {
+        checkCrash("system_server_watchdog");
     }
 }

@@ -30,7 +30,7 @@ import java.util.Map;
  * Helper to collect pinned files information from the device using dumpsys.
  */
 public class PinnerHelper implements ICollectorHelper<String> {
-  public static final String SYSTEM_HEADER_NAME = "pinner_system";
+  public static final String SYSTEM_HEADER_NAME = "system";
   public static final String TOTAL_SIZE_BYTES_KEY = "pinner_total_size_bytes";
   public static final String TOTAL_FILE_COUNT_KEY = "pinner_total_files_count";
   public static final String PINNER_FILES_COUNT_SUFFIX = "files_count";
@@ -68,7 +68,7 @@ public class PinnerHelper implements ICollectorHelper<String> {
     for (PinnedFileStat stat : stats) {
       // individual pinned file sizes.
       mPinnerMap.put(
-          String.format("%s_%s_bytes", stat.getGroupName(), stat.getFilename()),
+          String.format("pinner_%s_%s_bytes", stat.getGroupName(), stat.getFilename()),
           String.valueOf(stat.getBytesPinned()));
       totalBytes += stat.getBytesPinned();
       totalFilesCount++;
@@ -85,7 +85,7 @@ public class PinnerHelper implements ICollectorHelper<String> {
         groupInMetric = SYSTEM_HEADER_NAME;
       }
       mPinnerMap.put(
-          String.format("%s_%s", groupInMetric, PINNER_FILES_COUNT_SUFFIX),
+          String.format("pinner_%s_%s", groupInMetric, PINNER_FILES_COUNT_SUFFIX),
           String.valueOf(filesInGroup));
     }
 

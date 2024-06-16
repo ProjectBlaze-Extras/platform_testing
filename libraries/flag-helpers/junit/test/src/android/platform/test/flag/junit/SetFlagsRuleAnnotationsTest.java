@@ -21,6 +21,7 @@ import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
@@ -33,11 +34,25 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Map;
 
 /** Unit tests for {@code SetFlagsRule} being used with annotations. */
 @RunWith(JUnit4.class)
 public final class SetFlagsRuleAnnotationsTest {
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.METHOD, ElementType.TYPE})
+    @EnableFlags(Flags.FLAG_FLAG_NAME4)
+    public @interface EnableFlag4 {}
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.METHOD, ElementType.TYPE})
+    @EnableFlags({Flags.FLAG_FLAG_NAME3, Flags.FLAG_FLAG_NAME4})
+    public @interface EnableFlags3And4 {}
 
     @Test
     public void emptyTestWithoutAnnotationsPasses() {
@@ -99,6 +114,38 @@ public final class SetFlagsRuleAnnotationsTest {
                 .setTestCode(
                         () -> {
                             assertTrue(Flags.flagName3());
+                        })
+                .prepareTest()
+                .assertPasses();
+    }
+
+    @Test
+    public void allowMultipleAnnotations() {
+        @EnableFlags(Flags.FLAG_FLAG_NAME3)
+        @EnableFlag4
+        class SomeClass {}
+        new AnnotationTestRuleHelper(new SetFlagsRule(NULL_DEFAULT))
+                .setTestClass(SomeClass.class)
+                .setTestCode(
+                        () -> {
+                            assertTrue(Flags.flagName3());
+                            assertTrue(Flags.flagName4());
+                        })
+                .prepareTest()
+                .assertPasses();
+    }
+
+    @Test
+    public void allowMultipleOverlapingAnnotations() {
+        @EnableFlags(Flags.FLAG_FLAG_NAME3)
+        @EnableFlags3And4
+        class SomeClass {}
+        new AnnotationTestRuleHelper(new SetFlagsRule(NULL_DEFAULT))
+                .setTestClass(SomeClass.class)
+                .setTestCode(
+                        () -> {
+                            assertTrue(Flags.flagName3());
+                            assertTrue(Flags.flagName4());
                         })
                 .prepareTest()
                 .assertPasses();
@@ -325,6 +372,70 @@ public final class SetFlagsRuleAnnotationsTest {
     }
 
     @Test
+    public void settingAnyFlagBeforeRuleStartsThrows() {
+        SetFlagsRule setFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
+        try {
+            setFlagsRule.enableFlags(Flags.FLAG_FLAG_NAME4);
+        } catch (IllegalStateException ex) {
+            return; // Test passes
+        }
+        fail("Should not be allowed to set flags before test starts.");
+    }
+
+    @Test
+    public void settingAnyFlagAfterRuleFinishesThrows() {
+        SetFlagsRule setFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
+        new AnnotationTestRuleHelper(setFlagsRule).prepareTest().assertPasses();
+        try {
+            setFlagsRule.enableFlags(Flags.FLAG_FLAG_NAME4);
+        } catch (IllegalStateException ex) {
+            return; // Test passes
+        }
+        fail("Should not be allowed to set flags after test ends.");
+    }
+
+    @Test
+    public void initAllFlagsToReleaseConfigDefault_worksOutsideOfTestCode() {
+        SetFlagsRule setFlagsRule = new SetFlagsRule(NULL_DEFAULT);
+        setFlagsRule.initAllFlagsToReleaseConfigDefault();
+        new AnnotationTestRuleHelper(setFlagsRule)
+                .setTestCode(
+                        () -> {
+                            setFlagsRule.enableFlags(Flags.FLAG_FLAG_NAME4);
+                            assertFalse(Flags.flagName3());
+                        })
+                .prepareTest()
+                .assertPasses();
+    }
+
+    @Test
+    public void initAllFlagsToReleaseConfigDefault_worksInsideTestCode() {
+        SetFlagsRule setFlagsRule = new SetFlagsRule(NULL_DEFAULT);
+        new AnnotationTestRuleHelper(setFlagsRule)
+                .setTestCode(
+                        () -> {
+                            setFlagsRule.initAllFlagsToReleaseConfigDefault();
+                            setFlagsRule.enableFlags(Flags.FLAG_FLAG_NAME4);
+                            assertFalse(Flags.flagName3());
+                        })
+                .prepareTest()
+                .assertPasses();
+    }
+
+    @Test
+    public void initAllFlagsToReleaseConfigDefault_failsAfterFlagIsSet() {
+        SetFlagsRule setFlagsRule = new SetFlagsRule(NULL_DEFAULT);
+        new AnnotationTestRuleHelper(setFlagsRule)
+                .setTestCode(
+                        () -> {
+                            setFlagsRule.enableFlags(Flags.FLAG_FLAG_NAME4);
+                            setFlagsRule.initAllFlagsToReleaseConfigDefault();
+                        })
+                .prepareTest()
+                .assertFailsWithType(IllegalStateException.class);
+    }
+
+    @Test
     public void paramEnabledFlagsGetEnabled() {
         FlagsParameterization params =
                 new FlagsParameterization(Map.of(Flags.FLAG_FLAG_NAME3, true));
@@ -363,15 +474,6 @@ public final class SetFlagsRuleAnnotationsTest {
                         })
                 .prepareTest()
                 .assertPasses();
-    }
-
-    @Test
-    public void settingAnyFlagBeforeParameterizationIsAppliedFails() {
-        FlagsParameterization params =
-                new FlagsParameterization(Map.of(Flags.FLAG_FLAG_NAME3, true));
-        SetFlagsRule setFlagsRule = new SetFlagsRule(DEVICE_DEFAULT, params);
-        setFlagsRule.enableFlags(Flags.FLAG_FLAG_NAME4);
-        new AnnotationTestRuleHelper(setFlagsRule).prepareTest().assertFails();
     }
 
     @Test

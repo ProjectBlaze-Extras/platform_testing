@@ -17,6 +17,12 @@ package com.android.helpers.tests;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -34,17 +40,37 @@ import java.io.IOException;
 /**
  * Android Unit tests for {@link PerfettoHelper}.
  *
- * To run:
- * Have a valid text perfetto config under /data/misc/perfetto-traces/trace_config.textproto.
- * Use trace_config_detailed.textproto from prebuilts/tools/linux-x86_64/perfetto/configs.
- * TODO: b/119020380 to keep track of automating the above step.
- * atest CollectorsHelperTest:com.android.helpers.tests.PerfettoHelperTest
+ * <p>To run: Have a valid text perfetto config under
+ * /data/misc/perfetto-traces/trace_config.textproto. Use trace_config_detailed.textproto from
+ * prebuilts/tools/linux-x86_64/perfetto/configs. TODO: b/119020380 to keep track of automating the
+ * above step. atest CollectorsHelperTest:com.android.helpers.tests.PerfettoHelperTest
  */
 @RunWith(AndroidJUnit4.class)
 public class PerfettoHelperTest {
 
     private static final String REMOVE_CMD = "rm %s";
     private static final String FILE_SIZE_IN_BYTES = "wc -c %s";
+    private static final String DEFAULT_CFG =
+            """
+            buffers: {
+            size_kb: 63488
+            fill_policy: RING_BUFFER
+            }
+
+            data_sources {
+            config {
+                name: "linux.process_stats"
+                target_buffer: 0
+                # polled per-process memory counters and process/thread names.
+                # If you don't want the polled counters, remove the "process_stats_config"
+                # section, but keep the data source itself as it still provides on-demand
+                # thread/process naming for ftrace data below.
+                process_stats_config {
+                scan_all_processes_on_start: true
+                }
+            }
+            }
+            """;
 
     private PerfettoHelper mPerfettoHelper;
     private boolean isPerfettoStartSuccess = false;
@@ -68,12 +94,31 @@ public class PerfettoHelperTest {
         }
     }
 
+    /** Test perfetto choose config file over config */
+    @Test(expected = IllegalStateException.class)
+    public void testNullConfigAndConfigFileName() throws Exception {
+        mPerfettoHelper.startCollecting();
+    }
+
+    /** Test perfetto choose config file over config */
+    @Test
+    public void testChoosesFileOverConfig() throws Exception {
+        PerfettoHelper helper = spy(new PerfettoHelper());
+        doReturn(true).when(helper).startCollectingFromConfigFile(anyString(), anyBoolean());
+        helper.setIsTextProtoConfig(true);
+        helper.setTextProtoConfig(DEFAULT_CFG);
+        helper.setConfigFileName("trace_config.textproto");
+        helper.startCollecting();
+        verify(helper, times(0)).startCollectingFromConfigFile(anyString(), anyBoolean());
+        verify(helper, times(1)).startCollectingFromConfig(anyString());
+    }
+
     /**
      * Test perfetto collection returns false if the config file name is null.
      */
     @Test
     public void testNullConfigName() throws Exception {
-        assertFalse(mPerfettoHelper.startCollecting(null, false));
+        assertFalse(mPerfettoHelper.startCollectingFromConfigFile(null, false));
     }
 
     /**
@@ -81,30 +126,32 @@ public class PerfettoHelperTest {
      */
     @Test
     public void testEmptyConfigName() throws Exception {
-        assertFalse(mPerfettoHelper.startCollecting("", false));
+        assertFalse(mPerfettoHelper.startCollectingFromConfigFile("", false));
+    }
+
+    /** Test perfetto collection returns false if the config is empty. */
+    @Test
+    public void testEmptyConfig() throws Exception {
+        assertFalse(mPerfettoHelper.startCollectingFromConfig(""));
     }
 
     @Test
     public void testNullRootDirName() throws Exception {
         mPerfettoHelper.setPerfettoConfigRootDir(null);
-        assertFalse(mPerfettoHelper.startCollecting("trace_config.textproto", false));
+        assertFalse(mPerfettoHelper.startCollectingFromConfigFile("trace_config.textproto", false));
     }
 
-    /**
-     * Test perfetto collection returns false if the config file name is empty.
-     */
+    /** Test perfetto collection returns false if the config file name is empty. */
     @Test
     public void testEmptyRootDirName() throws Exception {
         mPerfettoHelper.setPerfettoConfigRootDir("");
-        assertFalse(mPerfettoHelper.startCollecting("trace_config.textproto", false));
+        assertFalse(mPerfettoHelper.startCollectingFromConfigFile("trace_config.textproto", false));
     }
 
-    /**
-     * Test perfetto collection returns false if the perfetto config file does not exist.
-     */
+    /** Test perfetto collection returns false if the perfetto config file does not exist. */
     @Test
     public void testNoConfigFile() throws Exception {
-        assertFalse(mPerfettoHelper.startCollecting("no_config.pb", false));
+        assertFalse(mPerfettoHelper.startCollectingFromConfigFile("no_config.pb", false));
     }
 
     /**
@@ -112,7 +159,14 @@ public class PerfettoHelperTest {
      */
     @Test
     public void testPerfettoStartSuccess() throws Exception {
-        assertTrue(mPerfettoHelper.startCollecting("trace_config.textproto", true));
+        assertTrue(mPerfettoHelper.startCollectingFromConfigFile("trace_config.textproto", true));
+        isPerfettoStartSuccess = true;
+    }
+
+    /** Test perfetto collection returns true if the valid perfetto config file. */
+    @Test
+    public void testPerfettoStartConfigSuccess() throws Exception {
+        assertTrue(mPerfettoHelper.startCollectingFromConfig(DEFAULT_CFG));
         isPerfettoStartSuccess = true;
     }
 
@@ -120,7 +174,7 @@ public class PerfettoHelperTest {
     @Test
     public void testPerfettoStartSuccessNoBgWait() throws Exception {
         mPerfettoHelper.setPerfettoStartBgWait(false);
-        assertTrue(mPerfettoHelper.startCollecting("trace_config.textproto", true));
+        assertTrue(mPerfettoHelper.startCollectingFromConfigFile("trace_config.textproto", true));
         isPerfettoStartSuccess = true;
     }
 
@@ -129,34 +183,54 @@ public class PerfettoHelperTest {
      */
     @Test
     public void testPerfettoValidOutputPath() throws Exception {
-        assertTrue(mPerfettoHelper.startCollecting("trace_config.textproto", true));
+        assertTrue(mPerfettoHelper.startCollectingFromConfigFile("trace_config.textproto", true));
         isPerfettoStartSuccess = true;
         assertTrue(mPerfettoHelper.stopCollecting(1000, "data/local/tmp/out.perfetto-trace"));
     }
 
-    /**
-     * Test the invalid output path.
-     */
+    /** Test the invalid output path. */
     @Test
     public void testPerfettoInvalidOutputPath() throws Exception {
-        assertTrue(mPerfettoHelper.startCollecting("trace_config.textproto", true));
+        assertTrue(mPerfettoHelper.startCollectingFromConfigFile("trace_config.textproto", true));
         isPerfettoStartSuccess = true;
         // Don't have permission to create new folder under /data
         assertFalse(mPerfettoHelper.stopCollecting(1000, "/data/xxx/xyz/out.perfetto-trace"));
     }
 
     /**
-     * Test perfetto collection returns true and output file size greater than zero
-     * if the valid perfetto config file used.
+     * Test perfetto collection returns true and output file size greater than zero if the valid
+     * perfetto config file used.
      */
     @Test
     public void testPerfettoSuccess() throws Exception {
-        assertTrue(mPerfettoHelper.startCollecting("trace_config.textproto", true));
+        assertTrue(mPerfettoHelper.startCollectingFromConfigFile("trace_config.textproto", true));
         isPerfettoStartSuccess = true;
         assertTrue(mPerfettoHelper.stopCollecting(1000, "/data/local/tmp/out.perfetto-trace"));
         UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
-        String[] fileStats = uiDevice.executeShellCommand(String.format(
-                FILE_SIZE_IN_BYTES, "/data/local/tmp/out.perfetto-trace")).split(" ");
+        String[] fileStats =
+                uiDevice.executeShellCommand(
+                                String.format(
+                                        FILE_SIZE_IN_BYTES, "/data/local/tmp/out.perfetto-trace"))
+                        .split(" ");
+        int fileSize = Integer.parseInt(fileStats[0].trim());
+        assertTrue(fileSize > 0);
+    }
+
+    /**
+     * Test perfetto collection returns true and output file size greater than zero if the valid
+     * perfetto config file used.
+     */
+    @Test
+    public void testPerfettoConfigSuccess() throws Exception {
+        assertTrue(mPerfettoHelper.startCollectingFromConfig(DEFAULT_CFG));
+        isPerfettoStartSuccess = true;
+        assertTrue(mPerfettoHelper.stopCollecting(1000, "/data/local/tmp/out.perfetto-trace"));
+        UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+        String[] fileStats =
+                uiDevice.executeShellCommand(
+                                String.format(
+                                        FILE_SIZE_IN_BYTES, "/data/local/tmp/out.perfetto-trace"))
+                        .split(" ");
         int fileSize = Integer.parseInt(fileStats[0].trim());
         assertTrue(fileSize > 0);
     }
@@ -168,7 +242,7 @@ public class PerfettoHelperTest {
     @Test
     public void testPerfettoFailureInvalidConfigRoot() throws Exception {
         mPerfettoHelper.setPerfettoConfigRootDir("/data/misc/invalid-folder/");
-        assertFalse(mPerfettoHelper.startCollecting("trace_config.textproto", true));
+        assertFalse(mPerfettoHelper.startCollectingFromConfigFile("trace_config.textproto", true));
     }
 
 }

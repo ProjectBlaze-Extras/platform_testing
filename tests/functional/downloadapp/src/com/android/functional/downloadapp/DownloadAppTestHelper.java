@@ -26,13 +26,14 @@ import android.database.Cursor;
 import android.icu.util.Calendar;
 import android.net.Uri;
 import android.os.Environment;
-import android.support.test.launcherhelper.ILauncherStrategy;
-import android.support.test.launcherhelper.LauncherStrategyFactory;
-import android.support.test.uiautomator.By;
-import android.support.test.uiautomator.UiDevice;
-import android.support.test.uiautomator.UiObject2;
-import android.support.test.uiautomator.Until;
+import android.support.test.launcherhelper2.ILauncherStrategy;
+import android.support.test.launcherhelper2.LauncherStrategyFactory;
 import android.util.Log;
+
+import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.UiObject2;
+import androidx.test.uiautomator.Until;
 
 import junit.framework.Assert;
 

@@ -47,7 +47,19 @@ public class FlagTest {
     }
 
     @Test
-    public void createFlag_aconfigFlag() {
+    public void createFlag_aconfigFlagWithoutRepackaging() {
+        String aconfigFlagWithoutNamespace = "android.platform.test.flag.junit.flag1";
+        Flag flag = Flag.createFlag(aconfigFlagWithoutNamespace);
+
+        assertNull(flag.namespace());
+        assertEquals("android.platform.test.flag.junit.flag1", flag.fullFlagName());
+        assertEquals("flag1", flag.simpleFlagName());
+        assertEquals("android.platform.test.flag.junit", flag.packageName());
+        assertEquals("android.platform.test.flag.junit.Flags", flag.flagsClassName());
+    }
+
+    @Test
+    public void createFlag_aconfigFlagWithRepackaging() {
         String aconfigFlagWithoutNamespace = "android.myflag.flag1";
         Flag flag = Flag.createFlag(aconfigFlagWithoutNamespace);
 
@@ -55,6 +67,8 @@ public class FlagTest {
         assertEquals("android.myflag.flag1", flag.fullFlagName());
         assertEquals("flag1", flag.simpleFlagName());
         assertEquals("android.myflag", flag.packageName());
-        assertEquals("android.myflag.Flags", flag.flagsClassName());
+        assertEquals(
+                "com.android.internal.hidden_from_bootclasspath.android.myflag.Flags",
+                flag.flagsClassName());
     }
 }

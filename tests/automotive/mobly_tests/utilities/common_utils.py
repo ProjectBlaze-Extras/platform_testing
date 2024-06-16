@@ -15,6 +15,8 @@
 import logging
 import time
 
+from utilities import constants
+
 
 class CommonUtils:
     """A common utilities for HU and phone device"""
@@ -48,3 +50,14 @@ class CommonUtils:
     def enable_wifi_on_phone_device(self):
         logging.info("Enable WIFI on phone device")
         self.target.mbs.wifiEnable()
+
+    # Grant restricted permission on HU
+    def grant_restricted_permission_on_hu(self, permission):
+        logging.info('Grant dangerous permission <%s> on HU', permission)
+        self.discoverer.mbs.grantRestrictedPermissionsForBTMedia(permission)
+
+    # TODO remove this function after BT Media local mac address issue resolved b/316199227
+    # Grant LOCAL_MAC_ADDRESS permission
+    def grant_local_mac_address_permission(self):
+        logging.info("Grant <LOCAL_MAC_ADDRESS> permission on HU")
+        self.grant_restricted_permission_on_hu(constants.LOCAL_MAC_ADDRESS_PERMISSION)

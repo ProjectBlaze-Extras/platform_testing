@@ -19,13 +19,8 @@ package {
 }
 
 filegroup {
-    name: "flickerlib-common-src",
-    srcs: ["src/android/tools/common/**/*.kt"],
-}
-
-filegroup {
     name: "flickerlib-helpers-src",
-    srcs: ["src/android/tools/device/**/helpers/*.kt"],
+    srcs: ["src/android/tools/**/helpers/*.kt"],
 }
 
 java_library {
@@ -55,34 +50,16 @@ java_library {
         enabled: false
     },
     srcs: [
-        "src/android/tools/device/**/*.kt",
+        "src/android/tools/**/*.kt",
     ],
     exclude_srcs: [
         ":flickerlib-helpers-src",    
     ],
-    common_srcs: [
-        ":flickerlib-common-src",
-    ],
     static_libs: [
-        "flickerlib-common",
         "androidx.benchmark_benchmark-macro",
         "perfetto_config-lite",
         "platformprotosnano",
         "view_capture_proto",
         "WindowManager-Shell-proto",
-    ],
-}
-
-java_library {
-    name: "flickerlib-common",
-    kotlincflags: [
-        "-Xmulti-platform",
-        "-opt-in=kotlin.ExperimentalMultiplatform",
-    ],
-    optimize: {
-        enabled: false
-    },
-    common_srcs: [
-        ":flickerlib-common-src",
     ],
 }

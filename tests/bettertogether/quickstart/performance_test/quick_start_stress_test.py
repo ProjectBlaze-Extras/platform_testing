@@ -66,6 +66,7 @@ class QuickStartStressTest(nc_base_test.NCBaseTestClass):
         nc_constants.SingleTestResult())
     self._quick_start_test_metrics: nc_constants.QuickStartTestMetrics = (
         nc_constants.QuickStartTestMetrics())
+    self._test_script_version = _TEST_SCRIPT_VERSION
 
   # @typing.override
   def setup_test(self):
@@ -103,16 +104,6 @@ class QuickStartStressTest(nc_base_test.NCBaseTestClass):
 
     setup_utils.enable_bluetooth_multiplex(ad)
 
-    if (
-        self.test_parameters.upgrade_medium
-        == nc_constants.NearbyMedium.WIFIAWARE_ONLY.value
-    ):
-      setup_utils.enable_wifi_aware(ad)
-
-    if self.test_parameters.wifi_country_code:
-      setup_utils.set_wifi_country_code(
-          ad, self.test_parameters.wifi_country_code
-      )
 
   # @typing.override
   def _teardown_device(self, ad: android_device.AndroidDevice) -> None:
@@ -208,6 +199,9 @@ class QuickStartStressTest(nc_base_test.NCBaseTestClass):
       )
       self._test_result.advertiser_wifi_wlan_expected = True
       self._test_result.advertiser_wifi_wlan_latency = advertiser_wlan_latency
+      time.sleep(
+          self.test_parameters.target_post_wifi_connection_idle_time_sec
+      )
 
     # 5. set up 2nd connection
     nearby_snippet_2 = nearby_connection_wrapper.NearbyConnectionWrapper(
@@ -278,7 +272,7 @@ class QuickStartStressTest(nc_base_test.NCBaseTestClass):
     self.record_data({
         'Test Class': self.TAG,
         'Test Name': self.current_test_info.name,
-        'sponge_properties': test_report,
+        'properties': test_report,
     })
 
   def _collect_current_test_metrics(self) -> None:
@@ -324,13 +318,13 @@ class QuickStartStressTest(nc_base_test.NCBaseTestClass):
   # @typing.override
   def _summary_test_results(self) -> None:
     """Summarizes test results of all iterations."""
-    bt_transfer_stats = self._stats_throughput_result(
+    first_bt_transfer_stats = self._stats_throughput_result(
         'BT',
         self._quick_start_test_metrics.bt_transfer_throughputs_kbps,
         nc_constants.BT_TRANSFER_SUCCESS_RATE_TARGET_PERCENTAGE,
         self.test_parameters.bt_transfer_throughput_median_benchmark_kbps)
 
-    wifi_transfer_stats = self._stats_throughput_result(
+    second_wifi_transfer_stats = self._stats_throughput_result(
         'Wi-Fi',
         self._quick_start_test_metrics.wifi_transfer_throughputs_kbps,
         nc_constants.WIFI_TRANSFER_SUCCESS_RATE_TARGET_PERCENTAGE,
@@ -350,12 +344,12 @@ class QuickStartStressTest(nc_base_test.NCBaseTestClass):
     passed = True
     result_message = 'Passed'
     fail_message = ''
-    if bt_transfer_stats.fail_targets:
+    if first_bt_transfer_stats.fail_targets:
       fail_message += self._generate_target_fail_message(
-          bt_transfer_stats.fail_targets)
-    if wifi_transfer_stats.fail_targets:
+          first_bt_transfer_stats.fail_targets)
+    if second_wifi_transfer_stats.fail_targets:
       fail_message += self._generate_target_fail_message(
-          wifi_transfer_stats.fail_targets)
+          second_wifi_transfer_stats.fail_targets)
     if fail_message:
       passed = False
       result_message = 'Test Failed due to:\n' + fail_message
@@ -363,29 +357,29 @@ class QuickStartStressTest(nc_base_test.NCBaseTestClass):
     detailed_stats = {
         '0 test iterations': self.performance_test_iterations,
         '1 Completed BT/Wi-Fi transfer': (
-            f'{bt_transfer_stats.success_count}'
-            f' / {wifi_transfer_stats.success_count}'),
+            f'{first_bt_transfer_stats.success_count}'
+            f' / {second_wifi_transfer_stats.success_count}'),
         '2 BT transfer failures': {
-            'discovery': first_discovery_stats.failure_count,
-            'connection': first_connection_stats.failure_count,
-            'transfer': self.performance_test_iterations - (
-                bt_transfer_stats.success_count),
+            '1 discovery': first_discovery_stats.failure_count,
+            '2 connection': first_connection_stats.failure_count,
+            '3 transfer': self.performance_test_iterations - (
+                first_bt_transfer_stats.success_count),
         },
         '3 Wi-Fi transfer failures': {
-            'discovery': second_discovery_stats.failure_count,
-            'connection': second_connection_stats.failure_count,
-            'upgrade': medium_upgrade_stats.failure_count,
-            'transfer': self.performance_test_iterations - (
-                wifi_transfer_stats.success_count),
+            '1 discovery': second_discovery_stats.failure_count,
+            '2 connection': second_connection_stats.failure_count,
+            '3 upgrade': medium_upgrade_stats.failure_count,
+            '4 transfer': self.performance_test_iterations - (
+                second_wifi_transfer_stats.success_count),
         },
         '4 Medium upgrade count': (
             self._summary_upgraded_wifi_transfer_mediums()),
         '5 50% and 95% of BT transfer speed (KBps)': (
-            f'{bt_transfer_stats.percentile_50_kbps}'
-            f' / {bt_transfer_stats.percentile_95_kbps}'),
+            f'{first_bt_transfer_stats.percentile_50_kbps}'
+            f' / {first_bt_transfer_stats.percentile_95_kbps}'),
         '6 50% and 95% of Wi-Fi transfer speed(KBps)': (
-            f'{wifi_transfer_stats.percentile_50_kbps}'
-            f' / {wifi_transfer_stats.percentile_95_kbps}'),
+            f'{second_wifi_transfer_stats.percentile_50_kbps}'
+            f' / {second_wifi_transfer_stats.percentile_95_kbps}'),
         '7 50% and 95% of discovery latency(sec)': (
             f'{first_discovery_stats.percentile_50}'
             f' / {first_discovery_stats.percentile_95} (1st), '
@@ -403,7 +397,7 @@ class QuickStartStressTest(nc_base_test.NCBaseTestClass):
 
     self.record_data({
         'Test Class': self.TAG,
-        'sponge_properties': {
+        'properties': {
             'test_script_version': _TEST_SCRIPT_VERSION,
             '00_test_report_alias_name': (
                 self.test_parameters.test_report_alias_name),
@@ -419,6 +413,7 @@ class QuickStartStressTest(nc_base_test.NCBaseTestClass):
         })
 
     asserts.assert_true(passed, result_message)
+
 
 if __name__ == '__main__':
   test_runner.main()

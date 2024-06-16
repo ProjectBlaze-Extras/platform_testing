@@ -26,7 +26,6 @@ android_test {
         "automotive-health-test-rules",
         "automotive-dial-app-helper",
         "app-helpers-auto-interfaces",
-        "ub-uiautomator",
         "collector-device-lib-platform",
         "common-platform-scenarios",
         "common-platform-scenario-tests",
@@ -34,5 +33,5 @@ android_test {
         "platform-test-options",
     ],
     srcs: ["src/**/*.java"],
-    test_suites: ["catbox"],
+    test_suites: ["ats", "catbox"],
 }

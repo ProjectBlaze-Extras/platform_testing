@@ -21,8 +21,7 @@ import android.app.Instrumentation;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.support.test.launcherhelper.LauncherStrategyFactory;
-import android.support.test.uiautomator.UiDevice;
+import android.support.test.launcherhelper2.LauncherStrategyFactory;
 import android.system.helpers.LockscreenHelper;
 import android.system.helpers.OverviewHelper;
 import android.system.helpers.SettingsHelper;
@@ -33,6 +32,7 @@ import android.view.WindowManagerGlobal;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.rule.logging.AtraceLogger;
+import androidx.test.uiautomator.UiDevice;
 
 import com.android.launcher3.tapl.LauncherInstrumentation;
 

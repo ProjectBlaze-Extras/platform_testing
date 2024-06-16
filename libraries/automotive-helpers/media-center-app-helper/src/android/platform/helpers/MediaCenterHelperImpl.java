@@ -541,7 +541,10 @@ public class MediaCenterHelperImpl extends AbstractStandardAppHelper implements 
                 getUiElementFromConfig(AutomotiveConfigConstants.BLUETOOTH_DISCONNECTED_LABEL);
         return getSpectatioUiUtil().hasUiElement(isBluetoothAudioDisconnectedLabel);
     }
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isConnectToBluetoothLabelVisible() {
         BySelector connectToBluetoothLabel =
@@ -729,5 +732,16 @@ public class MediaCenterHelperImpl extends AbstractStandardAppHelper implements 
                         playlistIconObject,
                         AutomotiveConfigConstants.MEDIA_PLAYLIST_ICON);
         getSpectatioUiUtil().clickAndWait(playlistIconObject);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void grantRestrictedPermissionsForBTMedia(String permission) {
+        if (permission == null || permission.length() < 1) {
+            throw new UnknownUiException("Permission must be provided");
+        }
+        mUiAutomation.adoptShellPermissionIdentity(permission);
     }
 }

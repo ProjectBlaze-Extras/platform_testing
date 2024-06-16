@@ -41,7 +41,7 @@ from performance_test import nc_constants
 from performance_test import nearby_connection_wrapper
 from performance_test import setup_utils
 
-_TEST_SCRIPT_VERSTION = '1.6'
+_TEST_SCRIPT_VERSION = '1.6'
 
 _DELAY_BETWEEN_EACH_TEST_CYCLE = datetime.timedelta(seconds=5)
 _TRANSFER_FILE_SIZE_1GB = 1024 * 1024
@@ -75,6 +75,7 @@ class NearbyShareStressTest(nc_base_test.NCBaseTestClass):
     super().__init__(configs)
     self._test_result = nc_constants.SingleTestResult()
     self._nearby_share_test_metrics = self.NearbyShareTestMetrics()
+    self._test_script_version = _TEST_SCRIPT_VERSION
 
   # @typing.override
   def setup_class(self):
@@ -174,7 +175,7 @@ class NearbyShareStressTest(nc_base_test.NCBaseTestClass):
     self.record_data({
         'Test Class': self.TAG,
         'Test Name': self.current_test_info.name,
-        'sponge_properties': test_report,
+        'properties': test_report,
     })
 
   def _collect_current_test_metrics(self):
@@ -198,7 +199,7 @@ class NearbyShareStressTest(nc_base_test.NCBaseTestClass):
     wifi_transfer_stats = self._stats_throughput_result(
         'WiFi',
         self._nearby_share_test_metrics.wifi_transfer_throughputs_kbps,
-        nc_constants.BT_TRANSFER_SUCCESS_RATE_TARGET_PERCENTAGE,
+        nc_constants.WIFI_TRANSFER_SUCCESS_RATE_TARGET_PERCENTAGE,
         self.test_parameters.wifi_transfer_throughput_median_benchmark_kbps)
 
     discovery_stats = self._stats_latency_result(
@@ -223,10 +224,10 @@ class NearbyShareStressTest(nc_base_test.NCBaseTestClass):
         '0 test iterations': self.performance_test_iterations,
         '1 Completed WiFi transfer': f'{wifi_transfer_stats.success_count}',
         '2 failure counts': {
-            'discovery': discovery_stats.failure_count,
-            'connection': connection_stats.failure_count,
-            'upgrade': medium_upgrade_stats.failure_count,
-            'transfer': self.performance_test_iterations - (
+            '1 discovery': discovery_stats.failure_count,
+            '2 connection': connection_stats.failure_count,
+            '3 upgrade': medium_upgrade_stats.failure_count,
+            '4 transfer': self.performance_test_iterations - (
                 wifi_transfer_stats.success_count),
         },
         '3 50% and 95% of WiFi transfer speed (KBps)': (
@@ -245,8 +246,8 @@ class NearbyShareStressTest(nc_base_test.NCBaseTestClass):
 
     self.record_data({
         'Test Class': self.TAG,
-        'sponge_properties': {
-            'test_script_verion': _TEST_SCRIPT_VERSTION,
+        'properties': {
+            'test_script_version': self._test_script_version,
             '00_test_report_alias_name': (
                 self.test_parameters.test_report_alias_name),
             '01_test_result': result_message,

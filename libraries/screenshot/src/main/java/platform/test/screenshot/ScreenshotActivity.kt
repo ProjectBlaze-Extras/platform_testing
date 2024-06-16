@@ -17,6 +17,7 @@
 package platform.test.screenshot
 
 import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 
 /**
  * The Activity that is launched and whose content is set for screenshot tests. Please add the
@@ -26,3 +27,11 @@ import androidx.activity.ComponentActivity
  * </activity>
  */
 class ScreenshotActivity : ComponentActivity()
+/**
+ * The Activity that is launched and whose content is set for screenshot tests. Please add the
+ * following snippet to your test's AndroidManifest.xml
+ *
+ * <activity android:name="platform.test.screenshot.FragmentScreenshotActivity"
+ * android:exported="true"> </activity>
+ */
+class FragmentScreenshotActivity : AppCompatActivity()

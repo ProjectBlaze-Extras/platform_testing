@@ -23,7 +23,7 @@ android_test {
         "androidx.test.rules",
         "launcher-helper-lib",
         "metrics-helper-lib",
-        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
     ],
 
     libs: ["android.test.base"],

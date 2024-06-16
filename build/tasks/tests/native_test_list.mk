@@ -236,7 +236,9 @@ native_tests := \
 ifeq ($(BOARD_IS_AUTOMOTIVE), true)
 native_tests += \
     libwatchdog_test \
-    evsmanagerd_test
+    evsmanagerd_test \
+    sv_2d_session_tests \
+    sv_3d_session_tests
 endif
 
 ifneq ($(strip $(BOARD_PERFSETUP_SCRIPT)),)

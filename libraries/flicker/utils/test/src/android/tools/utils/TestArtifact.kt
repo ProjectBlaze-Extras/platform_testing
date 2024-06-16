@@ -16,9 +16,9 @@
 
 package android.tools.utils
 
-import android.tools.common.io.Artifact
-import android.tools.common.io.ResultArtifactDescriptor
-import android.tools.common.io.RunStatus
+import android.tools.io.Artifact
+import android.tools.io.ResultArtifactDescriptor
+import android.tools.io.RunStatus
 
 class TestArtifact(artifactIdentifier: String) : Artifact {
 

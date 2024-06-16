@@ -20,7 +20,7 @@ import android.app.Instrumentation
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.traces.component.ComponentNameMatcher
 import androidx.test.platform.app.InstrumentationRegistry
 
 /**

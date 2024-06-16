@@ -21,7 +21,7 @@ package {
 java_library {
     name: "systemui-helper",
     libs: [
-        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
         "app-helpers-handheld-interfaces",
         "androidx.test.runner",
         "androidx.test.rules",
@@ -33,6 +33,7 @@ java_library {
     ],
     static_libs: [
         "truth",
+        "//frameworks/base/packages/SystemUI/aconfig:com_android_systemui_flags_lib",
     ],
     srcs: [
         "src/**/*.java",

@@ -19,16 +19,17 @@ package com.android.functional.downloadapp;
 import android.content.Context;
 import android.os.Environment;
 import android.os.SystemClock;
-import android.support.test.uiautomator.By;
-import android.support.test.uiautomator.Direction;
-import android.support.test.uiautomator.UiDevice;
-import android.support.test.uiautomator.UiObject2;
-import android.support.test.uiautomator.Until;
 import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.filters.Suppress;
+import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.Direction;
+import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.UiObject2;
+import androidx.test.uiautomator.Until;
 
 import com.android.functional.downloadapp.DownloadAppTestHelper.UIViewType;
 

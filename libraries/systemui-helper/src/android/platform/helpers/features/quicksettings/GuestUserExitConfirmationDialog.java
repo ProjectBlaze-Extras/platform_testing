@@ -21,8 +21,9 @@ import static android.platform.helpers.Constants.MAX_VERIFICATION_TIME_IN_SECOND
 import static android.platform.helpers.ui.UiAutomatorUtils.getUiDevice;
 
 import android.platform.helpers.features.Page;
-import android.support.test.uiautomator.By;
-import android.support.test.uiautomator.BySelector;
+
+import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.BySelector;
 
 import java.util.regex.Pattern;
 

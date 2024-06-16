@@ -41,14 +41,19 @@ class NCBaseTestClass(base_test.BaseTestClass):
     self.advertiser: android_device.AndroidDevice = None
     self.discoverer: android_device.AndroidDevice = None
     self.test_parameters: nc_constants.TestParameters = None
+    self._test_script_version = None
     self._nearby_snippet_apk_path: str = None
     self.performance_test_iterations: int = 1
+    self.num_bug_reports: int = 0
 
   def setup_class(self) -> None:
     self.ads = self.register_controller(android_device, min_number=2)
     self.test_parameters = self._get_test_parameter()
     self._nearby_snippet_apk_path = self.user_params.get('files', {}).get(
         'nearby_snippet', [''])[0]
+
+    # set run identifier property
+    self._set_run_identifier()
 
     utils.concurrent_exec(
         self._setup_android_device,
@@ -69,6 +74,22 @@ class NCBaseTestClass(base_test.BaseTestClass):
           'The result may not be expected.'
       )
       self.advertiser, self.discoverer = self.ads
+
+  def _set_run_identifier(self) -> None:
+    """Set a run_identifier property describing the test run context."""
+    run_identifier = {}
+    run_identifier['test_version'] = self._test_script_version
+    run_identifier['alias'] = self.test_parameters.test_report_alias_name
+    run_identifier['devices'] = [
+        f'{ad.model}({ad.build_info["build_id"]})' for ad in self.ads
+    ]
+    run_identifier_str = ', '.join(
+        [f'{key}:{value}' for key, value in run_identifier.items()]
+    )
+    run_identifier_str = f'{{{run_identifier_str}}}'
+    self.record_data(
+        {'properties': {'run_identifier': run_identifier_str}}
+    )
 
   def _disconnect_from_wifi(self, ad: android_device.AndroidDevice) -> None:
     if not ad.is_adb_root:
@@ -108,7 +129,17 @@ class NCBaseTestClass(base_test.BaseTestClass):
     setup_utils.enable_logs(ad)
 
     setup_utils.disable_redaction(ad)
-    setup_utils.enable_auto_reconnect(ad)
+
+    if (
+        self.test_parameters.upgrade_medium
+        == nc_constants.NearbyMedium.WIFIAWARE_ONLY.value
+    ):
+      setup_utils.enable_wifi_aware(ad)
+
+    if self.test_parameters.wifi_country_code:
+      setup_utils.set_country_code(
+          ad, self.test_parameters.wifi_country_code
+      )
 
   def setup_test(self):
     self._reset_nearby_connection()
@@ -168,10 +199,12 @@ class NCBaseTestClass(base_test.BaseTestClass):
     return test_parameters
 
   def on_fail(self, record: records.TestResultRecord) -> None:
-    logging.info('take bug report for failure')
-    android_device.take_bug_reports(
-        self.ads,
-        destination=self.current_test_info.output_path,
+    self.num_bug_reports = self.num_bug_reports + 1
+    if (self.num_bug_reports <= nc_constants.MAX_NUM_BUG_REPORT):
+      logging.info('take bug report for failure')
+      android_device.take_bug_reports(
+          self.ads,
+          destination=self.current_test_info.output_path,
     )
 
   def _stats_throughput_result(

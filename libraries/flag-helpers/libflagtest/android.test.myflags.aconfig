@@ -1,4 +1,5 @@
 package: "android.test.myflags"
+container: "system"
 flag {
   name: "test_flag_true"
   namespace: "flagtest"

@@ -53,4 +53,18 @@ public interface IAutoCarSmsMessengerHelper extends IAppHelper, Scrollable {
      * <p>This method is used checking if sms timestamp is displayed
      */
     boolean isNoMessagesDisplayed();
+
+    /**
+     * Setup expectations: bluetooth on and phone is paired, SMS app is open,HU is in driving mode
+     *
+     * <p>This method is used to tap on sms text received to play it aloud
+     */
+    void tapToReadAloud();
+
+    /**
+     * Setup expectations: None
+     *
+     * <p>This method is used to verify microphone Transcription plate in status bar.
+     */
+    boolean isAssistantSMSTranscriptionPlateDisplayed();
 }

@@ -35,10 +35,14 @@ class MSSIMMatcherTest {
         val filter = BooleanArray(first.width * first.height) { true }
 
         val matcher = MSSIMMatcher()
-        val result = matcher.calculateSSIM(
-            first.toIntArray(), second.toIntArray(),
-            first.width, first.height, filter
-        )
+        val result =
+            matcher.calculateSSIM(
+                first.toIntArray(),
+                second.toIntArray(),
+                first.width,
+                first.height,
+                filter
+            )
 
         // Asserts that all compared pixels are categorized as "similar".
         assertThat(result.SSIM).isEqualTo(1.0)
@@ -51,10 +55,14 @@ class MSSIMMatcherTest {
         val filter = BooleanArray(first.width * first.height) { false }
 
         val matcher = MSSIMMatcher()
-        val result = matcher.calculateSSIM(
-            first.toIntArray(), second.toIntArray(),
-            first.width, first.height, filter
-        )
+        val result =
+            matcher.calculateSSIM(
+                first.toIntArray(),
+                second.toIntArray(),
+                first.width,
+                first.height,
+                filter
+            )
 
         assertThat(result.numPixelsCompared).isEqualTo(0)
     }
@@ -75,10 +83,14 @@ class MSSIMMatcherTest {
         }
 
         val matcher = MSSIMMatcher()
-        val result = matcher.calculateSSIM(
-            first.toIntArray(), second.toIntArray(),
-            first.width, first.height, filter
-        )
+        val result =
+            matcher.calculateSSIM(
+                first.toIntArray(),
+                second.toIntArray(),
+                first.width,
+                first.height,
+                filter
+            )
 
         // Asserts that all compared pixels are categorized as "similar".
         assertThat(result.SSIM).isEqualTo(1.0)
@@ -91,10 +103,14 @@ class MSSIMMatcherTest {
         val filter = BooleanArray(first.width * first.height) { true }
 
         val matcher = MSSIMMatcher()
-        val result = matcher.calculateSSIM(
-            first.toIntArray(), second.toIntArray(),
-            first.width, first.height, filter
-        )
+        val result =
+            matcher.calculateSSIM(
+                first.toIntArray(),
+                second.toIntArray(),
+                first.width,
+                first.height,
+                filter
+            )
 
         assertThat(result.SSIM).isWithin(0.001).of(0.490)
     }
@@ -106,10 +122,14 @@ class MSSIMMatcherTest {
         val filter = BooleanArray(first.width * first.height) { true }
 
         val matcher = MSSIMMatcher()
-        val result = matcher.calculateSSIM(
-            first.toIntArray(), second.toIntArray(),
-            first.width, first.height, filter
-        )
+        val result =
+            matcher.calculateSSIM(
+                first.toIntArray(),
+                second.toIntArray(),
+                first.width,
+                first.height,
+                filter
+            )
 
         assertThat(result.SSIM).isWithin(0.001).of(0.951)
     }
@@ -121,10 +141,14 @@ class MSSIMMatcherTest {
         val filter = BooleanArray(first.width * first.height) { true }
 
         val matcher = MSSIMMatcher()
-        val result = matcher.calculateSSIM(
-            first.toIntArray(), second.toIntArray(),
-            first.width, first.height, filter
-        )
+        val result =
+            matcher.calculateSSIM(
+                first.toIntArray(),
+                second.toIntArray(),
+                first.width,
+                first.height,
+                filter
+            )
 
         assertThat(result.SSIM).isWithin(0.001).of(0.990)
     }
@@ -136,10 +160,14 @@ class MSSIMMatcherTest {
         val filter = BooleanArray(first.width * first.height) { true }
 
         val matcher = MSSIMMatcher()
-        val result = matcher.calculateSSIM(
-            first.toIntArray(), second.toIntArray(),
-            first.width, first.height, filter
-        )
+        val result =
+            matcher.calculateSSIM(
+                first.toIntArray(),
+                second.toIntArray(),
+                first.width,
+                first.height,
+                filter
+            )
 
         assertThat(result.SSIM).isWithin(0.001).of(0.960)
     }
@@ -151,10 +179,14 @@ class MSSIMMatcherTest {
         val filter = BooleanArray(first.width * first.height) { true }
 
         val matcher = MSSIMMatcher()
-        val result = matcher.calculateSSIM(
-            first.toIntArray(), second.toIntArray(),
-            first.width, first.height, filter
-        )
+        val result =
+            matcher.calculateSSIM(
+                first.toIntArray(),
+                second.toIntArray(),
+                first.width,
+                first.height,
+                filter
+            )
 
         assertThat(result.SSIM).isWithin(0.001).of(0.695)
     }
@@ -166,10 +198,14 @@ class MSSIMMatcherTest {
         val filter = BooleanArray(first.width * first.height) { true }
 
         val matcher = MSSIMMatcher()
-        val result = matcher.calculateSSIM(
-            first.toIntArray(), second.toIntArray(),
-            first.width, first.height, filter
-        )
+        val result =
+            matcher.calculateSSIM(
+                first.toIntArray(),
+                second.toIntArray(),
+                first.width,
+                first.height,
+                filter
+            )
 
         assertThat(result.SSIM).isWithin(0.001).of(0.921)
     }

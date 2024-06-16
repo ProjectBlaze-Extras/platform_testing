@@ -17,7 +17,7 @@
 package android.tools.device.apphelpers
 
 import android.app.Instrumentation
-import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.traces.component.ComponentNameMatcher
 import androidx.test.platform.app.InstrumentationRegistry
 
 /**

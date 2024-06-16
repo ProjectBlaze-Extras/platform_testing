@@ -60,14 +60,14 @@ public class AppInfoSettingTest {
     @Test
     public void testApplicationPermissions() {
         mAppInfoSettingsHelper.get().selectApp(CONTACTS_APP);
-        mAppInfoSettingsHelper.get().setAppPermission(PHONE_PERMISSION, State.DISABLE);
-        assertTrue(
-                "Permission is not disabled",
-                !mAppInfoSettingsHelper.get().getCurrentPermissions().contains(PHONE_PERMISSION));
         mAppInfoSettingsHelper.get().setAppPermission(PHONE_PERMISSION, State.ENABLE);
         assertTrue(
                 "Permission is disabled",
                 mAppInfoSettingsHelper.get().getCurrentPermissions().contains(PHONE_PERMISSION));
+        mAppInfoSettingsHelper.get().setAppPermission(PHONE_PERMISSION, State.DISABLE);
+        assertTrue(
+                "Permission is not disabled",
+                !mAppInfoSettingsHelper.get().getCurrentPermissions().contains(PHONE_PERMISSION));
     }
 
     @Test

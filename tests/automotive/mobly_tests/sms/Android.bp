@@ -44,13 +44,13 @@ python_test_host {
 }
 
 python_test_host {
-name: "BTSMSDeviceNotPairedTest",
-    main: "sms_test_device_not_paired.py",
-    srcs: ["sms_test_device_not_paired.py"],
+    name: "BTSMSDeviceNotPairedTest",
+    main: "bt_sms_test_device_not_paired.py",
+    srcs: ["bt_sms_test_device_not_paired.py"],
     libs: [
         "mobly",
         "utilities",
-        "bluetooth_test"
+        "bluetooth_test",
     ],
     test_suites: [
         "catbox",
@@ -77,7 +77,7 @@ python_test_host {
     libs: [
         "mobly",
         "utilities",
-        "BluetoothSMSTestLibrary"
+        "BluetoothSMSTestLibrary",
     ],
     test_suites: [
         "catbox",
@@ -105,7 +105,7 @@ python_test_host {
     libs: [
         "mobly",
         "utilities",
-        "BluetoothSMSTestLibrary"
+        "BluetoothSMSTestLibrary",
     ],
     test_suites: [
         "catbox",
@@ -117,7 +117,7 @@ python_test_host {
         // Package the snippet with the mobly test
         ":AutomotiveSnippet",
         ":PhoneSnippet",
-        "bt_sms_config.yaml"
+        "bt_sms_config.yaml",
     ],
     version: {
         py3: {
@@ -133,7 +133,7 @@ python_test_host {
     libs: [
         "mobly",
         "utilities",
-        "BluetoothSMSTestLibrary"
+        "BluetoothSMSTestLibrary",
     ],
     test_suites: [
         "catbox",
@@ -145,7 +145,7 @@ python_test_host {
         // Package the snippet with the mobly test
         ":AutomotiveSnippet",
         ":PhoneSnippet",
-        "bt_sms_config.yaml"
+        "bt_sms_config.yaml",
     ],
     version: {
         py3: {
@@ -155,13 +155,13 @@ python_test_host {
 }
 
 python_test_host {
-name: "SMSUnreadMessageDBSyncTest",
+    name: "SMSUnreadMessageDBSyncTest",
     main: "bt_sms_unread_sms_messagedb_sync_test.py",
     srcs: ["bt_sms_unread_sms_messagedb_sync_test.py"],
     libs: [
         "mobly",
         "utilities",
-        "BluetoothSMSTestLibrary"
+        "BluetoothSMSTestLibrary",
     ],
     test_suites: [
         "catbox",
@@ -181,14 +181,15 @@ name: "SMSUnreadMessageDBSyncTest",
         },
     },
 }
+
 python_test_host {
-name: "SMSReadAutoSync",
+    name: "SMSReadAutoSync",
     main: "bt_sms_read_auto_sync_test.py",
     srcs: ["bt_sms_read_auto_sync_test.py"],
     libs: [
         "mobly",
         "utilities",
-        "BluetoothSMSTestLibrary"
+        "BluetoothSMSTestLibrary",
     ],
     test_suites: [
         "catbox",
@@ -208,14 +209,43 @@ name: "SMSReadAutoSync",
         },
     },
 }
+
 python_test_host {
-name: "SMSReadMessageDBSync",
+    name: "SMSReadMessageDBSync",
     main: "bt_sms_read_messagebd_sync_test.py",
     srcs: ["bt_sms_read_messagebd_sync_test.py"],
     libs: [
         "mobly",
         "utilities",
-        "BluetoothSMSTestLibrary"
+        "BluetoothSMSTestLibrary",
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+        "bt_sms_config.yaml",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_test_host {
+    name: "SMSReplyFromPhoneSync",
+    main: "bt_sms_reply_from_phone_sync_test.py",
+    srcs: ["bt_sms_reply_from_phone_sync_test.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "BluetoothSMSTestLibrary",
     ],
     test_suites: [
         "catbox",

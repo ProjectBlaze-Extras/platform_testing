@@ -57,8 +57,8 @@ public class KillAppsRuleTest {
         TestableKillAppsRule rule = new TestableKillAppsRule(new Bundle(), "example.package.name");
         rule.apply(rule.getTestStatement(), createTestDescription("clzz", "mthd"))
                 .evaluate();
-        assertThat(rule.getOperations()).containsExactly(
-                "am force-stop example.package.name", "test")
+        assertThat(rule.getOperations())
+                .containsExactly("am stop-app --user current example.package.name", "test")
                 .inOrder();
     }
 
@@ -71,8 +71,8 @@ public class KillAppsRuleTest {
                 "example.package.name");
         rule.apply(rule.getTestStatement(), createTestDescription("clzz", "mthd"))
                 .evaluate();
-        assertThat(rule.getOperations()).containsExactly(
-                        "test", "am force-stop example.package.name")
+        assertThat(rule.getOperations())
+                .containsExactly("test", "am stop-app --user current example.package.name")
                 .inOrder();
     }
 
@@ -87,11 +87,12 @@ public class KillAppsRuleTest {
                 "package.name3");
         rule.apply(rule.getTestStatement(), createTestDescription("clzz", "mthd"))
                 .evaluate();
-        assertThat(rule.getOperations()).containsExactly(
-                "am force-stop package.name1",
-                "am force-stop package.name2",
-                "am force-stop package.name3",
-                "test")
+        assertThat(rule.getOperations())
+                .containsExactly(
+                        "am stop-app --user current package.name1",
+                        "am stop-app --user current package.name2",
+                        "am stop-app --user current package.name3",
+                        "test")
                 .inOrder();
     }
 
@@ -106,12 +107,12 @@ public class KillAppsRuleTest {
                 "package.name3");
         rule.apply(rule.getTestStatement(), createTestDescription("clzz", "mthd"))
                 .evaluate();
-        assertThat(rule.getOperations()).containsExactly(
+        assertThat(rule.getOperations())
+                .containsExactly(
                         "test",
-                        "am force-stop package.name1",
-                        "am force-stop package.name2",
-                        "am force-stop package.name3"
-                )
+                        "am stop-app --user current package.name1",
+                        "am stop-app --user current package.name2",
+                        "am stop-app --user current package.name3")
                 .inOrder();
     }
 

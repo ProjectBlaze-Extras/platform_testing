@@ -332,7 +332,17 @@ public class StatusBarHelperImpl extends AbstractStandardAppHelper implements IA
                         disabledMediaProfile, AutomotiveConfigConstants.DISABLED_MEDIA_PROFILE);
         return disabledMediaProfile.isChecked();
     }
-
+    /** {@inheritDoc} */
+    @Override
+    public void clickOnConnectedWifi() {
+        UiObject2 connectedObject =
+                getSpectatioUiUtil()
+                        .findUiObject(
+                                getUiElementFromConfig(AutomotiveConfigConstants.CONNECTED_WIFI));
+        getSpectatioUiUtil()
+                .validateUiObject(connectedObject, AutomotiveConfigConstants.CONNECTED_WIFI);
+        getSpectatioUiUtil().clickAndWait(connectedObject);
+    }
     /** {@inheritDoc} */
     @Override
     public void forgetWifi() {

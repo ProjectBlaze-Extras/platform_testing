@@ -16,31 +16,19 @@
 
 package android.overview.functional;
 
-import java.io.File;
-import java.io.IOException;
 
-import android.app.UiAutomation;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.Context;
-import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.PowerManager;
-import android.os.RemoteException;
-import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.launcherhelper.ILauncherStrategy;
-import android.support.test.launcherhelper.LauncherStrategyFactory;
-import android.support.test.uiautomator.By;
-import android.support.test.uiautomator.Direction;
-import android.support.test.uiautomator.UiDevice;
-import android.support.test.uiautomator.UiObject2;
-import android.support.test.uiautomator.UiObjectNotFoundException;
-import android.support.test.uiautomator.Until;
+import android.support.test.launcherhelper2.ILauncherStrategy;
+import android.support.test.launcherhelper2.LauncherStrategyFactory;
 import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.util.Log;
-import android.view.KeyEvent;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.UiObject2;
+import androidx.test.uiautomator.Until;
 
 public class RecentsTests extends InstrumentationTestCase {
 

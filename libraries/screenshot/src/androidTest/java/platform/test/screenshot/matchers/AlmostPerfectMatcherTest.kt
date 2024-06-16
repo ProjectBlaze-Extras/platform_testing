@@ -31,12 +31,14 @@ class AlmostPerfectMatcherTest {
         val expected = rgb(200, 200, 5)
         val test = rgb(200, 200, 5)
 
-        val result = matcher.compareBitmaps(
+        val result =
+            matcher.compareBitmaps(
                 expected = intArrayOf(expected),
                 given = intArrayOf(test),
                 width = 1,
                 height = 1,
-                regions = emptyList())
+                regions = emptyList()
+            )
 
         assertThat(result.matches).isTrue()
         assertThat(result.diff).isNull()
@@ -47,12 +49,14 @@ class AlmostPerfectMatcherTest {
         val expected = rgb(200, 200, 5)
         val test = rgb(200, 201, 6)
 
-        val result = matcher.compareBitmaps(
+        val result =
+            matcher.compareBitmaps(
                 expected = intArrayOf(expected),
                 given = intArrayOf(test),
                 width = 1,
                 height = 1,
-                regions = emptyList())
+                regions = emptyList()
+            )
 
         assertThat(result.matches).isTrue()
         assertThat(result.diff).isNull()
@@ -63,12 +67,14 @@ class AlmostPerfectMatcherTest {
         val expected = rgb(200, 200, 200)
         val test = rgb(201, 199, 200)
 
-        val result = matcher.compareBitmaps(
+        val result =
+            matcher.compareBitmaps(
                 expected = intArrayOf(expected),
                 given = intArrayOf(test),
                 width = 1,
                 height = 1,
-                regions = emptyList())
+                regions = emptyList()
+            )
 
         assertThat(result.matches).isTrue()
         assertThat(result.diff).isNull()
@@ -79,12 +85,14 @@ class AlmostPerfectMatcherTest {
         val expected = rgb(200, 200, 200)
         val test = rgb(212, 194, 203)
 
-        val result = matcher.compareBitmaps(
+        val result =
+            matcher.compareBitmaps(
                 expected = intArrayOf(expected),
                 given = intArrayOf(test),
                 width = 1,
                 height = 1,
-                regions = emptyList())
+                regions = emptyList()
+            )
 
         assertThat(result.matches).isFalse()
         assertThat(result.diff).isNotNull()
@@ -96,10 +104,13 @@ class AlmostPerfectMatcherTest {
         val second = loadBitmap("round_rect_gray")
 
         val matcher = PixelPerfectMatcher()
-        val result = matcher.compareBitmaps(
-                expected = first.toIntArray(), given = second.toIntArray(),
-                width = first.width, height = first.height
-        )
+        val result =
+            matcher.compareBitmaps(
+                expected = first.toIntArray(),
+                given = second.toIntArray(),
+                width = first.width,
+                height = first.height
+            )
 
         assertThat(result.matches).isTrue()
     }
@@ -109,11 +120,16 @@ class AlmostPerfectMatcherTest {
         val first = loadBitmap("qmc-folder1")
         val second = loadBitmap("qmc-folder2")
         val matcher = PixelPerfectMatcher()
-        val interestingRegion = Rect(/* left= */10, /* top= */15, /* right= */70, /* bottom= */50)
-        val result = matcher.compareBitmaps(
-                expected = first.toIntArray(), given = second.toIntArray(),
-                width = first.width, height = first.height, regions = listOf(interestingRegion)
-        )
+        val interestingRegion =
+            Rect(/* left= */ 10, /* top= */ 15, /* right= */ 70, /* bottom= */ 50)
+        val result =
+            matcher.compareBitmaps(
+                expected = first.toIntArray(),
+                given = second.toIntArray(),
+                width = first.width,
+                height = first.height,
+                regions = listOf(interestingRegion)
+            )
         val diffImage = result.diff!!.toIntArray()
 
         assertThat(result.matches).isFalse()

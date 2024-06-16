@@ -19,7 +19,7 @@ package {
 java_library_static {
     name: "automotive-multiuser-scenarios",
     min_sdk_version: "24",
-    srcs: [ "src/**/*.java" ],
+    srcs: ["src/**/*.java"],
     libs: [
         "androidx.test.runner",
         "androidx.test.rules",
@@ -30,7 +30,9 @@ java_library_static {
         "common-platform-scenarios",
         "platform-test-options",
         "platform-test-rules",
-        "ub-uiautomator",
         "multi-user-helper",
     ],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }

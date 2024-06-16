@@ -10,7 +10,7 @@ android_test {
     srcs: ["**/*.java"],
     static_libs: [
         "launcher-helper-lib",
-        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
         "androidx.test.rules",
     ],
 

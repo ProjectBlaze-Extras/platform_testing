@@ -21,7 +21,6 @@ import static android.platform.helpers.ui.UiAutomatorUtils.getUiDevice;
 import static android.platform.helpers.ui.UiSearch.search;
 import static android.platform.uiautomator_helpers.DeviceHelpers.getContext;
 
-import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static java.lang.String.format;
@@ -37,14 +36,13 @@ import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.platform.helpers.features.common.HomeLockscreenPage;
-import android.platform.helpers.ui.UiSearch2;
 import android.platform.test.util.HealthTestingUtils;
-import android.support.test.uiautomator.BySelector;
-import android.support.test.uiautomator.UiObject;
-import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.uiautomator.BySelector;
+import androidx.test.uiautomator.UiObject;
+import androidx.test.uiautomator.UiObjectNotFoundException;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -270,19 +268,6 @@ public class CommonUtils {
     }
 
     /**
-     * Asserts that a given page is visible.
-     *
-     * @param pageSelector      selector helped to verify the page
-     * @param pageName          name of the page to be verified
-     * @param maxTimeoutSeconds max time in seconds to verify the page
-     */
-    public static void assertPageVisible(androidx.test.uiautomator.BySelector pageSelector,
-            String pageName, int maxTimeoutSeconds) {
-        assertThat(UiSearch2.search(null, pageSelector, format("Page[%s]", pageName),
-                maxTimeoutSeconds)).isTrue();
-    }
-
-    /**
      * Asserts that a given page is not visible.
      *
      * @param pageSelector selector helped to verify the page
@@ -292,19 +277,6 @@ public class CommonUtils {
         HealthTestingUtils.waitForCondition(
                 () -> "Page is still visible",
                 () -> !search(null, pageSelector, format("Page[%s]", pageName), 0));
-    }
-
-    /**
-     * Asserts that a given page is visible.
-     *
-     * @param pageSelector      selector helped to verify the page
-     * @param pageName          name of the page to be verified
-     * @param maxTimeoutSeconds max time in seconds to verify the page
-     */
-    public static void assertPageNotVisible(androidx.test.uiautomator.BySelector pageSelector,
-            String pageName, int maxTimeoutSeconds) {
-        assertThat(UiSearch2.search(null, pageSelector, format("Page[%s]", pageName),
-                maxTimeoutSeconds)).isFalse();
     }
 
     /**

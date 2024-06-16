@@ -17,17 +17,14 @@
 package com.android.calculator.functional;
 
 import android.content.Context;
-import android.content.Intent;
-import android.support.test.uiautomator.By;
-import android.support.test.uiautomator.Direction;
-import android.support.test.uiautomator.UiDevice;
-import android.support.test.uiautomator.UiObject2;
-import android.support.test.uiautomator.Until;
 import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.view.inputmethod.InputMethodManager;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.UiObject2;
+import androidx.test.uiautomator.Until;
 
 public class CalculatorTests extends InstrumentationTestCase {
     private CalculatorHelper mCalculatorHelper = null;

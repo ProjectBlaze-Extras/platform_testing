@@ -48,4 +48,7 @@ public class UISnippet implements Snippet {
     public boolean hasUIElementWithText(String text) {
         return mUIHelper.get().hasElementWithText(text);
     }
+
+
+
 }

@@ -28,7 +28,6 @@ native_metric_tests := \
     minikin_perftests \
     mmapPerf \
     netd_benchmark \
-    skia_nanobench \
     VibratorHalIntegrationBenchmark \
     librenderengine_bench
 

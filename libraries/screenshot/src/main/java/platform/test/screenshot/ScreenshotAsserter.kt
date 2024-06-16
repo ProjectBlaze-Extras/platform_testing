@@ -16,9 +16,41 @@
 
 package platform.test.screenshot
 
+import android.graphics.Bitmap
 import android.graphics.Rect
+import androidx.test.runner.screenshot.Screenshot
+import platform.test.screenshot.matchers.BitmapMatcher
+import platform.test.screenshot.matchers.PixelPerfectMatcher
 
 interface ScreenshotAsserter {
     fun assertGoldenImage(goldenId: String, areas: List<Rect>)
     fun assertGoldenImage(goldenId: String)
 }
+
+/**
+ * Factory to create [ScreenshotAsserter] instances.
+ *
+ * Prefer using this interface over of exposing [ScreenshotTestRule] - or its wrappers - directly.
+ */
+interface ScreenshotAsserterFactory {
+    /** Creates a pre-configured [ScreenshotAsserter]. */
+    fun createScreenshotAsserter(
+        config: ScreenshotAsserterConfig = ScreenshotAsserterConfig()
+    ): ScreenshotAsserter
+}
+
+/** Config options to configure new [ScreenshotAsserter] instances. */
+data class ScreenshotAsserterConfig(
+    /**
+     * Strategy to compute whether two bitmaps are the same for the purpose of a screenshot golden
+     * tests
+     */
+    val matcher: BitmapMatcher = PixelPerfectMatcher(),
+    val beforeScreenshot: () -> Unit = {},
+    val afterScreenshot: () -> Unit = {},
+    /**
+     * The [Bitmap] produced by [captureStrategy] will be recycled immediately after assertions are
+     * completed. Therefore, do not retain references to created [Bitmap]s.
+     */
+    val captureStrategy: BitmapSupplier = { Screenshot.capture().bitmap }
+)

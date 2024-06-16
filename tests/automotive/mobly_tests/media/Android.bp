@@ -17,6 +17,60 @@ package {
 }
 
 python_test_host {
+    name: "BTMediaEnabledDuringParingWHenRadioLunchedOnHU",
+    main: "media_test_stream_when_radio_lunched.py",
+    srcs: ["media_test_stream_when_radio_lunched.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test",
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_test_host {
+    name: "BTMediaIsAVRCPTreeDisplayedOnHU",
+    main: "media_test_avrcp_tree_displayed.py",
+    srcs: ["media_test_avrcp_tree_displayed.py"],
+    libs: [
+        "mobly",
+        "utilities",
+        "bluetooth_test",
+    ],
+    test_suites: [
+        "catbox",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    data: [
+        // Package the snippet with the mobly test
+        ":AutomotiveSnippet",
+        ":PhoneSnippet",
+    ],
+    version: {
+        py3: {
+            embedded_launcher: true,
+        },
+    },
+}
+
+python_test_host {
     name: "BTMediaAbleToPlayPauseMediaOnHU",
     main: "media_test_play_media_from_widget.py",
     srcs: ["media_test_play_media_from_widget.py"],
@@ -204,6 +258,33 @@ python_test_host {
          },
      },
  }
+
+python_test_host {
+     name: "BTMediaIsAbleToSwitchAppTest",
+     main: "media_test_switch_app_validation.py",
+     srcs: ["media_test_switch_app_validation.py"],
+      libs: [
+          "mobly",
+          "utilities",
+          "bluetooth_test",
+      ],
+      test_suites: [
+          "catbox",
+      ],
+      test_options: {
+          unit_test: false,
+      },
+      data: [
+          // Package the snippet with the mobly test
+          ":AutomotiveSnippet",
+          ":PhoneSnippet",
+      ],
+      version: {
+          py3: {
+              embedded_launcher: true,
+          },
+      },
+  }
 
  python_test_host {
      name: "BTMediaSynchronizedAfterReconnect",

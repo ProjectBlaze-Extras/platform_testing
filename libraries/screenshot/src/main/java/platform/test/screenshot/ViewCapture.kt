@@ -1,42 +1,60 @@
+/*
+ * Copyright 2024 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+@file:JvmName("ViewCapture")
+
 package platform.test.screenshot
 
-import android.annotation.WorkerThread
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.HardwareRenderer
 import android.graphics.Rect
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.PixelCopy
+import android.view.Surface
 import android.view.SurfaceView
 import android.view.View
-import android.view.ViewGroup
-import android.view.ViewTreeObserver
-import android.view.Window
+import android.view.ViewTreeObserver.OnDrawListener
+import android.view.WindowManager
 import androidx.annotation.RequiresApi
-import androidx.concurrent.futures.ResolvableFuture
+import androidx.concurrent.futures.SuspendToFutureAdapter
 import androidx.test.annotation.ExperimentalTestApi
 import androidx.test.core.internal.os.HandlerExecutor
-import androidx.test.espresso.Espresso
+import androidx.test.internal.platform.ServiceLoaderWrapper
+import androidx.test.internal.platform.os.ControlledLooper
+import androidx.test.internal.platform.os.ControlledLooperSingleton
+import androidx.test.internal.platform.reflect.ReflectiveField
+import androidx.test.internal.platform.reflect.ReflectiveMethod
+import androidx.test.internal.util.Checks.checkState
 import androidx.test.platform.graphics.HardwareRendererCompat
-import com.google.common.util.concurrent.FutureCallback
-import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
-import kotlin.coroutines.suspendCoroutine
-import kotlinx.coroutines.runBlocking
-
-/*
- * This file was forked from androidx/test/core/view/ViewCapture.kt to add [Window] parameter to
- * [View.captureToBitmap].
- * TODO(b/195673633): Remove this fork and use the AndroidX version instead.
- */
+import java.util.function.Consumer
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.android.asCoroutineDispatcher
+import kotlinx.coroutines.job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
- * Asynchronously captures an image of the underlying view into a [Bitmap].
+ * Suspend function for capturing an image of the underlying view into a [Bitmap].
  *
  * For devices below [Build.VERSION_CODES#O] (or if the view's window cannot be determined), the
  * image is obtained using [View#draw]. Otherwise, [PixelCopy] is used.
@@ -44,206 +62,274 @@ import kotlinx.coroutines.runBlocking
  * This method will also enable [HardwareRendererCompat#setDrawingEnabled(boolean)] if required.
  *
  * This API is primarily intended for use in lower layer libraries or frameworks. For test authors,
- * its recommended to use espresso or compose's captureToImage.
+ * it's recommended to use Espresso or Compose's captureToImage.
+ *
+ * If a rect is supplied, this will further crop locally from the bounds of the given view. For
+ * example, if the given view is at (10, 10 - 30, 30) and the rect is (5, 5 - 10, 10), the final
+ * bitmap will be a 5x5 bitmap that spans (15, 15 - 20, 20). This is particularly useful for
+ * Compose, which only has a singular view that contains a hierarchy of nodes.
+ *
+ * This API must be called on the View's handler thread. If you're calling this from another
+ * context, eg directly from the test thread, you can use something like
+ * <pre>{@code
+ *   runBlocking(view.handler.asCoroutineDispatcher()) {
+ *     withTimeout(10.seconds) {
+ *       view.captureToBitmap(rect)
+ *     }
+ *   }
+ * }</pre>
  *
  * This API is currently experimental and subject to change or removal.
  */
 @ExperimentalTestApi
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-fun View.captureToBitmap(window: Window? = null): ListenableFuture<Bitmap> {
-    val bitmapFuture: ResolvableFuture<Bitmap> = ResolvableFuture.create()
-    val mainExecutor = HandlerExecutor(Handler(Looper.getMainLooper()))
-    val isRobolectric = if (Build.FINGERPRINT.contains("robolectric")) true else false
-
-    // disable drawing again if necessary once work is complete
-    if (!HardwareRendererCompat.isDrawingEnabled()) {
-        HardwareRendererCompat.setDrawingEnabled(true)
-        bitmapFuture.addListener({ HardwareRendererCompat.setDrawingEnabled(false) }, mainExecutor)
-    }
-
-    // We need to flush all the events in the UI queue before taking a screenshot.
-    // This can be guaranteed by waiting for an onSuccess callback, as implemented by toBitmap, but
-    // in robolectric mode,
-    //  we have to use this sync call as the procssing is done on the main looper and therefore we
-    // need a sync based solution.
-    if (isRobolectric) {
-        Espresso.onIdle()
-    }
-
-    mainExecutor.execute {
-        if (isRobolectric) {
-            generateBitmap(bitmapFuture, window)
-        } else {
-            val forceRedrawFuture = forceRedraw()
-            forceRedrawFuture.addListener({ generateBitmap(bitmapFuture, window) }, mainExecutor)
+suspend fun View.captureToBitmap(rect: Rect? = null): Bitmap {
+    val mainHandlerDispatcher = Handler(Looper.getMainLooper()).asCoroutineDispatcher()
+    var bitmap: Bitmap? = null
+    val job =
+        CoroutineScope(mainHandlerDispatcher).launch {
+            val hardwareDrawingEnabled = HardwareRendererCompat.isDrawingEnabled()
+            HardwareRendererCompat.setDrawingEnabled(true)
+            // TODO(b/238919862#comment2): temporarily skip forceRedraw on robolectric until
+            // robolectric
+            //  adds proper support for listing to draw events
+            if (!Build.FINGERPRINT.contains("robolectric")) {
+                forceRedraw()
+            }
+            bitmap = generateBitmap(rect)
+            HardwareRendererCompat.setDrawingEnabled(hardwareDrawingEnabled)
         }
-    }
 
-    return bitmapFuture
+    ControlledLooperSingleton.getInstance().drainMainThreadUntilIdle()
+    job.join()
+
+    return bitmap!!
 }
 
-/**
- * Synchronously captures an image of the view into a [Bitmap]. Synchronous equivalent of
- * [captureToBitmap].
- */
-@WorkerThread
+private fun getControlledLooper(): ControlledLooper {
+    return ServiceLoaderWrapper.loadSingleService(ControlledLooper::class.java) {
+        ControlledLooper.NO_OP_CONTROLLED_LOOPER
+    }
+}
+
+/** A ListenableFuture variant of captureToBitmap intended for use from Java. */
 @ExperimentalTestApi
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
-fun View.toBitmap(window: Window? = null): Bitmap {
-    if (Looper.getMainLooper() == Looper.myLooper()) {
-        error("toBitmap() can't be called from the main thread")
-    }
-
-    if (!HardwareRenderer.isDrawingEnabled()) {
-        error("Hardware rendering is not enabled")
-    }
-
-    // Make sure we are idle.
-    Espresso.onIdle()
-
-    val mainExecutor = context.mainExecutor
-    return runBlocking {
-        suspendCoroutine { continuation ->
-            Futures.addCallback(
-                captureToBitmap(window),
-                object : FutureCallback<Bitmap> {
-                    override fun onSuccess(result: Bitmap?) {
-                        continuation.resumeWith(Result.success(result!!))
-                    }
-
-                    override fun onFailure(t: Throwable) {
-                        continuation.resumeWith(Result.failure(t))
-                    }
-                },
-                // We know that we are not on the main thread, so we can block the current
-                // thread and wait for the result in the main thread.
-                mainExecutor,
-            )
-        }
-    }
+fun View.captureToBitmapAsync(rect: Rect? = null): ListenableFuture<Bitmap> {
+    return SuspendToFutureAdapter.launchFuture(Dispatchers.Main) { captureToBitmap(rect) }
 }
 
 /**
  * Trigger a redraw of the given view.
  *
  * Should only be called on UI thread.
- *
- * @return a [ListenableFuture] that will be complete once ui drawing is complete
  */
-// NoClassDefFoundError occurs on API 15
-@RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+// TODO(b/316921934): uncomment once @ExperimentalTestApi is removed
 // @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @ExperimentalTestApi
-fun View.forceRedraw(): ListenableFuture<Void> {
-    val future: ResolvableFuture<Void> = ResolvableFuture.create()
-
-    if (Build.VERSION.SDK_INT >= 29 && isHardwareAccelerated) {
-        viewTreeObserver.registerFrameCommitCallback() { future.set(null) }
-    } else {
-        viewTreeObserver.addOnDrawListener(
-            object : ViewTreeObserver.OnDrawListener {
-                var handled = false
-                override fun onDraw() {
-                    if (!handled) {
-                        handled = true
-                        future.set(null)
-                        // cannot remove on draw listener inside of onDraw
-                        Handler(Looper.getMainLooper()).post {
-                            viewTreeObserver.removeOnDrawListener(this)
-                        }
-                    }
-                }
-            }
-        )
-    }
-    invalidate()
-    return future
-}
-
-private fun View.generateBitmap(
-    bitmapFuture: ResolvableFuture<Bitmap>,
-    window: Window? = null,
-) {
-    if (bitmapFuture.isCancelled) {
+suspend fun View.forceRedraw() {
+    checkState(handler.looper.isCurrentThread, "Must be called from view's handler thread")
+    if (Build.FINGERPRINT.contains("robolectric")) {
+        Log.i("ViewCapture", "Skipping forceRedraw as it is not supported")
         return
     }
 
-    val destBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-    when {
-        Build.VERSION.SDK_INT < 26 -> generateBitmapFromDraw(destBitmap, bitmapFuture)
-        this is SurfaceView -> generateBitmapFromSurfaceViewPixelCopy(destBitmap, bitmapFuture)
-        else -> {
-            val window = window ?: getActivity()?.window
-            if (window != null) {
-                generateBitmapFromPixelCopy(window, destBitmap, bitmapFuture)
+    var drawListener: OnDrawListener? = null
+    try {
+        return suspendCancellableCoroutine<Unit> { cont ->
+            if (Build.VERSION.SDK_INT >= 29 && isHardwareAccelerated) {
+                viewTreeObserver.registerFrameCommitCallback() { cont.resume(Unit) }
             } else {
-                bitmapFuture.setException(IllegalStateException("Could not find window for view."))
+                drawListener =
+                    object : OnDrawListener {
+                        var handled = false
+
+                        override fun onDraw() {
+                            if (!handled) {
+                                handled = true
+                                cont.resume(Unit)
+                            }
+                        }
+                    }
+                viewTreeObserver.addOnDrawListener(drawListener)
             }
+            invalidate()
+        }
+    } finally {
+        // cannot remove on draw listener inside of onDraw
+        if (drawListener != null) {
+            viewTreeObserver.removeOnDrawListener(drawListener)
         }
     }
 }
 
-@SuppressWarnings("NewApi")
-private fun SurfaceView.generateBitmapFromSurfaceViewPixelCopy(
-    destBitmap: Bitmap,
-    bitmapFuture: ResolvableFuture<Bitmap>
-) {
-    val onCopyFinished =
-        PixelCopy.OnPixelCopyFinishedListener { result ->
-            if (result == PixelCopy.SUCCESS) {
-                bitmapFuture.set(destBitmap)
-            } else {
-                bitmapFuture.setException(
-                    RuntimeException(String.format("PixelCopy failed: %d", result))
-                )
-            }
-        }
-    PixelCopy.request(this, null, destBitmap, onCopyFinished, handler)
+private suspend fun View.generateBitmap(rect: Rect? = null): Bitmap {
+    val rectWidth = rect?.width() ?: width
+    val rectHeight = rect?.height() ?: height
+    val destBitmap = Bitmap.createBitmap(rectWidth, rectHeight, Bitmap.Config.ARGB_8888)
+
+    return when {
+        Build.VERSION.SDK_INT < 26 -> generateBitmapFromDraw(destBitmap, rect)
+        Build.VERSION.SDK_INT >= 34 -> generateBitmapFromPixelCopy(destBitmap, rect)
+        this is SurfaceView -> generateBitmapFromSurfaceViewPixelCopy(destBitmap, rect)
+        else -> generateBitmapFromPixelCopy(this.getSurface(), destBitmap, rect)
+    }
 }
 
-internal fun View.generateBitmapFromDraw(
+@RequiresApi(Build.VERSION_CODES.O)
+private suspend fun SurfaceView.generateBitmapFromSurfaceViewPixelCopy(
     destBitmap: Bitmap,
-    bitmapFuture: ResolvableFuture<Bitmap>
-) {
+    rect: Rect?,
+): Bitmap {
+    return suspendCancellableCoroutine<Bitmap> { cont ->
+        val onCopyFinished =
+            PixelCopy.OnPixelCopyFinishedListener { result ->
+                if (result == PixelCopy.SUCCESS) {
+                    cont.resume(destBitmap)
+                } else {
+                    cont.resumeWithException(
+                        RuntimeException(String.format("PixelCopy failed: %d", result))
+                    )
+                }
+            }
+        PixelCopy.request(this, rect, destBitmap, onCopyFinished, handler)
+    }
+}
+
+internal fun View.generateBitmapFromDraw(destBitmap: Bitmap, rect: Rect?): Bitmap {
     destBitmap.density = resources.displayMetrics.densityDpi
     computeScroll()
     val canvas = Canvas(destBitmap)
     canvas.translate((-scrollX).toFloat(), (-scrollY).toFloat())
+    if (rect != null) {
+        canvas.translate((-rect.left).toFloat(), (-rect.top).toFloat())
+    }
+
     draw(canvas)
-    bitmapFuture.set(destBitmap)
+    return destBitmap
 }
 
-private fun View.getActivity(): Activity? {
-    fun Context.getActivity(): Activity? {
-        return when (this) {
-            is Activity -> this
-            is ContextWrapper -> this.baseContext.getActivity()
-            else -> null
-        }
-    }
-    val activity = context.getActivity()
-    if (activity != null) {
-        return activity
-    } else if (this is ViewGroup && this.childCount > 0) {
-        // getActivity is known to fail if View is a DecorView such as specified via espresso's
-        // isRoot().
-        // Make another attempt to find the activity from its first child view
-        return getChildAt(0).getActivity()
-    } else {
-        return null
-    }
-}
-
-private fun View.generateBitmapFromPixelCopy(
-    window: Window,
+/**
+ * Generates a bitmap from the given surface using [PixelCopy].
+ *
+ * This method is effectively the backwards compatibility version of android U's
+ * [PixelCopy.ofWindow(View)], and will be called when running on Android API levels O to T.
+ */
+@RequiresApi(Build.VERSION_CODES.O)
+private suspend fun View.generateBitmapFromPixelCopy(
+    surface: Surface,
     destBitmap: Bitmap,
-    bitmapFuture: ResolvableFuture<Bitmap>
-) {
+    rect: Rect?,
+): Bitmap {
+    return suspendCancellableCoroutine<Bitmap> { cont ->
+        var bounds = getBoundsInSurface()
+        if (rect != null) {
+            bounds =
+                Rect(
+                    bounds.left + rect.left,
+                    bounds.top + rect.top,
+                    bounds.left + rect.right,
+                    bounds.top + rect.bottom,
+                )
+        }
+        val onCopyFinished =
+            PixelCopy.OnPixelCopyFinishedListener { result ->
+                if (result == PixelCopy.SUCCESS) {
+                    cont.resume(destBitmap)
+                } else {
+                    cont.resumeWithException(RuntimeException("PixelCopy failed: $result"))
+                }
+            }
+        PixelCopy.request(
+            surface,
+            bounds,
+            destBitmap,
+            onCopyFinished,
+            Handler(Looper.getMainLooper())
+        )
+    }
+}
+
+/** Returns the Rect indicating the View's coordinates within its containing window. */
+private fun View.getBoundsInWindow(): Rect {
     val locationInWindow = intArrayOf(0, 0)
     getLocationInWindow(locationInWindow)
     val x = locationInWindow[0]
     val y = locationInWindow[1]
-    val boundsInWindow = Rect(x, y, x + width, y + height)
+    return Rect(x, y, x + width, y + height)
+}
 
-    return window.generateBitmapFromPixelCopy(boundsInWindow, destBitmap, bitmapFuture)
+/** Returns the Rect indicating the View's coordinates within its containing surface. */
+private fun View.getBoundsInSurface(): Rect {
+    val locationInSurface = intArrayOf(0, 0)
+    if (Build.VERSION.SDK_INT < 29) {
+        reflectivelyGetLocationInSurface(locationInSurface)
+    } else {
+        getLocationInSurface(locationInSurface)
+    }
+    val x = locationInSurface[0]
+    val y = locationInSurface[1]
+    val bounds = Rect(x, y, x + width, y + height)
+
+    Log.d("ViewCapture", "getBoundsInSurface $bounds")
+
+    return bounds
+}
+
+private fun View.getSurface(): Surface {
+    // copy the implementation of API 34's PixelCopy.ofWindow to get the surface from view
+    val viewRootImpl = ReflectiveMethod<Any>(View::class.java, "getViewRootImpl").invoke(this)
+    return ReflectiveField<Surface>("android.view.ViewRootImpl", "mSurface").get(viewRootImpl)
+}
+
+/**
+ * The backwards compatible version of API 29's [View.getLocationInSurface].
+ *
+ * It makes a best effort attempt to replicate the API 29 logic.
+ */
+@SuppressLint("NewApi")
+private fun View.reflectivelyGetLocationInSurface(locationInSurface: IntArray) {
+    // copy the implementation of API 29+ getLocationInSurface
+    getLocationInWindow(locationInSurface)
+    if (Build.VERSION.SDK_INT < 28) {
+        val viewRootImpl = ReflectiveMethod<Any>(View::class.java, "getViewRootImpl").invoke(this)
+        val windowAttributes =
+            ReflectiveField<WindowManager.LayoutParams>(
+                    "android.view.ViewRootImpl",
+                    "mWindowAttributes"
+                )
+                .get(viewRootImpl)
+        val surfaceInsets =
+            ReflectiveField<Rect>(WindowManager.LayoutParams::class.java, "surfaceInsets")
+                .get(windowAttributes)
+        locationInSurface[0] += surfaceInsets.left
+        locationInSurface[1] += surfaceInsets.top
+    } else {
+        // ART restrictions introduced in API 29 disallow reflective access to mWindowAttributes
+        Log.w(
+            "ViewCapture",
+            "Could not calculate offset of view in surface on API 28," +
+                " resulting image may have incorrect positioning",
+        )
+    }
+}
+
+private suspend fun View.generateBitmapFromPixelCopy(
+    destBitmap: Bitmap,
+    rect: Rect? = null,
+): Bitmap {
+    return suspendCancellableCoroutine<Bitmap> { cont ->
+        val request =
+            PixelCopy.Request.Builder.ofWindow(this)
+                .setSourceRect(rect ?: getBoundsInWindow())
+                .setDestinationBitmap(destBitmap)
+                .build()
+        val onCopyFinished =
+            Consumer<PixelCopy.Result> { result ->
+                if (result.status == PixelCopy.SUCCESS) {
+                    cont.resume(result.bitmap)
+                } else {
+                    cont.resumeWithException(RuntimeException("PixelCopy failed: $(result.status)"))
+                }
+            }
+        PixelCopy.request(request, HandlerExecutor(handler), onCopyFinished)
+    }
 }

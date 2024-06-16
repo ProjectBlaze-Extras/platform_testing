@@ -24,13 +24,13 @@ import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.support.test.launcherhelper.ILauncherStrategy;
-import android.support.test.launcherhelper.LauncherStrategyFactory;
-import android.support.test.uiautomator.UiDevice;
+import android.support.test.launcherhelper2.ILauncherStrategy;
+import android.support.test.launcherhelper2.LauncherStrategyFactory;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.rule.logging.AtraceLogger;
+import androidx.test.uiautomator.UiDevice;
 
 import com.android.launcher3.tapl.LauncherInstrumentation;
 import com.android.launcher3.tapl.Workspace;

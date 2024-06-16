@@ -42,4 +42,3 @@ java_test_host {
 
     required: ["layoutlib"],
 }
-

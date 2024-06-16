@@ -19,7 +19,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -31,32 +30,33 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.annotation.SuppressLint;
 import android.app.Instrumentation;
-import android.device.collectors.PerfettoListener.WakeLockAcquirer;
-import android.device.collectors.PerfettoListener.WakeLockContext;
-import android.device.collectors.PerfettoListener.WakeLockReleaser;
 import android.os.Bundle;
+
 import androidx.test.runner.AndroidJUnit4;
+
 import com.android.helpers.PerfettoHelper;
-import java.util.HashMap;
-import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.Description;
-import org.junit.runner.notification.Failure;
 import org.junit.runner.Result;
 import org.junit.runner.RunWith;
+import org.junit.runner.notification.Failure;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Android Unit tests for {@link PerfettoListener}.
  *
- * To run:
- * atest CollectorDeviceLibTest:android.device.collectors.PerfettoListenerTest
+ * <p>To run: atest CollectorDeviceLibTest:android.device.collectors.PerfettoListenerTest
  */
+@SuppressLint("VisibleForTests")
 @RunWith(AndroidJUnit4.class)
 public class PerfettoListenerTest {
 
@@ -76,9 +76,9 @@ public class PerfettoListenerTest {
 
     @Spy private PerfettoHelper mPerfettoHelper;
 
-    @Mock private WakeLockContext mWakeLockContext;
-    @Mock private WakeLockAcquirer mWakelLockAcquirer;
-    @Mock private WakeLockReleaser mWakeLockReleaser;
+    @Mock private PerfettoTracingStrategy.WakeLockContext mWakeLockContext;
+    @Mock private PerfettoTracingStrategy.WakeLockAcquirer mWakelLockAcquirer;
+    @Mock private PerfettoTracingStrategy.WakeLockReleaser mWakeLockReleaser;
 
     @Before
     public void setUp() {
@@ -88,7 +88,7 @@ public class PerfettoListenerTest {
         mTest2Desc = Description.createTestDescription("run", "test2");
         doAnswer(
                         invocation -> {
-                            Runnable runnable = (Runnable) invocation.getArgument(0);
+                            Runnable runnable = invocation.getArgument(0);
                             runnable.run();
                             return null;
                         })
@@ -96,19 +96,39 @@ public class PerfettoListenerTest {
                 .run(any());
     }
 
+    private PerfettoTracingStrategy initStrategy(Bundle b) {
+        if (Boolean.parseBoolean(b.getString(PerfettoListener.COLLECT_PER_RUN))) {
+            return new PerfettoTracingPerRunStrategy(
+                    mPerfettoHelper,
+                    mInstrumentation,
+                    mWakeLockContext,
+                    () -> null,
+                    mWakelLockAcquirer,
+                    mWakeLockReleaser);
+        } else if (Boolean.parseBoolean(b.getString(PerfettoListener.COLLECT_PER_CLASS))) {
+            return new PerfettoTracingPerClassStrategy(
+                    mPerfettoHelper,
+                    mInstrumentation,
+                    mWakeLockContext,
+                    () -> null,
+                    mWakelLockAcquirer,
+                    mWakeLockReleaser);
+        }
+
+        return new PerfettoTracingPerTestStrategy(
+                mPerfettoHelper,
+                mInstrumentation,
+                mInvocationCount,
+                mWakeLockContext,
+                () -> null,
+                mWakelLockAcquirer,
+                mWakeLockReleaser);
+    }
+
     private PerfettoListener initListener(Bundle b) {
         mInvocationCount = new HashMap<>();
 
-        PerfettoListener listener =
-                spy(
-                        new PerfettoListener(
-                                b,
-                                mPerfettoHelper,
-                                mInvocationCount,
-                                mWakeLockContext,
-                                () -> null,
-                                mWakelLockAcquirer,
-                                mWakeLockReleaser));
+        PerfettoListener listener = spy(new PerfettoListener(b, initStrategy(b)));
 
         mDataRecord = listener.createDataRecord();
         listener.setInstrumentation(mInstrumentation);
@@ -122,19 +142,22 @@ public class PerfettoListenerTest {
     public void testPerfettoPerTestSuccessFlow() throws Exception {
         Bundle b = new Bundle();
         mListener = initListener(b);
-        doReturn(true).when(mPerfettoHelper).startCollecting(anyString(), anyBoolean());
+        doReturn(true).when(mPerfettoHelper).startCollecting();
         doReturn(true).when(mPerfettoHelper).stopCollecting(anyLong(), anyString());
         // Test run start behavior
         mListener.testRunStarted(mRunDesc);
 
         // Test test start behavior
         mListener.testStarted(mTest1Desc);
-        verify(mPerfettoHelper, times(1)).startCollecting(anyString(), anyBoolean());
+        verify(mPerfettoHelper, times(1)).startCollecting();
         mListener.onTestEnd(mDataRecord, mTest1Desc);
-        verify(mPerfettoHelper, times(1)).stopCollecting(anyLong(), eq(
-                "/sdcard/test_results/run_test1/PerfettoListener_1_Proxy/"
-                + "perfetto_run_test1-1.perfetto-trace"));
-
+        verify(mPerfettoHelper, times(1))
+                .stopCollecting(
+                        anyLong(),
+                        eq(
+                                "/sdcard/test_results/run_test1/"
+                                        + "PerfettoTracingPerTestStrategy/"
+                                        + "perfetto_run_test1-1.perfetto-trace"));
     }
 
     /*
@@ -144,17 +167,17 @@ public class PerfettoListenerTest {
     @Test
     public void testPerfettoPerTestFailureFlowDefault() throws Exception {
         Bundle b = new Bundle();
-        b.putString(PerfettoListener.SKIP_TEST_FAILURE_METRICS, "false");
+        b.putString(PerfettoTracingStrategy.SKIP_TEST_FAILURE_METRICS, "false");
         mListener = initListener(b);
 
-        doReturn(true).when(mPerfettoHelper).startCollecting(anyString(), anyBoolean());
+        doReturn(true).when(mPerfettoHelper).startCollecting();
         doReturn(true).when(mPerfettoHelper).stopCollecting(anyLong(), anyString());
         // Test run start behavior
         mListener.testRunStarted(mRunDesc);
 
         // Test test start behavior
         mListener.testStarted(mTest1Desc);
-        verify(mPerfettoHelper, times(1)).startCollecting(anyString(), anyBoolean());
+        verify(mPerfettoHelper, times(1)).startCollecting();
 
         // Test fail behaviour
         Failure failureDesc = new Failure(FAKE_TEST_DESCRIPTION,
@@ -172,17 +195,17 @@ public class PerfettoListenerTest {
     @Test
     public void testPerfettoPerTestFailureFlowWithSkipMmetrics() throws Exception {
         Bundle b = new Bundle();
-        b.putString(PerfettoListener.SKIP_TEST_FAILURE_METRICS, "true");
+        b.putString(PerfettoTracingStrategy.SKIP_TEST_FAILURE_METRICS, "true");
         mListener = initListener(b);
 
-        doReturn(true).when(mPerfettoHelper).startCollecting(anyString(), anyBoolean());
+        doReturn(true).when(mPerfettoHelper).startCollecting();
         doReturn(true).when(mPerfettoHelper).stopPerfetto(anyInt());
         // Test run start behavior
         mListener.testRunStarted(mRunDesc);
 
         // Test test start behavior
         mListener.testStarted(mTest1Desc);
-        verify(mPerfettoHelper, times(1)).startCollecting(anyString(), anyBoolean());
+        verify(mPerfettoHelper, times(1)).startCollecting();
 
         // Test fail behaviour
         Failure failureDesc = new Failure(FAKE_TEST_DESCRIPTION,
@@ -200,7 +223,7 @@ public class PerfettoListenerTest {
     public void testPerfettoDefaultStartWaitTime() throws Exception {
         Bundle b = new Bundle();
         mListener = initListener(b);
-        doReturn(true).when(mPerfettoHelper).startCollecting(anyString(), anyBoolean());
+        doReturn(true).when(mPerfettoHelper).startCollecting();
         doReturn(true).when(mPerfettoHelper).stopCollecting(anyLong(), anyString());
         // Test run start behavior
         mListener.testRunStarted(mRunDesc);
@@ -209,12 +232,13 @@ public class PerfettoListenerTest {
         long startTime = System.currentTimeMillis();
         mListener.testStarted(mTest1Desc);
         long endTime = System.currentTimeMillis();
-        verify(mPerfettoHelper, times(1)).startCollecting(anyString(), anyBoolean());
+        verify(mPerfettoHelper, times(1)).startCollecting();
         mListener.onTestEnd(mDataRecord, mTest1Desc);
         verify(mPerfettoHelper, times(1)).stopCollecting(anyLong(), anyString());
         // Test for wait time of 3 secs before starting the trace.
-        assertTrue((endTime - startTime) >= Long
-                .parseLong(PerfettoListener.DEFAULT_START_WAIT_TIME_MSECS));
+        assertTrue(
+                (endTime - startTime)
+                        >= Long.parseLong(PerfettoTracingStrategy.DEFAULT_START_WAIT_TIME_MSECS));
     }
 
     /*
@@ -224,9 +248,9 @@ public class PerfettoListenerTest {
     public void testPerfettoCustomStartWaitTime() throws Exception {
 
         Bundle b = new Bundle();
-        b.putString(PerfettoListener.PERFETTO_START_WAIT_TIME_ARG, "10000");
+        b.putString(PerfettoTracingStrategy.PERFETTO_START_WAIT_TIME_ARG, "10000");
         mListener = initListener(b);
-        doReturn(true).when(mPerfettoHelper).startCollecting(anyString(), anyBoolean());
+        doReturn(true).when(mPerfettoHelper).startCollecting();
         doReturn(true).when(mPerfettoHelper).stopCollecting(anyLong(), anyString());
         // Test run start behavior
         mListener.testRunStarted(mRunDesc);
@@ -235,7 +259,7 @@ public class PerfettoListenerTest {
         long startTime = System.currentTimeMillis();
         mListener.testStarted(mTest1Desc);
         long endTime = System.currentTimeMillis();
-        verify(mPerfettoHelper, times(1)).startCollecting(anyString(), anyBoolean());
+        verify(mPerfettoHelper, times(1)).startCollecting();
         mListener.onTestEnd(mDataRecord, mTest1Desc);
         verify(mPerfettoHelper, times(1)).stopCollecting(anyLong(), anyString());
         assertTrue((endTime - startTime) >= 10000);
@@ -250,14 +274,14 @@ public class PerfettoListenerTest {
         Bundle b = new Bundle();
         b.putString(PerfettoListener.COLLECT_PER_RUN, "true");
         mListener = initListener(b);
-        doReturn(true).when(mPerfettoHelper).startCollecting(anyString(), anyBoolean());
+        doReturn(true).when(mPerfettoHelper).startCollecting();
         doReturn(true).when(mPerfettoHelper).stopCollecting(anyLong(), anyString());
 
         // Test run start behavior
         mListener.testRunStarted(FAKE_DESCRIPTION);
-        verify(mPerfettoHelper, times(1)).startCollecting(anyString(), anyBoolean());
+        verify(mPerfettoHelper, times(1)).startCollecting();
         mListener.testStarted(mTest1Desc);
-        verify(mPerfettoHelper, times(1)).startCollecting(anyString(), anyBoolean());
+        verify(mPerfettoHelper, times(1)).startCollecting();
         mListener.testFinished(mTest1Desc);
         verify(mPerfettoHelper, times(0)).stopCollecting(anyLong(), anyString());
         mListener.testRunFinished(new Result());
@@ -300,7 +324,7 @@ public class PerfettoListenerTest {
         b.putString(PerfettoListener.COLLECT_PER_RUN, "true");
         mListener = initListener(b);
 
-        doReturn(true).when(mPerfettoHelper).startCollecting(anyString(), anyBoolean());
+        doReturn(true).when(mPerfettoHelper).startCollecting();
         doReturn(true).when(mPerfettoHelper).stopCollecting(anyLong(), anyString());
 
         // Test run start behavior
@@ -319,7 +343,7 @@ public class PerfettoListenerTest {
         Bundle b = new Bundle();
         mListener = initListener(b);
 
-        doReturn(true).when(mPerfettoHelper).startCollecting(anyString(), anyBoolean());
+        doReturn(true).when(mPerfettoHelper).startCollecting();
         doReturn(true).when(mPerfettoHelper).stopCollecting(anyLong(), anyString());
 
         // Test run start behavior
@@ -336,11 +360,11 @@ public class PerfettoListenerTest {
     @Test
     public void testHoldWakeLockOnTestRunStart() throws Exception {
         Bundle b = new Bundle();
-        b.putString(PerfettoListener.HOLD_WAKELOCK_WHILE_COLLECTING, "true");
+        b.putString(PerfettoTracingStrategy.HOLD_WAKELOCK_WHILE_COLLECTING, "true");
         b.putString(PerfettoListener.COLLECT_PER_RUN, "true");
         mListener = initListener(b);
 
-        doReturn(true).when(mPerfettoHelper).startCollecting(anyString(), anyBoolean());
+        doReturn(true).when(mPerfettoHelper).startCollecting();
         doReturn(true).when(mPerfettoHelper).stopCollecting(anyLong(), anyString());
 
         // Test run start behavior
@@ -355,10 +379,10 @@ public class PerfettoListenerTest {
     @Test
     public void testHoldWakeLockOnTestStart() throws Exception {
         Bundle b = new Bundle();
-        b.putString(PerfettoListener.HOLD_WAKELOCK_WHILE_COLLECTING, "true");
+        b.putString(PerfettoTracingStrategy.HOLD_WAKELOCK_WHILE_COLLECTING, "true");
         mListener = initListener(b);
 
-        doReturn(true).when(mPerfettoHelper).startCollecting(anyString(), anyBoolean());
+        doReturn(true).when(mPerfettoHelper).startCollecting();
         doReturn(true).when(mPerfettoHelper).stopCollecting(anyLong(), anyString());
 
         // Test run start behavior
@@ -376,10 +400,10 @@ public class PerfettoListenerTest {
     @Test
     public void testHoldWakeLockOnTestEnd() throws Exception {
         Bundle b = new Bundle();
-        b.putString(PerfettoListener.HOLD_WAKELOCK_WHILE_COLLECTING, "true");
+        b.putString(PerfettoTracingStrategy.HOLD_WAKELOCK_WHILE_COLLECTING, "true");
         mListener = initListener(b);
 
-        doReturn(true).when(mPerfettoHelper).startCollecting(anyString(), anyBoolean());
+        doReturn(true).when(mPerfettoHelper).startCollecting();
         doReturn(true).when(mPerfettoHelper).stopCollecting(anyLong(), anyString());
 
         // Test run start behavior
@@ -401,11 +425,11 @@ public class PerfettoListenerTest {
     @Test
     public void testHoldWakeLockOnTestRunEnd() throws Exception {
         Bundle b = new Bundle();
-        b.putString(PerfettoListener.HOLD_WAKELOCK_WHILE_COLLECTING, "true");
+        b.putString(PerfettoTracingStrategy.HOLD_WAKELOCK_WHILE_COLLECTING, "true");
         b.putString(PerfettoListener.COLLECT_PER_RUN, "true");
         mListener = initListener(b);
 
-        doReturn(true).when(mPerfettoHelper).startCollecting(anyString(), anyBoolean());
+        doReturn(true).when(mPerfettoHelper).startCollecting();
         doReturn(true).when(mPerfettoHelper).stopCollecting(anyLong(), anyString());
 
         // Test run start behavior
@@ -430,11 +454,11 @@ public class PerfettoListenerTest {
         Bundle b = new Bundle();
         b.putString(PerfettoListener.COLLECT_PER_RUN, "true");
         mListener = initListener(b);
-        doReturn(false).when(mPerfettoHelper).startCollecting(anyString(), anyBoolean());
+        doReturn(false).when(mPerfettoHelper).startCollecting();
 
         // Test run start behavior
         mListener.testRunStarted(FAKE_DESCRIPTION);
-        verify(mPerfettoHelper, times(1)).startCollecting(anyString(), anyBoolean());
+        verify(mPerfettoHelper, times(1)).startCollecting();
         mListener.testRunFinished(new Result());
         verify(mPerfettoHelper, times(0)).stopCollecting(anyLong(), anyString());
     }
@@ -446,14 +470,14 @@ public class PerfettoListenerTest {
     public void testPerfettoStartFailureFlow() throws Exception {
         Bundle b = new Bundle();
         mListener = initListener(b);
-        doReturn(false).when(mPerfettoHelper).startCollecting(anyString(), anyBoolean());
+        doReturn(false).when(mPerfettoHelper).startCollecting();
 
         // Test run start behavior
         mListener.testRunStarted(mRunDesc);
 
         // Test test start behavior
         mListener.testStarted(mTest1Desc);
-        verify(mPerfettoHelper, times(1)).startCollecting(anyString(), anyBoolean());
+        verify(mPerfettoHelper, times(1)).startCollecting();
         mListener.onTestEnd(mDataRecord, mTest1Desc);
         verify(mPerfettoHelper, times(0)).stopCollecting(anyLong(), anyString());
     }
@@ -466,7 +490,7 @@ public class PerfettoListenerTest {
     public void testPerfettoInvocationCount() throws Exception {
         Bundle b = new Bundle();
         mListener = initListener(b);
-        doReturn(true).when(mPerfettoHelper).startCollecting(anyString(), anyBoolean());
+        doReturn(true).when(mPerfettoHelper).startCollecting();
         doReturn(true).when(mPerfettoHelper).stopCollecting(anyLong(), anyString());
 
         // Test run start behavior
@@ -474,29 +498,29 @@ public class PerfettoListenerTest {
 
         // Test1 invocation 1 start behavior
         mListener.testStarted(mTest1Desc);
-        verify(mPerfettoHelper, times(1)).startCollecting(anyString(), anyBoolean());
+        verify(mPerfettoHelper, times(1)).startCollecting();
         mListener.onTestEnd(mDataRecord, mTest1Desc);
         verify(mPerfettoHelper, times(1)).stopCollecting(anyLong(), anyString());
 
         // Test1 invocation 2 start behaviour
         mListener.testStarted(mTest1Desc);
-        verify(mPerfettoHelper, times(2)).startCollecting(anyString(), anyBoolean());
+        verify(mPerfettoHelper, times(2)).startCollecting();
         mListener.onTestEnd(mDataRecord, mTest1Desc);
         verify(mPerfettoHelper, times(2)).stopCollecting(anyLong(), anyString());
 
         // Test2 invocation 1 start behaviour
         mListener.testStarted(mTest2Desc);
-        verify(mPerfettoHelper, times(3)).startCollecting(anyString(), anyBoolean());
+        verify(mPerfettoHelper, times(3)).startCollecting();
         mDataRecord = mListener.createDataRecord();
         mListener.onTestEnd(mDataRecord, mTest2Desc);
         verify(mPerfettoHelper, times(3)).stopCollecting(anyLong(), anyString());
 
-        // Check if the the test count is incremented properly.
+        // Check if the test count is incremented properly.
         assertEquals(2, (int) mInvocationCount.get(mListener.getTestFileName(mTest1Desc)));
         assertEquals(1, (int) mInvocationCount.get(mListener.getTestFileName(mTest2Desc)));
 
     }
-    
+
     /*
      * Verify perfetto start and stop collection methods called when the text
      * proto config option is enabled
@@ -504,16 +528,16 @@ public class PerfettoListenerTest {
     @Test
     public void testPerfettoSuccessFlowWithTextConfig() throws Exception {
         Bundle b = new Bundle();
-        b.putString(PerfettoListener.PERFETTO_CONFIG_TEXT_PROTO, "true");
+        b.putString(PerfettoTracingStrategy.PERFETTO_CONFIG_TEXT_PROTO, "true");
         mListener = initListener(b);
-        doReturn(true).when(mPerfettoHelper).startCollecting(anyString(), anyBoolean());
+        doReturn(true).when(mPerfettoHelper).startCollecting();
         doReturn(true).when(mPerfettoHelper).stopCollecting(anyLong(), anyString());
         // Test run start behavior
         mListener.testRunStarted(mRunDesc);
 
-        // Test test start behavior
+        // Test tetest start behavior
         mListener.testStarted(mTest1Desc);
-        verify(mPerfettoHelper, times(1)).startCollecting(anyString(), anyBoolean());
+        verify(mPerfettoHelper, times(1)).startCollecting();
         mListener.onTestEnd(mDataRecord, mTest1Desc);
         verify(mPerfettoHelper, times(1)).stopCollecting(anyLong(), anyString());
 
@@ -528,7 +552,7 @@ public class PerfettoListenerTest {
     public void testPerfettoTestNameWithSpaces() throws Exception {
         Bundle b = new Bundle();
         mListener = initListener(b);
-        doReturn(true).when(mPerfettoHelper).startCollecting(anyString(), anyBoolean());
+        doReturn(true).when(mPerfettoHelper).startCollecting();
         doReturn(true).when(mPerfettoHelper).stopCollecting(anyLong(), anyString());
         // Test run start behavior
         mListener.testRunStarted(mRunDesc);
@@ -537,12 +561,14 @@ public class PerfettoListenerTest {
                 "test1 456");
         // Test test start behavior
         mListener.testStarted(mTest1DescWithSpaces);
-        verify(mPerfettoHelper, times(1)).startCollecting(anyString(), anyBoolean());
+        verify(mPerfettoHelper, times(1)).startCollecting();
         mListener.onTestEnd(mDataRecord, mTest1DescWithSpaces);
-        verify(mPerfettoHelper, times(1)).stopCollecting(anyLong(), eq(
-                "/sdcard/test_results/run#123_test1#456/PerfettoListener_1_Proxy/"
-                + "perfetto_run#123_test1#456-1.perfetto-trace"));
-
+        verify(mPerfettoHelper, times(1))
+                .stopCollecting(
+                        anyLong(),
+                        eq(
+                                "/sdcard/test_results/run#123_test1#456/"
+                                        + "PerfettoTracingPerTestStrategy/"
+                                        + "perfetto_run#123_test1#456-1.perfetto-trace"));
     }
-
 }

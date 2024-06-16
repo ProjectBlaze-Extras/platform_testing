@@ -24,7 +24,7 @@
 import logging
 
 from mobly import asserts
-from mobly import base_test
+from bluetooth_test import bluetooth_base_test
 from mobly.controllers import android_device
 
 from utilities.main_utils import common_main
@@ -33,28 +33,8 @@ from utilities import spectatio_utils
 from utilities import bt_utils
 
 
-class ImportAddressDetailsTest(base_test.BaseTestClass):
+class ImportAddressDetailsTest(bluetooth_base_test.BluetoothBaseTest):
     VCF_ADDRESS_HEADER = "ADR"
-
-    def setup_class(self):
-        # Registering android_device controller module, and declaring that the test
-        # requires at least two Android devices.
-        self.ads = self.register_controller(android_device, min_number=2)
-        # # The device used to discover Bluetooth devices.
-        self.discoverer = android_device.get_device(
-            self.ads, label='auto')
-        # # Sets the tag that represents this device in logs.
-        self.discoverer.debug_tag = 'discoverer'
-        # # The device that is expected to be discovered
-        self.target = android_device.get_device(self.ads, label='phone')
-        self.target.debug_tag = 'target'
-        #
-        self.target.load_snippet('mbs', android_device.MBS_PACKAGE)
-        self.discoverer.load_snippet('mbs', android_device.MBS_PACKAGE)
-        #
-        self.call_utils = (spectatio_utils.CallUtils(self.discoverer))
-        #
-        self.bt_utils = (bt_utils.BTUtils(self.discoverer, self.target))
 
     def get_first_address(self, vcf_path):
         """ Reads the first address from the given vcf file'"""
@@ -63,7 +43,6 @@ class ImportAddressDetailsTest(base_test.BaseTestClass):
             for line in vcf_file:
                 if line.startswith(self.VCF_ADDRESS_HEADER):
                     return line
-
 
 
     def setup_test(self):
@@ -98,8 +77,7 @@ class ImportAddressDetailsTest(base_test.BaseTestClass):
 
     def teardown_test(self):
         # Turn Bluetooth off on both devices after test finishes.
-        self.target.mbs.btDisable()
-        self.discoverer.mbs.btDisable()
+        super().teardown_test()
 
     def compare_display_address_to_vcf_line(self, display_address, vcf_address):
         """Confirm that each portion of a display-able street address appears in the vcf line.

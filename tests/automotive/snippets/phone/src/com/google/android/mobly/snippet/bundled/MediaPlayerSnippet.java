@@ -137,7 +137,6 @@ public class MediaPlayerSnippet implements Snippet {
         return mAutoMediaHelper.get().isNowPlayingLabelVisible();
     }
 
-
     @Rpc(description = "Is Playlist icon visible")
     public boolean isPlaylistIconVisible() {
         return mAutoMediaHelper.get().isPlaylistIconVisible();
@@ -146,5 +145,10 @@ public class MediaPlayerSnippet implements Snippet {
     @Rpc(description = "Click on PLaylist icon")
     public void clickOnPlaylistIcon() {
         mAutoMediaHelper.get().clickOnPlaylistIcon();
+    }
+
+    @Rpc(description = "Grant restricted parmissions")
+    public void grantRestrictedPermissionsForBTMedia(String permission) {
+        mAutoMediaHelper.get().grantRestrictedPermissionsForBTMedia(permission);
     }
 }

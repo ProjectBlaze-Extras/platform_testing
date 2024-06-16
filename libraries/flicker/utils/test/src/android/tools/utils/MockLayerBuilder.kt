@@ -16,15 +16,15 @@
 
 package android.tools.utils
 
-import android.tools.common.datatypes.ActiveBuffer
-import android.tools.common.datatypes.Color
-import android.tools.common.datatypes.Matrix33
-import android.tools.common.datatypes.Rect
-import android.tools.common.datatypes.Region
-import android.tools.common.traces.surfaceflinger.Flag
-import android.tools.common.traces.surfaceflinger.HwcCompositionType
-import android.tools.common.traces.surfaceflinger.Layer
-import android.tools.common.traces.surfaceflinger.Transform
+import android.tools.datatypes.ActiveBuffer
+import android.tools.datatypes.Color
+import android.tools.datatypes.Matrix33
+import android.tools.datatypes.Rect
+import android.tools.datatypes.Region
+import android.tools.traces.surfaceflinger.Flag
+import android.tools.traces.surfaceflinger.HwcCompositionType
+import android.tools.traces.surfaceflinger.Layer
+import android.tools.traces.surfaceflinger.Transform
 
 class MockLayerBuilder(private val name: String) {
     companion object {

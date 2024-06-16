@@ -34,7 +34,6 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -153,7 +152,7 @@ public class AnnotationsRetriever {
     private static <T extends Annotation> Set<String> getFlagsForAnnotation(
             FlagsAnnotation<T> flagsAnnotation, Collection<Annotation> annotations) {
         Class<T> annotationType = flagsAnnotation.mAnnotationType;
-        List<T> results = new ArrayList<>();
+        Set<String> results = new HashSet<>();
         Queue<Annotation> annotationQueue = new ArrayDeque<>();
         Set<Class<? extends Annotation>> visitedAnnotations = new HashSet<>();
         annotationQueue.addAll(annotations);
@@ -161,21 +160,14 @@ public class AnnotationsRetriever {
             Annotation annotation = annotationQueue.poll();
             Class<? extends Annotation> currentAnnotationType = annotation.annotationType();
             if (currentAnnotationType.equals(annotationType)) {
-                results.add((T) annotation);
+                results.addAll(flagsAnnotation.getFlagsSet((T) annotation));
             } else if (!KNOWN_UNRELATED_ANNOTATIONS.contains(currentAnnotationType)
                     && !visitedAnnotations.contains(currentAnnotationType)) {
                 annotationQueue.addAll(List.of(annotation.annotationType().getAnnotations()));
                 visitedAnnotations.add(currentAnnotationType);
             }
         }
-
-        if (results.size() > 1) {
-            throw new RuntimeException(
-                    String.format(
-                            "Annotation %s has been specified multiple time: %s",
-                            annotationType, results));
-        }
-        return results.isEmpty() ? Set.of() : flagsAnnotation.getFlagsSet(results.get(0));
+        return results;
     }
 
     /** Contains all feature flag related annotations. */

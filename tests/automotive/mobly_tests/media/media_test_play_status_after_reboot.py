@@ -29,6 +29,7 @@ class IsSongPLayingAfterRebootTest(bluetooth_base_test.BluetoothBaseTest):
         self.common_utils = CommonUtils(self.target, self.discoverer)
 
     def setup_test(self):
+        self.common_utils.grant_local_mac_address_permission()
         self.common_utils.enable_wifi_on_phone_device()
         self.bt_utils.pair_primary_to_secondary()
 

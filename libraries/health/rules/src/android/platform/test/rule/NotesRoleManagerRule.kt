@@ -18,6 +18,7 @@ package android.platform.test.rule
 import android.app.role.RoleManager
 import android.os.Build
 import android.platform.helpers.notesrole.NotesRoleUtil
+import android.provider.Settings
 import org.junit.runner.Description
 
 /**
@@ -34,6 +35,7 @@ class NotesRoleManagerRule
 constructor(
     private val requiredAndroidVersion: Int = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
     private val requiredNotesRoleHolderPackage: String,
+    private val isStylusEverUsed: Boolean = true,
 ) : TestWatcher() {
 
     /**
@@ -41,8 +43,10 @@ constructor(
      * current [RoleManager.ROLE_NOTES].
      */
     val utils = NotesRoleUtil(context)
+    private val contentResolver = context.contentResolver
 
     private var prevNotesRoleHolder: String? = null
+    private var previousStylusEverUsed: Int = 1
 
     override fun starting(description: Description?) {
         super.starting(description)
@@ -61,6 +65,10 @@ constructor(
 
         // Kill the supplied Notes role holder app to avoid issues during verification in test.
         utils.forceStopPackage(requiredNotesRoleHolderPackage)
+
+        previousStylusEverUsed =
+            Settings.Global.getInt(contentResolver, Settings.Global.STYLUS_EVER_USED, /* def= */ 0)
+        setStylusEverUsed(if (isStylusEverUsed) 1 else 0)
     }
 
     override fun finished(description: Description?) {
@@ -69,5 +77,11 @@ constructor(
         utils.forceStopPackage(requiredNotesRoleHolderPackage)
 
         prevNotesRoleHolder?.let { utils.setRoleHolder(it) }
+
+        setStylusEverUsed(previousStylusEverUsed)
+    }
+
+    private fun setStylusEverUsed(stylusEverUsed: Int) {
+        Settings.Global.putInt(contentResolver, Settings.Global.STYLUS_EVER_USED, stylusEverUsed)
     }
 }

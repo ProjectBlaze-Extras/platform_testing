@@ -21,7 +21,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.provider.AlarmClock
-import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.traces.component.ComponentNameMatcher
 import androidx.test.platform.app.InstrumentationRegistry
 
 /** Helper to launch the Camera app. */

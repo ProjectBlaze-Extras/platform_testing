@@ -17,10 +17,10 @@
 package android.platform.helpers.ui;
 
 import android.app.Instrumentation;
-import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.uiautomator.UiDevice;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

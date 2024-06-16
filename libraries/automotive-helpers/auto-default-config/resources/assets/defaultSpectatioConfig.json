@@ -75,10 +75,33 @@
     "OPEN_CAR_UI": "am crash com.android.car"
   },
   "UI_ELEMENTS": {
-    "MAKE_CALL": {
+
+
+
+    "MOBILE_PHONE_ICON": {
+      "TYPE": "TEXT",
+      "VALUE": "Phone"
+    },
+    "MOBILE_CALL_BUTTON": {
+      "TYPE": "MULTIPLE",
+      "SPECIFIERS": [
+        {
+          "TYPE": "TEXT",
+          "VALUE": "Call"
+        },
+        {
+          "TYPE": "CLASS",
+          "VALUE": "android.widget.Button"
+        }
+      ]
+    },
+    "MOBILE_DIALPAD_ICON": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "call_button",
-      "PACKAGE": "com.android.car.dialer"
+      "VALUE": "dialpad_fab"
+    },
+    "MOBILE_DIALPAD_INPUT": {
+      "TYPE": "CLASS",
+      "VALUE": "android.widget.EditText"
     },
     "END_CALL": {
       "TYPE": "RESOURCE_ID",
@@ -254,6 +277,31 @@
       "VALUE": "call_action_id",
       "PACKAGE": "com.android.car.dialer"
     },
+    "DIALER_CONNECTED_PHONE_NAME": {
+      "TYPE": "MULTIPLE",
+      "SPECIFIERS": [
+        {
+          "TYPE": "RESOURCE_ID",
+          "VALUE": "summary"
+        },
+        {
+          "TYPE": "HAS_ANCESTOR",
+          "MAX_DEPTH": 1,
+          "ANCESTOR": {
+            "TYPE": "HAS_DESCENDANT",
+            "MAX_DEPTH": 1,
+            "DESCENDANT": {
+              "TYPE": "TEXT",
+              "VALUE": "Connected Phone"
+            }
+          }
+        }
+      ]
+    },
+    "DIALER_SETTINGS_BUTTON": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "car_ui_toolbar_menu_item_icon_container"
+    },
     "SEARCH_CONTACT": {
       "TYPE": "RESOURCE_ID",
       "VALUE": "car_ui_toolbar_menu_item_icon_container"
@@ -422,8 +470,7 @@
     },
     "HOME_MAP_CARD": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "scene_card",
-      "PACKAGE": "com.android.car.carlauncher"
+      "VALUE": "scene_card"
     },
     "STATUS_BAR_BRIGHTNESS_BUTTON": {
       "TYPE": "RESOURCE_ID",
@@ -548,8 +595,8 @@
       "PACKAGE": "com.android.car.carlauncher"
     },
     "SECURITY_SETTINGS_TITLE": {
-      "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_toolbar_title"
+      "TYPE": "TEXT",
+      "VALUE": "Security"
     },
     "SECURITY_SETTINGS_LOCK_TYPE_PASSWORD": {
       "TYPE": "TEXT",
@@ -673,9 +720,17 @@
       "VALUE": "View all"
     },
     "APP_INFO_SETTINGS_SCROLL_ELEMENT": {
-      "TYPE": "RESOURCE_ID",
-      "VALUE": "fragment_container",
-      "PACKAGE": "com.android.car.settings"
+      "TYPE": "MULTIPLE",
+      "SPECIFIERS": [
+        {
+          "TYPE": "RESOURCE_ID",
+          "VALUE": "car_ui_internal_recycler_view"
+        },
+        {
+          "TYPE": "DESCRIPTION",
+          "VALUE": "com.android.car.ui.utils.ROTARY_CONTAINER"
+        }
+      ]
     },
     "APP_INFO_SETTINGS_SCROLL_FORWARD_BUTTON": {
       "TYPE": "DESCRIPTION",
@@ -721,7 +776,7 @@
     },
     "APP_INFO_SETTINGS_PERMISSIONS_MENU": {
       "TYPE": "TEXT",
-      "VALUE": "Permissions?"
+      "VALUE": "Permissions"
     },
     "APP_INFO_SETTINGS_ALLOW_BUTTON": {
       "TYPE": "TEXT",
@@ -1276,8 +1331,7 @@
     },
     "ACCOUNT_SETTINGS_REMOVE_BUTTON": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_secondary_action",
-      "PACKAGE": "com.android.car.settings"
+      "VALUE": "car_ui_secondary_action"
     },
     "ACCOUNT_SETTINGS_REMOVE_ACCOUNT_BUTTON": {
       "TYPE": "TEXT",
@@ -1401,7 +1455,7 @@
     "MEDIA_APP_DROP_DOWN_MENU": {
       "TYPE": "RESOURCE_ID",
       "VALUE": "car_ui_toolbar_menu_item_icon",
-      "PACKAGE": "com.android.car.media"
+      "PACKAGE": "com.chassis.car.ui.plugin"
     },
     "MEDIA_APP_NO_LOGIN_MSG": {
       "TYPE": "RESOURCE_ID",
@@ -1481,8 +1535,7 @@
     },
     "TOGGLE_HOTSPOT": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_secondary_action_concrete",
-      "PACKAGE": "com.android.car.settings"
+      "VALUE": "car_ui_secondary_action_concrete"
     },
     "TOGGLE_BLUETOOTH": {
       "TYPE": "DESCRIPTION",
@@ -1543,8 +1596,7 @@
     },
     "SEARCH_BOX": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "car_ui_toolbar_search_bar",
-      "PACKAGE": "com.android.settings.intelligence"
+      "VALUE": "car_ui_toolbar_search_bar"
     },
     "SEARCH_RESULTS": {
       "TYPE": "MULTIPLE",
@@ -1763,6 +1815,31 @@
       "TYPE": "TEXT",
       "VALUE": "Dialpad"
     },
+    "DIALER_ACTIVE_CALL_TOGGLE": {
+      "TYPE": "MULTIPLE",
+      "SPECIFIERS": [
+        {
+          "TYPE": "CLASS",
+          "VALUE": "android.widget.Switch"
+        },
+        {
+          "TYPE": "HAS_ANCESTOR",
+          "MAX_DEPTH": 3,
+          "ANCESTOR": {
+            "TYPE": "HAS_DESCENDANT",
+            "MAX_DEPTH": 2,
+            "DESCENDANT": {
+              "TYPE": "TEXT",
+              "VALUE": "Active Call"
+            }
+          }
+        }
+      ]
+    },
+    "DIALER_ONGOING_CALL_CONTROL_BAR": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "ongoing_call_control_bar"
+    },
     "LOCATION_ACCESS": {
       "TYPE": "TEXT",
       "VALUE": "Location access"
@@ -1777,7 +1854,7 @@
     },
     "LOCATION_WIDGET": {
       "TYPE": "RESOURCE_ID",
-      "VALUE": "qc_location_status_icon",
+      "VALUE": "read_only_location_icon",
       "PACKAGE": "com.android.systemui"
     },
     "RECENTLY_CLOSED_TEXT": {
@@ -1860,6 +1937,14 @@
       "TYPE": "RESOURCE_ID",
       "VALUE": "date_time_view",
       "PACKAGE": "com.android.car.messenger"
+    },
+    "TAP_TO_READ_ALOUD": {
+      "TYPE": "TEXT",
+      "VALUE": "Tap to read aloud"
+    },
+    "ASSISTANT_SMS_TRANSCRIPTION_PLATE": {
+      "TYPE": "RESOURCE_ID",
+      "VALUE": "transcription_immersive_container"
     },
     "SMS_EMPTY_MESSAGE": {
       "TYPE": "RESOURCE_ID",
@@ -1970,19 +2055,13 @@
       "VALUE": "qc_summary",
       "PACKAGE": "com.android.systemui"
     },
+    "CONNECTED_WIFI": {
+      "TYPE": "TEXT",
+      "VALUE": "Connected"
+    },
     "FORGET_WIFI": {
-      "TYPE": "MULTIPLE",
-      "SPECIFIERS": [
-        {
-          "TYPE": "CLASS",
-          "VALUE": "android.widget.ImageView"
-        },
-        {
-          "TYPE": "RESOURCE_ID",
-          "VALUE": "car_ui_secondary_action_concrete",
-          "PACKAGE": "com.android.car.settings"
-        }
-      ]
+      "TYPE": "TEXT",
+      "VALUE": "Forget"
     },
     "NETWORK_PALETTE_WIFI": {
       "TYPE": "MULTIPLE",
@@ -2000,6 +2079,19 @@
             "TYPE": "TEXT_CONTAINS",
             "VALUE": "Wi‑Fi"
           }
+        }
+      ]
+    },
+    "PHONE_CARD_DIALER_BUTTON": {
+      "TYPE": "MULTIPLE",
+      "SPECIFIERS": [
+        {
+          "TYPE": "RESOURCE_ID",
+          "VALUE": "button_right"
+        },
+        {
+          "TYPE": "CLASS",
+          "VALUE": "android.widget.ImageButton"
         }
       ]
     },
@@ -2085,7 +2177,7 @@
           "SCROLL_DIRECTION": "VERTICAL",
           "SCROLL_ELEMENT": {
             "TYPE": "RESOURCE_ID",
-            "VALUE": "car_ui_internal_recycler_view"
+            "VALUE": "car_ui_recycler_view"
           }
         }
       }
@@ -2119,7 +2211,7 @@
           "SCROLL_DIRECTION": "VERTICAL",
           "SCROLL_ELEMENT": {
             "TYPE": "RESOURCE_ID",
-            "VALUE": "car_ui_internal_recycler_view"
+            "VALUE": "car_ui_recycler_view"
           }
         }
       }
@@ -2153,7 +2245,7 @@
           "SCROLL_DIRECTION": "VERTICAL",
           "SCROLL_ELEMENT": {
             "TYPE": "RESOURCE_ID",
-            "VALUE": "car_ui_internal_recycler_view"
+            "VALUE": "car_ui_recycler_view"
           }
         }
       }
@@ -2187,7 +2279,7 @@
           "SCROLL_DIRECTION": "VERTICAL",
           "SCROLL_ELEMENT": {
             "TYPE": "RESOURCE_ID",
-            "VALUE": "car_ui_internal_recycler_view"
+            "VALUE": "car_ui_recycler_view"
           }
         }
       }
@@ -2221,7 +2313,7 @@
           "SCROLL_DIRECTION": "VERTICAL",
           "SCROLL_ELEMENT": {
             "TYPE": "RESOURCE_ID",
-            "VALUE": "car_ui_internal_recycler_view"
+            "VALUE": "car_ui_recycler_view"
           }
         }
       }
@@ -2255,7 +2347,7 @@
           "SCROLL_DIRECTION": "VERTICAL",
           "SCROLL_ELEMENT": {
             "TYPE": "RESOURCE_ID",
-            "VALUE": "car_ui_internal_recycler_view"
+            "VALUE": "car_ui_recycler_view"
           }
         }
       }
@@ -2289,7 +2381,7 @@
           "SCROLL_DIRECTION": "VERTICAL",
           "SCROLL_ELEMENT": {
             "TYPE": "RESOURCE_ID",
-            "VALUE": "car_ui_internal_recycler_view"
+            "VALUE": "car_ui_recycler_view"
           },
           "SCROLL_MARGIN": "8",
           "SCROLL_WAIT_TIME": "3"
@@ -2325,7 +2417,7 @@
           "SCROLL_DIRECTION": "VERTICAL",
           "SCROLL_ELEMENT": {
             "TYPE": "RESOURCE_ID",
-            "VALUE": "car_ui_internal_recycler_view"
+            "VALUE": "car_ui_recycler_view"
           }
         }
       }
@@ -2359,7 +2451,7 @@
           "SCROLL_DIRECTION": "VERTICAL",
           "SCROLL_ELEMENT": {
             "TYPE": "RESOURCE_ID",
-            "VALUE": "car_ui_internal_recycler_view"
+            "VALUE": "car_ui_recycler_view"
           },
           "SCROLL_MARGIN": "8",
           "SCROLL_WAIT_TIME": "3"
@@ -2395,7 +2487,7 @@
           "SCROLL_DIRECTION": "VERTICAL",
           "SCROLL_ELEMENT": {
             "TYPE": "RESOURCE_ID",
-            "VALUE": "car_ui_internal_recycler_view"
+            "VALUE": "car_ui_recycler_view"
           }
         }
       },
@@ -2448,7 +2540,7 @@
           "SCROLL_DIRECTION": "VERTICAL",
           "SCROLL_ELEMENT": {
             "TYPE": "RESOURCE_ID",
-            "VALUE": "car_ui_internal_recycler_view"
+            "VALUE": "car_ui_recycler_view"
           }
         }
       }

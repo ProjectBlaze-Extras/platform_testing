@@ -16,7 +16,9 @@ import os
 import logging
 from typing import Any, Dict
 
-CB_FILENAME = 'crystalball.test_results.txt'
+# Keep consistent with
+# https://g3doc.corp.google.com/wireless/android/test_tools/crystalball/cbpp/README.md
+CB_FILENAME = 'test_results.txt'
 
 
 def export_to_crystalball(data: Dict[str, Any], output_dir: str, test_name: str) -> None:

@@ -17,12 +17,14 @@ class HumanEyeMatcherTest {
         val expected = rgb(5, 200, 200)
         val test = rgb(5, 200, 200)
 
-        val result = matcher.compareBitmaps(
+        val result =
+            matcher.compareBitmaps(
                 expected = intArrayOf(expected),
                 given = intArrayOf(test),
                 width = 1,
                 height = 1,
-                regions = emptyList())
+                regions = emptyList()
+            )
 
         assertMatches(result)
     }
@@ -32,12 +34,14 @@ class HumanEyeMatcherTest {
         val expected = rgb(5, 200, 200)
         val test = rgb(6, 200, 201)
 
-        val result = matcher.compareBitmaps(
+        val result =
+            matcher.compareBitmaps(
                 expected = intArrayOf(expected),
                 given = intArrayOf(test),
                 width = 1,
                 height = 1,
-                regions = emptyList())
+                regions = emptyList()
+            )
 
         assertMatches(result)
     }
@@ -47,12 +51,14 @@ class HumanEyeMatcherTest {
         val expected = rgb(200, 200, 200)
         val test = rgb(200, 201, 199)
 
-        val result = matcher.compareBitmaps(
+        val result =
+            matcher.compareBitmaps(
                 expected = intArrayOf(expected),
                 given = intArrayOf(test),
                 width = 1,
                 height = 1,
-                regions = emptyList())
+                regions = emptyList()
+            )
 
         assertMatches(result)
     }
@@ -62,12 +68,14 @@ class HumanEyeMatcherTest {
         val expected = rgb(200, 200, 200)
         val test = rgb(203, 212, 194)
 
-        val result = matcher.compareBitmaps(
+        val result =
+            matcher.compareBitmaps(
                 expected = intArrayOf(expected),
                 given = intArrayOf(test),
                 width = 1,
                 height = 1,
-                regions = emptyList())
+                regions = emptyList()
+            )
 
         assertHasDiff(result, intArrayOf(diff))
     }
@@ -77,10 +85,13 @@ class HumanEyeMatcherTest {
         val first = loadBitmap("round_rect_gray")
         val second = loadBitmap("round_rect_gray")
 
-        val result = matcher.compareBitmaps(
-                expected = first.toIntArray(), given = second.toIntArray(),
-                width = first.width, height = first.height
-        )
+        val result =
+            matcher.compareBitmaps(
+                expected = first.toIntArray(),
+                given = second.toIntArray(),
+                width = first.width,
+                height = first.height
+            )
 
         assertMatches(result)
     }
@@ -89,16 +100,27 @@ class HumanEyeMatcherTest {
     fun performDiff_sameSize_partialCompare_diffsInComparedArea() {
         val first = IntArray(6) { Color.BLACK }
         val second = IntArray(6) { Color.WHITE }
-        val comparedRegion = Rect(/* left= */0, /* top= */0, /* right= */1, /* bottom= */1)
-        val result = matcher.compareBitmaps(
-                expected = first, given = second,
-                width = 3, height = 2, regions = listOf(comparedRegion)
-        )
+        val comparedRegion = Rect(/* left= */ 0, /* top= */ 0, /* right= */ 1, /* bottom= */ 1)
+        val result =
+            matcher.compareBitmaps(
+                expected = first,
+                given = second,
+                width = 3,
+                height = 2,
+                regions = listOf(comparedRegion)
+            )
 
-        assertHasDiff(result, intArrayOf(
-                diff, diff, same,
-                diff, diff, same,
-        ))
+        assertHasDiff(
+            result,
+            intArrayOf(
+                diff,
+                diff,
+                same,
+                diff,
+                diff,
+                same,
+            )
+        )
     }
 
     @Test
@@ -107,16 +129,29 @@ class HumanEyeMatcherTest {
         val second = IntArray(9) { Color.BLACK }
         second[4] = rgb(0, 21, 0)
 
-        val result = matcher.compareBitmaps(
-                expected = first, given = second,
-                width = 3, height = 3, regions = emptyList()
-        )
+        val result =
+            matcher.compareBitmaps(
+                expected = first,
+                given = second,
+                width = 3,
+                height = 3,
+                regions = emptyList()
+            )
 
-        assertHasDiff(result, intArrayOf(
-                same, same, same,
-                same, diff, same,
-                same, same, same,
-        ))
+        assertHasDiff(
+            result,
+            intArrayOf(
+                same,
+                same,
+                same,
+                same,
+                diff,
+                same,
+                same,
+                same,
+                same,
+            )
+        )
     }
 
     @Test
@@ -125,10 +160,14 @@ class HumanEyeMatcherTest {
         val second = IntArray(9) { Color.BLACK }
         second[4] = rgb(0, 15, 0)
 
-        val result = matcher.compareBitmaps(
-                expected = first, given = second,
-                width = 3, height = 3, regions = emptyList()
-        )
+        val result =
+            matcher.compareBitmaps(
+                expected = first,
+                given = second,
+                width = 3,
+                height = 3,
+                regions = emptyList()
+            )
 
         assertMatches(result)
     }
@@ -140,16 +179,32 @@ class HumanEyeMatcherTest {
         second[5] = rgb(0, 21, 0)
         second[6] = rgb(0, 21, 0)
 
-        val result = matcher.compareBitmaps(
-                expected = first, given = second,
-                width = 4, height = 3, regions = emptyList()
-        )
+        val result =
+            matcher.compareBitmaps(
+                expected = first,
+                given = second,
+                width = 4,
+                height = 3,
+                regions = emptyList()
+            )
 
-        assertHasDiff(result, intArrayOf(
-                same, same, same, same,
-                same, diff, diff, same,
-                same, same, same, same,
-        ))
+        assertHasDiff(
+            result,
+            intArrayOf(
+                same,
+                same,
+                same,
+                same,
+                same,
+                diff,
+                diff,
+                same,
+                same,
+                same,
+                same,
+                same,
+            )
+        )
     }
 
     @Test
@@ -159,10 +214,14 @@ class HumanEyeMatcherTest {
         second[5] = rgb(0, 6, 0)
         second[6] = rgb(0, 6, 0)
 
-        val result = matcher.compareBitmaps(
-                expected = first, given = second,
-                width = 4, height = 3, regions = emptyList()
-        )
+        val result =
+            matcher.compareBitmaps(
+                expected = first,
+                given = second,
+                width = 4,
+                height = 3,
+                regions = emptyList()
+            )
 
         assertMatches(result)
     }
@@ -175,16 +234,29 @@ class HumanEyeMatcherTest {
         second[4] = rgb(0, 7, 0)
         second[5] = rgb(0, 7, 0)
 
-        val result = matcher.compareBitmaps(
-                expected = first, given = second,
-                width = 3, height = 3, regions = emptyList()
-        )
+        val result =
+            matcher.compareBitmaps(
+                expected = first,
+                given = second,
+                width = 3,
+                height = 3,
+                regions = emptyList()
+            )
 
-        assertHasDiff(result, intArrayOf(
-                same, same, same,
-                diff, diff, diff,
-                same, same, same,
-        ))
+        assertHasDiff(
+            result,
+            intArrayOf(
+                same,
+                same,
+                same,
+                diff,
+                diff,
+                diff,
+                same,
+                same,
+                same,
+            )
+        )
     }
 
     @Test
@@ -195,10 +267,14 @@ class HumanEyeMatcherTest {
         second[4] = rgb(0, 3, 0)
         second[5] = rgb(0, 3, 0)
 
-        val result = matcher.compareBitmaps(
-                expected = first, given = second,
-                width = 3, height = 3, regions = emptyList()
-        )
+        val result =
+            matcher.compareBitmaps(
+                expected = first,
+                given = second,
+                width = 3,
+                height = 3,
+                regions = emptyList()
+            )
 
         assertMatches(result)
     }
@@ -214,17 +290,32 @@ class HumanEyeMatcherTest {
         second[7] = rgb(0, 6, 0)
         second[8] = rgb(0, 6, 0)
 
-        val result = matcher.compareBitmaps(
-                expected = first, given = second,
-                width = 3, height = 4, regions = emptyList()
-        )
+        val result =
+            matcher.compareBitmaps(
+                expected = first,
+                given = second,
+                width = 3,
+                height = 4,
+                regions = emptyList()
+            )
 
-        assertHasDiff(result, intArrayOf(
-                same, same, same,
-                diff, diff, diff,
-                diff, diff, diff,
-                same, same, same,
-        ))
+        assertHasDiff(
+            result,
+            intArrayOf(
+                same,
+                same,
+                same,
+                diff,
+                diff,
+                diff,
+                diff,
+                diff,
+                diff,
+                same,
+                same,
+                same,
+            )
+        )
     }
 
     @Test
@@ -238,10 +329,14 @@ class HumanEyeMatcherTest {
         second[7] = rgb(0, 2, 0)
         second[8] = rgb(0, 2, 0)
 
-        val result = matcher.compareBitmaps(
-                expected = first, given = second,
-                width = 3, height = 4, regions = emptyList()
-        )
+        val result =
+            matcher.compareBitmaps(
+                expected = first,
+                given = second,
+                width = 3,
+                height = 4,
+                regions = emptyList()
+            )
 
         assertMatches(result)
     }
@@ -251,17 +346,36 @@ class HumanEyeMatcherTest {
         val first = IntArray(16) { Color.BLACK }
         val second = IntArray(16) { index -> if (index > 3) rgb(0, 2, 0) else Color.BLACK }
 
-        val result = matcher.compareBitmaps(
-                expected = first, given = second,
-                width = 4, height = 4, regions = emptyList()
-        )
+        val result =
+            matcher.compareBitmaps(
+                expected = first,
+                given = second,
+                width = 4,
+                height = 4,
+                regions = emptyList()
+            )
 
-        assertHasDiff(result, intArrayOf(
-                same, same, same, same,
-                same, same, same, same,
-                diff, diff, diff, diff,
-                diff, diff, diff, diff,
-        ))
+        assertHasDiff(
+            result,
+            intArrayOf(
+                same,
+                same,
+                same,
+                same,
+                same,
+                same,
+                same,
+                same,
+                diff,
+                diff,
+                diff,
+                diff,
+                diff,
+                diff,
+                diff,
+                diff,
+            )
+        )
     }
 
     @Test
@@ -269,10 +383,14 @@ class HumanEyeMatcherTest {
         val first = IntArray(16) { Color.BLACK }
         val second = IntArray(16) { index -> if (index > 3) rgb(0, 1, 0) else Color.BLACK }
 
-        val result = matcher.compareBitmaps(
-                expected = first, given = second,
-                width = 4, height = 4, regions = emptyList()
-        )
+        val result =
+            matcher.compareBitmaps(
+                expected = first,
+                given = second,
+                width = 4,
+                height = 4,
+                regions = emptyList()
+            )
 
         assertMatches(result)
     }
@@ -287,10 +405,14 @@ class HumanEyeMatcherTest {
         second[5] = rgb(0, 2, 0)
         second[7] = rgb(0, 2, 0)
 
-        val result = matcher.compareBitmaps(
-                expected = first, given = second,
-                width = 3, height = 3, regions = emptyList()
-        )
+        val result =
+            matcher.compareBitmaps(
+                expected = first,
+                given = second,
+                width = 3,
+                height = 3,
+                regions = emptyList()
+            )
 
         assertMatches(result)
     }
@@ -305,10 +427,14 @@ class HumanEyeMatcherTest {
         second[5] = rgb(0, 4, 0)
         second[7] = rgb(0, 2, 0)
 
-        val result = matcher.compareBitmaps(
-                expected = first, given = second,
-                width = 3, height = 3, regions = emptyList()
-        )
+        val result =
+            matcher.compareBitmaps(
+                expected = first,
+                given = second,
+                width = 3,
+                height = 3,
+                regions = emptyList()
+            )
 
         assertMatches(result)
     }
@@ -319,17 +445,36 @@ class HumanEyeMatcherTest {
         val first = IntArray(16) { Color.BLACK }
         val second = IntArray(16) { index -> if (index > 3) rgb(0, 2, 0) else Color.BLACK }
 
-        val result = matcherWithoutGrouping.compareBitmaps(
-                expected = first, given = second,
-                width = 4, height = 4, regions = emptyList()
-        )
+        val result =
+            matcherWithoutGrouping.compareBitmaps(
+                expected = first,
+                given = second,
+                width = 4,
+                height = 4,
+                regions = emptyList()
+            )
 
-        assertHasDiff(result, intArrayOf(
-                same, same, same, same,
-                diff, diff, diff, diff,
-                diff, diff, diff, diff,
-                diff, diff, diff, diff,
-        ))
+        assertHasDiff(
+            result,
+            intArrayOf(
+                same,
+                same,
+                same,
+                same,
+                diff,
+                diff,
+                diff,
+                diff,
+                diff,
+                diff,
+                diff,
+                diff,
+                diff,
+                diff,
+                diff,
+                diff,
+            )
+        )
     }
 
     @Test
@@ -338,10 +483,14 @@ class HumanEyeMatcherTest {
         val first = IntArray(16) { Color.BLACK }
         val second = IntArray(16) { index -> if (index > 3) rgb(0, 1, 0) else Color.BLACK }
 
-        val result = matcherWithoutGrouping.compareBitmaps(
-                expected = first, given = second,
-                width = 4, height = 4, regions = emptyList()
-        )
+        val result =
+            matcherWithoutGrouping.compareBitmaps(
+                expected = first,
+                given = second,
+                width = 4,
+                height = 4,
+                regions = emptyList()
+            )
 
         assertMatches(result)
     }
@@ -353,16 +502,29 @@ class HumanEyeMatcherTest {
         val second = IntArray(9) { Color.BLACK }
         second[4] = rgb(0, 2, 0)
 
-        val result = matcherIgnoringGrouping.compareBitmaps(
-                expected = first, given = second,
-                width = 3, height = 3, regions = emptyList()
-        )
+        val result =
+            matcherIgnoringGrouping.compareBitmaps(
+                expected = first,
+                given = second,
+                width = 3,
+                height = 3,
+                regions = emptyList()
+            )
 
-        assertHasDiff(result, intArrayOf(
-                same, same, same,
-                same, diff, same,
-                same, same, same,
-        ))
+        assertHasDiff(
+            result,
+            intArrayOf(
+                same,
+                same,
+                same,
+                same,
+                diff,
+                same,
+                same,
+                same,
+                same,
+            )
+        )
     }
 
     @Test
@@ -372,10 +534,14 @@ class HumanEyeMatcherTest {
         val second = IntArray(9) { Color.BLACK }
         second[4] = rgb(0, 1, 0)
 
-        val result = matcherIgnoringGrouping.compareBitmaps(
-                expected = first, given = second,
-                width = 3, height = 3, regions = emptyList()
-        )
+        val result =
+            matcherIgnoringGrouping.compareBitmaps(
+                expected = first,
+                given = second,
+                width = 3,
+                height = 3,
+                regions = emptyList()
+            )
 
         assertMatches(result)
     }
@@ -385,10 +551,14 @@ class HumanEyeMatcherTest {
         val first = intArrayOf(argb(128, 255, 255, 255))
         val second = intArrayOf(argb(129, 255, 255, 255))
 
-        val result = matcher.compareBitmaps(
-                expected = first, given = second,
-                width = 1, height = 1, regions = emptyList()
-        )
+        val result =
+            matcher.compareBitmaps(
+                expected = first,
+                given = second,
+                width = 1,
+                height = 1,
+                regions = emptyList()
+            )
 
         assertMatches(result)
     }
@@ -398,10 +568,14 @@ class HumanEyeMatcherTest {
         val first = intArrayOf(argb(251, 255, 255, 255))
         val second = intArrayOf(argb(255, 255, 255, 255))
 
-        val result = matcher.compareBitmaps(
-                expected = first, given = second,
-                width = 1, height = 1, regions = emptyList()
-        )
+        val result =
+            matcher.compareBitmaps(
+                expected = first,
+                given = second,
+                width = 1,
+                height = 1,
+                regions = emptyList()
+            )
 
         assertHasDiff(result, intArrayOf(diff))
     }
@@ -411,10 +585,14 @@ class HumanEyeMatcherTest {
         val first = intArrayOf(argb(251, 0, 0, 0))
         val second = intArrayOf(argb(255, 0, 0, 0))
 
-        val result = matcher.compareBitmaps(
-                expected = first, given = second,
-                width = 1, height = 1, regions = emptyList()
-        )
+        val result =
+            matcher.compareBitmaps(
+                expected = first,
+                given = second,
+                width = 1,
+                height = 1,
+                regions = emptyList()
+            )
 
         assertHasDiff(result, intArrayOf(diff))
     }
@@ -425,10 +603,14 @@ class HumanEyeMatcherTest {
         val first = intArrayOf(argb(1, 255, 255, 255))
         val second = intArrayOf(argb(255, 255, 255, 255))
 
-        val result = matcherIgnoringTransparency.compareBitmaps(
-                expected = first, given = second,
-                width = 1, height = 1, regions = emptyList()
-        )
+        val result =
+            matcherIgnoringTransparency.compareBitmaps(
+                expected = first,
+                given = second,
+                width = 1,
+                height = 1,
+                regions = emptyList()
+            )
 
         assertMatches(result)
     }
@@ -439,10 +621,14 @@ class HumanEyeMatcherTest {
         val first = intArrayOf(rgb(255, 250, 255))
         val second = intArrayOf(rgb(255, 255, 255))
 
-        val result = matcherIgnoringTransparency.compareBitmaps(
-                expected = first, given = second,
-                width = 1, height = 1, regions = emptyList()
-        )
+        val result =
+            matcherIgnoringTransparency.compareBitmaps(
+                expected = first,
+                given = second,
+                width = 1,
+                height = 1,
+                regions = emptyList()
+            )
 
         assertHasDiff(result, intArrayOf(diff))
     }

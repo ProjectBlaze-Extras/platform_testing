@@ -283,12 +283,12 @@ object WaitUtils {
      * This can be used to reduce flakiness in cases where waitForObj throws although the object
      * does seem to be present.
      */
-    fun retryIfStale(description: String, times: Int, block: () -> Unit) {
-        trace("retryIfStale: $description") {
+    fun <T> retryIfStale(description: String, times: Int, block: () -> T): T {
+        return trace("retryIfStale: $description") outerTrace@{
             repeat(times) {
                 trace("attempt #$it") {
                     try {
-                        return block()
+                        return@outerTrace block()
                     } catch (e: StaleObjectException) {
                         Log.w(TAG, "Caught a StaleObjectException ($e). Retrying.")
                     }

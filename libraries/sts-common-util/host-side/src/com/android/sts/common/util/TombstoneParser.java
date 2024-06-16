@@ -391,7 +391,8 @@ public class TombstoneParser {
         List<String> tailLines = lines(tailBlob);
 
         try {
-            if (!parseThreadHeader(headerLines, tombstoneBuilder, mainThreadBuilder)) {
+            if (!parseThreadHeader(
+                    headerLines, tombstoneBuilder, mainThreadBuilder, /* isMainThread */ true)) {
                 CLog.w("main thread get header failed");
                 return false;
             }
@@ -582,7 +583,7 @@ public class TombstoneParser {
             Tombstone.Builder tombstoneBuilder,
             com.android.server.os.TombstoneProtos.Thread.Builder threadBuilder) {
         List<String> lines = lines(blob);
-        if (!parseThreadHeader(lines, tombstoneBuilder, threadBuilder)) {
+        if (!parseThreadHeader(lines, tombstoneBuilder, threadBuilder, /* isMainThread */ false)) {
             return false;
         }
         if (!parseThreadRegisters(lines, threadBuilder)) {
@@ -600,22 +601,27 @@ public class TombstoneParser {
     private static boolean parseThreadHeader(
             List<String> lines,
             Tombstone.Builder tombstoneBuilder,
-            com.android.server.os.TombstoneProtos.Thread.Builder threadBuilder) {
-
+            com.android.server.os.TombstoneProtos.Thread.Builder threadBuilder,
+            boolean isMainThread) {
         matchLine(
                 lines.iterator(),
                 CMD_LINE_PATTERN,
                 m -> {
-                    tombstoneBuilder.addAllCommandLine(Arrays.asList(m.group("cmd").split(" ")));
+                    if (isMainThread) {
+                        tombstoneBuilder.addAllCommandLine(
+                                Arrays.asList(m.group("cmd").split(" ")));
+                    }
                 });
         matchLine(
                 lines.iterator(),
                 THREAD_HEADER_1_PATTERN,
                 m -> {
                     int tid = Integer.valueOf(m.group("tid"));
-                    tombstoneBuilder.setPid(Integer.valueOf(m.group("pid"))).setTid(tid);
-                    if (tombstoneBuilder.getCommandLineList().isEmpty()) {
-                        tombstoneBuilder.addCommandLine(m.group("processname"));
+                    if (isMainThread) {
+                        tombstoneBuilder.setPid(Integer.valueOf(m.group("pid"))).setTid(tid);
+                        if (tombstoneBuilder.getCommandLineList().isEmpty()) {
+                            tombstoneBuilder.addCommandLine(m.group("processname"));
+                        }
                     }
                     threadBuilder.setId(tid).setName(m.group("threadname"));
                 });
@@ -623,7 +629,9 @@ public class TombstoneParser {
                 lines.iterator(),
                 THREAD_HEADER_2_PATTERN,
                 m -> {
-                    tombstoneBuilder.setUid(Integer.valueOf(m.group("uid")));
+                    if (isMainThread) {
+                        tombstoneBuilder.setUid(Integer.valueOf(m.group("uid")));
+                    }
                 });
 
         matchLine(

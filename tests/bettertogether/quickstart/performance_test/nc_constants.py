@@ -51,6 +51,8 @@ SUCCESS_RATE_PRECISION_DIGITS = 1
 
 UNSET_LATENCY = datetime.timedelta.max
 UNSET_THROUGHPUT_KBPS = -1.0
+MAX_NUM_BUG_REPORT = 5
+TARGET_POST_WIFI_CONNECTION_IDLE_TIME_SEC = 0
 
 
 @enum.unique
@@ -101,6 +103,9 @@ class TestParameters:
   allow_unrooted_device: bool = False
   keep_alive_timeout_ms: int = KEEP_ALIVE_TIMEOUT_WIFI_MS
   keep_alive_interval_ms: int = KEEP_ALIVE_INTERVAL_WIFI_MS
+  target_post_wifi_connection_idle_time_sec: int = (
+      TARGET_POST_WIFI_CONNECTION_IDLE_TIME_SEC
+  )
 
 
 @enum.unique

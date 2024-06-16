@@ -45,12 +45,10 @@ private val DARK_COLOR_MAPPING =
 private const val FILTER_SIZE = 2
 
 private fun pixelWithinFilterRange(row: Int, col: Int, width: Int, height: Int): Boolean {
-    return (
-        row >= FILTER_SIZE &&
-            row < height - FILTER_SIZE &&
-            col >= FILTER_SIZE &&
-            col < width - FILTER_SIZE
-    )
+    return (row >= FILTER_SIZE &&
+        row < height - FILTER_SIZE &&
+        col >= FILTER_SIZE &&
+        col < width - FILTER_SIZE)
 }
 
 private fun fillAverageColorForUnmappedPixel(
@@ -84,7 +82,7 @@ private fun fillAverageColorForUnmappedPixel(
         val blue = (validBlueSum / validColorCount + 0.5).toInt()
         bitmapArray[col + row * bitmapWidth] =
             ((0xFF shl 24) or // alpha
-                (red shl 16) or // red
+            (red shl 16) or // red
                 (green shl 8) or // green
                 blue // blue
             )

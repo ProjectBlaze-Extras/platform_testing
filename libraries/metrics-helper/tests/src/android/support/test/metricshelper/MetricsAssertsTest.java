@@ -21,8 +21,8 @@ import static org.mockito.Mockito.when;
 
 import android.metrics.LogMaker;
 import android.metrics.MetricsReader;
-import android.test.suitebuilder.annotation.SmallTest;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;

@@ -24,7 +24,6 @@ android_test {
         "androidx.test.rules",
         "app-helpers-auto-interfaces",
         "automotive-status-bar-helper",
-        "ub-uiautomator",
         "hamcrest-library",
         "automotive-home-helper",
         "automotive-utility-helper",

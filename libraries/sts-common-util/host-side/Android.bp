@@ -25,6 +25,7 @@ java_library_host {
     ],
     static_libs: [
         "auto_value_annotations",
+        "caliper-prebuilts",
         "sts-common-util-lib",
         "sts-libtombstone_proto-java",
         "truth",

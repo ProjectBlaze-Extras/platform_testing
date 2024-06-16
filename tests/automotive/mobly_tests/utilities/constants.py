@@ -13,6 +13,7 @@
 #  limitations under the License.
 """Constants class contains final variables using by other classes."""
 
+LOCAL_MAC_ADDRESS_PERMISSION = 'android.permission.LOCAL_MAC_ADDRESS'
 APS_PACKAGE = 'android.platform.snippets'
 DIAL_A_NUMBER = 'Dial a number'
 DEFAULT_WAIT_TIME_FIVE_SECS = 5
@@ -40,6 +41,10 @@ DEFAULT_DIAL_PAD_ENTRY = "Dial a number"
 # The word or phrase present in a device summary that is connected.
 CONNECTED_SUMMARY_STATUS = "Connected"
 DISCONNECTED_SUMMARY_STATUS = "Disconnected"
+DECLINE_CALL_TEXT = "Decline"
+ANSWER_CALL_TEXT = "Answer"
+ACCEPT_CALL_TEXT = "Accept"
+DISABLE_ANDROID_AUTO_POP_UP = "pm disable --user 10 com.google.android.embedded.projection"
 
 BTSNOOP_LOG_PATH_ON_DEVICE = '/data/misc/bluetooth/logs/btsnoop_hci.log'
 BTSNOOP_LAST_LOG_PATH_ON_DEVICE = (
@@ -53,7 +58,6 @@ IMPOST_CONTACTS_SHELL_COMAND = (
         + PHONE_CONTACTS_DESTINATION_PATH
         + ' -a android.intent.action.VIEW com.google.android.contacts'
 )
-PATH_TO_CONTACTS_VCF_FILE = 'platform_testing/tests/automotive/mobly_tests/utils/contacts_test.vcf'
 
 # Should be kept in sync with BluetoothProfile.java
 BT_PROFILE_CONSTANTS = {
@@ -114,9 +118,21 @@ STOP_YOUTUBE_MEDIA_SHELL = 'am force-stop ' + YOUTUBE_MUSIC_PACKAGE
 GET_DUMPSYS_METADATA = 'dumpsys media_session'
 SONG_METADATA_PATTERN = r"description=.[^\n]*"
 DEFAULT_YOUTUBE_MUSIC_PLAYLIST = 'am start -a android.intent.action.VIEW -d https://music.youtube.com/watch?v=sjuOaAf9C70'
+BLUETOOTH_AUDIO_APP = "Bluetooth Audio"
+YOUTUBE_MUSIC_APP = "YouTube Music"
+BLUETOOTH_PLAYER = "Bluetooth Player"
+YOUTUBE_MUSIC_DOWNLOADS = "Downloads"
+RADIO_APP = "Radio"
+FM_FREQUENCY_PATTERN = '^(10[1-7][13579])|(8[789][1357])|(9\\d[1357])$'
+RADIO_FM_RANGE = "FM"
+CONFIRM_RADIO_FREQUENCY = "Enter"
+DEFAULT_FM_FREQUENCY = "1013"
 
 # SMS
 SMS_TEXT = "sms_test"
+REPLY_SMS= "Okay"
+SMS_REPLY_TEXT = "SMS Reply"
+SMS_TEXT_DRIVE_MODE="Tap to read aloud"
 TIMEZONE_DICT = {
     "PST": "Pacific Standard Time",
     "PDT": "Pacific Daylight Time",
@@ -126,3 +142,10 @@ TIMEZONE_DICT = {
 CLEAR_MESSAGING_APP = 'pm clear com.google.android.apps.messaging'
 DELETE_MESSAGING_DB = 'rm /data/data/com.android.providers.telephony/databases/mmssms.db'
 OPEN_NOTIFICATION = 'service call statusbar 1'
+
+# Dialer Page
+NO_PHONE_MESSAGE = "To complete your call, first connect your phone to your car via Bluetooth."
+DIALER_RECENTS_LABEL = "Recents"
+DIALER_CONTACTS_LABEL = "Contacts"
+DIALER_FAVORITES_LABEL = "Favorites"
+DIALER_DIALPAD_LABEL = "Dialpad"

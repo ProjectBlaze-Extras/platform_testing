@@ -18,9 +18,13 @@ package {
 
 java_test_host {
     name: "BootTimeTest",
-    srcs: [ "src/**/*.java" ],
+    srcs: ["src/**/*.java"],
     libs: [
         "tradefed",
         "loganalysis",
+    ],
+    test_suites: [
+        "general-tests",
+        "catbox",
     ],
 }

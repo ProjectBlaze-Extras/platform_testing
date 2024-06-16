@@ -39,17 +39,18 @@
                        com.google.android.mobly.snippet.bundled.bluetooth.profiles.BluetoothHearingAidSnippet,
                        com.google.android.mobly.snippet.bundled.BluetoothLeAdvertiserSnippet,
                        com.google.android.mobly.snippet.bundled.BluetoothLeScannerSnippet,
-                       com.google.android.mobly.snippet.bundled.PhoneSnippet,
-                       com.google.android.mobly.snippet.bundled.LogSnippet,
-                       com.google.android.mobly.snippet.bundled.UISnippet,
-                       com.google.android.mobly.snippet.bundled.MediaSnippet,
-                       com.google.android.mobly.snippet.bundled.NotificationSnippet,
-                       com.google.android.mobly.snippet.bundled.TelephonySnippet,
-                       com.google.android.mobly.snippet.bundled.NetworkingSnippet,
                        com.google.android.mobly.snippet.bundled.FileSnippet,
+                       com.google.android.mobly.snippet.bundled.LogSnippet,
+                       com.google.android.mobly.snippet.bundled.MediaSnippet,
+                       com.google.android.mobly.snippet.bundled.NetworkingSnippet,
+                       com.google.android.mobly.snippet.bundled.NotificationSnippet,
+                       com.google.android.mobly.snippet.bundled.PhoneSnippet,
                        com.google.android.mobly.snippet.bundled.SmsSnippet,
-                       com.google.android.mobly.snippet.bundled.WifiManagerSnippet,
-                       com.google.android.mobly.snippet.bundled.StorageSnippet" />
+                       com.google.android.mobly.snippet.bundled.StorageSnippet,
+                       com.google.android.mobly.snippet.bundled.TelephonySnippet,
+                       com.google.android.mobly.snippet.bundled.UISnippet,
+                       com.google.android.mobly.snippet.bundled.WifiManagerSnippet"
+                       />
   </application>
   <instrumentation
       android:name="com.google.android.mobly.snippet.SnippetRunner"

@@ -28,9 +28,8 @@ import platform.test.screenshot.proto.ScreenshotResultProto
  * Simoncelli. Details can be read in their paper:
  * https://ece.uwaterloo.ca/~z70wang/publications/ssim.pdf
  */
-class MSSIMMatcher(
-    @FloatRange(from = 0.0, to = 1.0) private val threshold: Double = 0.98
-) : BitmapMatcher() {
+class MSSIMMatcher(@FloatRange(from = 0.0, to = 1.0) private val threshold: Double = 0.98) :
+    BitmapMatcher() {
 
     companion object {
         // These values were taken from the publication
@@ -52,34 +51,25 @@ class MSSIMMatcher(
         val filter = getFilter(width, height, regions)
         val calSSIMResult = calculateSSIM(expected, given, width, height, filter)
 
-        val stats = ScreenshotResultProto.DiffResult.ComparisonStatistics
-            .newBuilder()
-            .setNumberPixelsCompared(calSSIMResult.numPixelsCompared)
-            .setNumberPixelsSimilar(calSSIMResult.numPixelsSimilar)
-            .setNumberPixelsIgnored(calSSIMResult.numPixelsIgnored)
-            .setNumberPixelsDifferent(
-                calSSIMResult.numPixelsCompared - calSSIMResult.numPixelsSimilar
-            )
-            .build()
+        val stats =
+            ScreenshotResultProto.DiffResult.ComparisonStatistics.newBuilder()
+                .setNumberPixelsCompared(calSSIMResult.numPixelsCompared)
+                .setNumberPixelsSimilar(calSSIMResult.numPixelsSimilar)
+                .setNumberPixelsIgnored(calSSIMResult.numPixelsIgnored)
+                .setNumberPixelsDifferent(
+                    calSSIMResult.numPixelsCompared - calSSIMResult.numPixelsSimilar
+                )
+                .build()
 
-        if (calSSIMResult.numPixelsSimilar
-            >= threshold * calSSIMResult.numPixelsCompared.toDouble()
+        if (
+            calSSIMResult.numPixelsSimilar >= threshold * calSSIMResult.numPixelsCompared.toDouble()
         ) {
-            return MatchResult(
-                matches = true,
-                diff = null,
-                comparisonStatistics = stats
-            )
+            return MatchResult(matches = true, diff = null, comparisonStatistics = stats)
         }
 
         // Create diff
-        val result = PixelPerfectMatcher()
-            .compareBitmaps(expected, given, width, height, regions)
-        return MatchResult(
-            matches = false,
-            diff = result.diff,
-            comparisonStatistics = stats
-        )
+        val result = PixelPerfectMatcher().compareBitmaps(expected, given, width, height, regions)
+        return MatchResult(matches = false, diff = result.diff, comparisonStatistics = stats)
     }
 
     internal fun calculateSSIM(
@@ -111,10 +101,10 @@ class MSSIMMatcher(
             var currentWindowX = 0
             while (currentWindowX < width) {
                 val windowWidth = computeWindowSize(currentWindowX, width)
-                val start: Int =
-                    indexFromXAndY(currentWindowX, currentWindowY, stride, offset)
-                if (shouldIgnoreWindow(ideal, start, stride, windowWidth, windowHeight, filter) &&
-                    shouldIgnoreWindow(given, start, stride, windowWidth, windowHeight, filter)
+                val start: Int = indexFromXAndY(currentWindowX, currentWindowY, stride, offset)
+                if (
+                    shouldIgnoreWindow(ideal, start, stride, windowWidth, windowHeight, filter) &&
+                        shouldIgnoreWindow(given, start, stride, windowWidth, windowHeight, filter)
                 ) {
                     currentWindowX += WINDOW_SIZE
                     ignored += windowWidth * windowHeight
@@ -123,16 +113,24 @@ class MSSIMMatcher(
                 val means = getMeans(ideal, given, filter, start, stride, windowWidth, windowHeight)
                 val meanX = means[0]
                 val meanY = means[1]
-                val variances = getVariances(
-                    ideal, given, filter, meanX, meanY, start, stride, windowWidth, windowHeight
-                )
+                val variances =
+                    getVariances(
+                        ideal,
+                        given,
+                        filter,
+                        meanX,
+                        meanY,
+                        start,
+                        stride,
+                        windowWidth,
+                        windowHeight
+                    )
                 val varX = variances[0]
                 val varY = variances[1]
                 val stdBoth = variances[2]
                 val SSIM = SSIM(meanX, meanY, varX, varY, stdBoth)
-                val numPixelsCompared = numPixelsToCompareInWindow(
-                    start, stride, windowWidth, windowHeight, filter
-                )
+                val numPixelsCompared =
+                    numPixelsToCompareInWindow(start, stride, windowWidth, windowHeight, filter)
                 SSIMTotal += SSIM * numPixelsCompared
                 totalNumPixelsCompared += numPixelsCompared.toDouble()
                 currentWindowX += WINDOW_SIZE
@@ -150,8 +148,8 @@ class MSSIMMatcher(
     }
 
     /**
-     * Compute the size of the window. The window defaults to WINDOW_SIZE, but
-     * must be contained within dimension.
+     * Compute the size of the window. The window defaults to WINDOW_SIZE, but must be contained
+     * within dimension.
      */
     private fun computeWindowSize(coordinateStart: Int, dimension: Int): Int {
         return if (coordinateStart + WINDOW_SIZE <= dimension) {
@@ -176,8 +174,8 @@ class MSSIMMatcher(
     }
 
     /**
-     * Checks whether a whole window should be ignored. A window should be ignored if all pixels
-     * are either white or should be ignored.
+     * Checks whether a whole window should be ignored. A window should be ignored if all pixels are
+     * either white or should be ignored.
      */
     private fun shouldIgnoreWindow(
         colors: IntArray,

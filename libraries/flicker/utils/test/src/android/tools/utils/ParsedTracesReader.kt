@@ -16,16 +16,17 @@
 
 package android.tools.utils
 
-import android.tools.common.Timestamp
-import android.tools.common.io.Reader
-import android.tools.common.io.RunStatus
-import android.tools.common.io.TraceType
-import android.tools.common.traces.events.CujTrace
-import android.tools.common.traces.events.EventLog
-import android.tools.common.traces.surfaceflinger.LayersTrace
-import android.tools.common.traces.surfaceflinger.TransactionsTrace
-import android.tools.common.traces.wm.TransitionsTrace
-import android.tools.common.traces.wm.WindowManagerTrace
+import android.tools.Timestamp
+import android.tools.io.Reader
+import android.tools.io.RunStatus
+import android.tools.io.TraceType
+import android.tools.traces.events.CujTrace
+import android.tools.traces.events.EventLog
+import android.tools.traces.protolog.ProtoLogTrace
+import android.tools.traces.surfaceflinger.LayersTrace
+import android.tools.traces.surfaceflinger.TransactionsTrace
+import android.tools.traces.wm.TransitionsTrace
+import android.tools.traces.wm.WindowManagerTrace
 
 /** Reads parsed traces from in memory objects */
 class ParsedTracesReader(
@@ -35,6 +36,7 @@ class ParsedTracesReader(
     private val transitionsTrace: TransitionsTrace? = null,
     private val transactionsTrace: TransactionsTrace? = null,
     private val eventLog: EventLog? = null,
+    private val protoLogTrace: ProtoLogTrace? = null,
     private val layerDumps: Map<String, LayersTrace> = emptyMap(),
     private val wmDumps: Map<String, WindowManagerTrace> = emptyMap(),
 ) : Reader {
@@ -57,6 +59,8 @@ class ParsedTracesReader(
 
     override fun readCujTrace(): CujTrace? = eventLog?.cujTrace
 
+    override fun readProtoLogTrace(): ProtoLogTrace? = protoLogTrace
+
     override fun slice(startTimestamp: Timestamp, endTimestamp: Timestamp): ParsedTracesReader {
         return ParsedTracesReader(
             artifact,
@@ -65,6 +69,7 @@ class ParsedTracesReader(
             transitionsTrace?.slice(startTimestamp, endTimestamp),
             transactionsTrace?.slice(startTimestamp, endTimestamp),
             eventLog?.slice(startTimestamp, endTimestamp),
+            protoLogTrace?.slice(startTimestamp, endTimestamp),
             layerDumps,
             wmDumps
         )

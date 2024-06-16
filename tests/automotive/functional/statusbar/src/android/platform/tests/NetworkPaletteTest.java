@@ -102,6 +102,7 @@ public class NetworkPaletteTest {
     @Test
     public void testNetworkAndinternetSettings() {
         mSettingHelper.get().openMenuWith("Network & internet settings");
+        mStatusBarHelper.get().clickOnConnectedWifi();
         mStatusBarHelper.get().forgetWifi();
         openNetworkPalette();
         // check if wifi and hostpot is enabled

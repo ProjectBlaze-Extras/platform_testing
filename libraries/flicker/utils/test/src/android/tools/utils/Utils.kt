@@ -17,23 +17,26 @@
 package android.tools.utils
 
 import android.content.Context
-import android.tools.common.Scenario
-import android.tools.common.ScenarioBuilder
-import android.tools.common.ScenarioImpl
-import android.tools.common.Timestamp
-import android.tools.common.Timestamps
-import android.tools.common.io.Reader
-import android.tools.common.io.ResultArtifactDescriptor
-import android.tools.common.io.RunStatus
-import android.tools.device.traces.io.ArtifactBuilder
-import android.tools.device.traces.io.ResultWriter
-import android.tools.device.traces.parsers.perfetto.LayersTraceParser
-import android.tools.device.traces.parsers.perfetto.TraceProcessorSession
-import android.tools.device.traces.parsers.wm.WindowManagerDumpParser
-import android.tools.device.traces.parsers.wm.WindowManagerTraceParser
+import android.tools.Scenario
+import android.tools.ScenarioBuilder
+import android.tools.ScenarioImpl
+import android.tools.Timestamp
+import android.tools.Timestamps
+import android.tools.io.Reader
+import android.tools.io.ResultArtifactDescriptor
+import android.tools.io.RunStatus
 import android.tools.rules.CacheCleanupRule
 import android.tools.rules.InitializeCrossPlatformRule
 import android.tools.rules.StopAllTracesRule
+import android.tools.traces.io.ArtifactBuilder
+import android.tools.traces.io.ResultWriter
+import android.tools.traces.parsers.perfetto.LayersTraceParser
+import android.tools.traces.parsers.perfetto.TraceProcessorSession
+import android.tools.traces.parsers.wm.WindowManagerDumpParser
+import android.tools.traces.parsers.wm.WindowManagerTraceParser
+import android.tools.traces.wm.ConfigurationContainerImpl
+import android.tools.traces.wm.RootWindowContainer
+import android.tools.traces.wm.WindowContainerImpl
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.google.common.io.ByteStreams
@@ -202,3 +205,17 @@ fun createDefaultArtifactBuilder(
 
 fun getLauncherPackageName() =
     UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).launcherPackageName
+
+fun newEmptyRootContainer(orientation: Int = 0, layerId: Int = 0) =
+    RootWindowContainer(
+        WindowContainerImpl(
+            title = "root",
+            token = "",
+            orientation = orientation,
+            layerId = layerId,
+            _isVisible = true,
+            _children = emptyList(),
+            configurationContainer = ConfigurationContainerImpl.EMPTY,
+            computedZ = 0
+        )
+    )

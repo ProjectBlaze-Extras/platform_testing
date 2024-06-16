@@ -26,7 +26,7 @@ android_test {
         "automotive-facet-bar-helper",
         "automotive-utility-helper",
         "app-helpers-auto-interfaces",
-        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
         "hamcrest-library",
         "automotive-home-helper",
         "platform-test-junit-rules",

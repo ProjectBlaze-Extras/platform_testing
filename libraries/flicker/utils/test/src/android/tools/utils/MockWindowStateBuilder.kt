@@ -16,11 +16,8 @@
 
 package android.tools.utils
 
-import android.tools.common.traces.wm.ConfigurationContainer
-import android.tools.common.traces.wm.KeyguardControllerState
-import android.tools.common.traces.wm.RootWindowContainer
-import android.tools.common.traces.wm.WindowContainer
-import android.tools.common.traces.wm.WindowManagerState
+import android.tools.traces.wm.KeyguardControllerState
+import android.tools.traces.wm.WindowManagerState
 
 class MockWindowStateBuilder() {
     var timestamp = -1L
@@ -54,20 +51,8 @@ class MockWindowStateBuilder() {
             inputMethodWindowAppToken = "",
             isHomeRecentsComponent = false,
             isDisplayFrozen = false,
-            _pendingActivities = emptyArray(),
-            root =
-                RootWindowContainer(
-                    WindowContainer(
-                        title = "root container",
-                        token = "",
-                        orientation = 1,
-                        layerId = 1,
-                        _isVisible = true,
-                        configurationContainer = ConfigurationContainer.EMPTY,
-                        _children = emptyArray(),
-                        computedZ = 0
-                    )
-                ),
+            _pendingActivities = emptyList(),
+            root = newEmptyRootContainer(orientation = 1, layerId = 1),
             keyguardControllerState =
                 KeyguardControllerState.from(
                     isAodShowing = false,

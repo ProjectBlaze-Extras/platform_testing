@@ -16,8 +16,8 @@
 
 package android.tools.rules
 
-import android.tools.common.Cache
-import android.tools.common.ICache
+import android.tools.Cache
+import android.tools.ICache
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 

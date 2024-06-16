@@ -71,6 +71,23 @@ public interface IAutoBluetoothSettingsHelper extends IAppHelper, Scrollable {
     void pressBluetoothToggleOnDevice(String deviceName);
 
     /**
+     * Setup Expectations: The bluetooth settings view is open, and the looked-for device is present
+     * under "paired devices"
+     *
+     * @param deviceName - The name of the connected device to disconnect
+     */
+    void pressMediaToggleOnDevice(String deviceName);
+
+    /**
+     * Setup Expectations: The bluetooth settings view is open, and the looked-for device is present
+     * under "paired devices"
+     *
+     * @param deviceName - The name of the connected device whose phone connection should be
+     *     disabled
+     */
+    void pressPhoneToggleOnDevice(String deviceName);
+
+    /**
      * Opens the device bluetooth view by clicking the device name.
      *
      * <p>Setup Expectations: The bluetooth settings view is open. and the looked-for device is

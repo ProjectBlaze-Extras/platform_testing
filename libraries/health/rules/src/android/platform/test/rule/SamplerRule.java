@@ -16,6 +16,7 @@
 package android.platform.test.rule;
 
 import android.os.SystemClock;
+import android.os.Trace;
 import android.util.Log;
 
 import org.junit.runner.Description;
@@ -89,17 +90,22 @@ public class SamplerRule extends TestWatcher {
                             throws IOException, InterruptedException {
                         int count = 0;
                         while (true) {
-                            writer.write(
-                                    "#"
-                                            + (count++)
-                                            + " =============================================\r\n");
-                            for (StackTraceElement[] stack : getAllStackTraces().values()) {
-                                writer.write("---------------------\r\n");
-                                for (StackTraceElement frame : stack) {
-                                    writer.write(frame.toString() + "\r\n");
+                            Trace.beginSection("SamplerRule#writeSampleEverySecond");
+                            try {
+                                writer.write(
+                                        "#"
+                                                + (count++)
+                                                + " =========================================\r\n");
+                                for (StackTraceElement[] stack : getAllStackTraces().values()) {
+                                    writer.write("---------------------\r\n");
+                                    for (StackTraceElement frame : stack) {
+                                        writer.write(frame.toString() + "\r\n");
+                                    }
                                 }
+                                writer.flush();
+                            } finally {
+                                Trace.endSection();
                             }
-                            writer.flush();
 
                             sleep(1000);
                         }

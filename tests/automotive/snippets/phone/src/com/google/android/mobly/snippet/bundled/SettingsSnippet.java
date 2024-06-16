@@ -83,11 +83,25 @@ public class SettingsSnippet implements Snippet {
         mSettingsHelper.get().openSetting(sBluetoothSettings);
     }
 
-
+    /** Press the phone preference toggle button */
+    @Rpc(description = "Press the phone toggle on a entry under 'Paired Devices'")
+    public void pressPhoneToggleOnDevice(String deviceName) {
+        mBluetoothSettingsHelper.get().pressPhoneToggleOnDevice(deviceName);
+    }
 
     @Rpc(description = "Press the bluetooth toggle on a entry under 'Paired Devices'")
     public void pressBluetoothToggleOnDevice(String deviceName) {
         mBluetoothSettingsHelper.get().pressBluetoothToggleOnDevice(deviceName);
+    }
+
+    /**
+     * RPC to press the bluetooth toggle on a entry under 'Paired Devices'"
+     *
+     * @param deviceName - The listed device whose bluetooth toggle should be switched.
+     */
+    @Rpc(description = "Press the bluetooth toggle on a entry under 'Paired Devices'")
+    public void pressMediaToggleOnDevice(String deviceName) {
+        mBluetoothSettingsHelper.get().pressMediaToggleOnDevice(deviceName);
     }
 
     @Rpc(description = "Press device on device list.")

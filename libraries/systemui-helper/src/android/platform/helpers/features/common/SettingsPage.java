@@ -21,8 +21,9 @@ import static android.provider.Settings.ACTION_SETTINGS;
 
 import android.platform.helpers.CommonUtils;
 import android.platform.helpers.features.Page;
-import android.support.test.uiautomator.By;
-import android.support.test.uiautomator.BySelector;
+
+import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.BySelector;
 
 /**
  * Helper class for Settings Home page. This contains the all the possible helper methods for the
@@ -30,7 +31,8 @@ import android.support.test.uiautomator.BySelector;
  * HSV: https://hsv.googleplex.com/5014201858785280
  */
 public class SettingsPage implements Page {
-    private static final String SETTINGS_PAGE_IDENTIFIER = "com.android.settings:id/settings_homepage_container";
+    private static final String SETTINGS_PAGE_IDENTIFIER =
+            "com.android.settings:id/settings_homepage_container";
     private static final String SETTINGS_PAGE_NAME = "Settings";
 
     /**

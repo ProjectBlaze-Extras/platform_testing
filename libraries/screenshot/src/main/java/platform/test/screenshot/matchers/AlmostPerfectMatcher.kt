@@ -21,8 +21,8 @@ import android.graphics.Rect
 import platform.test.screenshot.proto.ScreenshotResultProto
 
 /**
- * Matcher for differences not detectable by human eye.
- * The relaxed threshold allows for low quality png storage.
+ * Matcher for differences not detectable by human eye. The relaxed threshold allows for low quality
+ * png storage.
  */
 class AlmostPerfectMatcher(
     private val acceptableThreshold: Double = 0.0,

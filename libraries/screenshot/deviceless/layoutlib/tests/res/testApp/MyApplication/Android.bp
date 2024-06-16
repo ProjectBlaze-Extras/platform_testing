@@ -18,7 +18,10 @@ package {
 
 android_app {
     name: "layoutlib-myapplication",
-    srcs: ["src/**/*.java", "src/**/*.kt",],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
     sdk_version: "current",
     dex_preopt: {
         enabled: false,

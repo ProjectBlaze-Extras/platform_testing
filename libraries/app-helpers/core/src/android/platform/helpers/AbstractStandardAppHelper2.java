@@ -234,7 +234,9 @@ public abstract class AbstractStandardAppHelper2 implements IAppHelper {
         }
 
         BySelector screenLock;
-        if (keyguardBottomAreaRefactor()) {
+        // keyguardBottomAreaRefactor() needs READ_DEVICE_CONFIG permission
+        // which is only available for system app.
+        if (!mUnrootNonPixel && keyguardBottomAreaRefactor()) {
             screenLock = KEYGUARD_ROOT_VIEW;
         } else {
             screenLock = KEYGUARD_BOTTOM_AREA_VIEW;

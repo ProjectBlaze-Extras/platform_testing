@@ -22,7 +22,7 @@ import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.graphics.Rect
 import android.net.Uri
-import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.traces.component.ComponentNameMatcher
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until

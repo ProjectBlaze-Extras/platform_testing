@@ -17,10 +17,12 @@
 package android.platform.test.flag.junit;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 /** A Fake FakeFeatureFlagsImpl to test the {@code MockFlagsRule}. */
 public class FakeFeatureFlagsImpl implements FeatureFlags {
 
+    public HashSet<String> readOnlyFlagSet = new HashSet<>();
     private HashMap<String, Boolean> mFlagMap = new HashMap<>();
 
     public FakeFeatureFlagsImpl() {
@@ -46,5 +48,10 @@ public class FakeFeatureFlagsImpl implements FeatureFlags {
 
     public void resetAll() {
         this.mFlagMap.clear();
+    }
+
+    /** Verify if the given flag is read_only and optimized */
+    public boolean isFlagReadOnlyOptimized(String flagName) {
+        return readOnlyFlagSet.contains(flagName);
     }
 }

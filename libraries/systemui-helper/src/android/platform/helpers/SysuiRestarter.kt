@@ -24,6 +24,7 @@ import android.platform.uiautomator_helpers.DeviceHelpers.uiDevice
 import android.platform.uiautomator_helpers.DurationUtils.platformAdjust
 import androidx.test.uiautomator.By
 import com.android.app.tracing.traceSection
+import com.android.systemui.Flags.migrateClocksToBlueprint
 import java.time.Duration
 import java.util.regex.Pattern
 
@@ -33,8 +34,11 @@ object SysuiRestarter {
     private val sysuiProcessUtils = ProcessUtil(UI_PACKAGE_NAME_SYSUI)
 
     // https://hsv.googleplex.com/5130837462876160?node=117
-    private val PAGE_TITLE_SELECTOR_PATTERN =
+    private val PAGE_TITLE_SELECTOR_PATTERN = if (migrateClocksToBlueprint()) {
+        Pattern.compile(String.format("com.android.systemui:id/%s", "keyguard_indication_area"))
+    } else {
         Pattern.compile(String.format("com.android.systemui:id/%s", "keyguard_clock_container"))
+    }
     private val PAGE_TITLE_SELECTOR = By.res(PAGE_TITLE_SELECTOR_PATTERN)
 
     /**

@@ -9,11 +9,12 @@ android_test {
 
     srcs: ["**/*.java"],
     static_libs: [
-        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
         "launcher-helper-lib",
         "permission-helper",
         "package-helper",
         "junit",
+        "androidx.test.rules",
     ],
 
     libs: ["android.test.base.stubs"],

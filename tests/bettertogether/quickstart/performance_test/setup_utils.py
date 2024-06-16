@@ -38,10 +38,10 @@ LOG_TAGS = [
 ]
 
 
-def set_wifi_country_code(
+def set_country_code(
     ad: android_device.AndroidDevice, country_code: str
 ) -> None:
-  """Sets Wi-Fi country code to shrink Wi-Fi 5GHz available channels.
+  """Sets Wi-Fi and Telephony country code.
 
   When you set the phone to EU or JP, the available 5GHz channels shrinks.
   Some phones, like Pixel 2, can't use Wi-Fi Direct or Hotspot on 5GHz
@@ -51,21 +51,31 @@ def set_wifi_country_code(
 
   Args:
     ad: AndroidDevice, Mobly Android Device.
-    country_code: WiFi Country Code.
+    country_code: WiFi and Telephony Country Code.
   """
   if (not ad.is_adb_root):
     ad.log.info(f'Skipped setting wifi country code on device "{ad.serial}" '
-                'because we do not set wifi country code on unrooted phone.')
+                'because we do not set country code on unrooted phone.')
     return
 
-  ad.log.info(f'Set Wi-Fi country code to {country_code}.')
+  ad.log.info(f'Set Wi-Fi and Telephony country code to {country_code}.')
   ad.adb.shell('cmd wifi set-wifi-enabled disabled')
   time.sleep(WIFI_COUNTRYCODE_CONFIG_TIME_SEC)
+  ad.adb.shell(
+      'am broadcast -a com.android.internal.telephony.action.COUNTRY_OVERRIDE'
+      f' --es country {country_code}'
+  )
   ad.adb.shell(f'cmd wifi force-country-code enabled {country_code}')
   enable_airplane_mode(ad)
   time.sleep(WIFI_COUNTRYCODE_CONFIG_TIME_SEC)
   disable_airplane_mode(ad)
   ad.adb.shell('cmd wifi set-wifi-enabled enabled')
+  telephony_country_code = (
+      ad.adb.shell('dumpsys wifi | grep mTelephonyCountryCode')
+      .decode('utf-8')
+      .strip()
+  )
+  ad.log.info(f'Telephony country code: {telephony_country_code}')
 
 
 def enable_logs(ad: android_device.AndroidDevice) -> None:

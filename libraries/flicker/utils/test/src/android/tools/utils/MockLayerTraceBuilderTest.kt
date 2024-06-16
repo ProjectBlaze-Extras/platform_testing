@@ -16,7 +16,7 @@
 
 package android.tools.utils
 
-import android.tools.common.datatypes.Rect
+import android.tools.datatypes.Rect
 import com.google.common.truth.Truth
 import org.junit.ClassRule
 import org.junit.Test
@@ -46,8 +46,8 @@ class MockLayerTraceBuilderTest {
                 .addChild(MockLayerBuilder("Child Mock Layer"))
                 .build()
 
-        Truth.assertThat(mockLayer.children[0].screenBounds).isEqualTo(mockLayer.screenBounds)
-        Truth.assertThat(mockLayer.children[0].bounds).isEqualTo(mockLayer.bounds)
+        Truth.assertThat(mockLayer.children.first().screenBounds).isEqualTo(mockLayer.screenBounds)
+        Truth.assertThat(mockLayer.children.first().bounds).isEqualTo(mockLayer.bounds)
     }
 
     @Test

@@ -24,10 +24,13 @@ import android.platform.test.scenario.annotation.Scenario;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import java.util.Locale;
 
 /**
  * This test will always switch to a newly created guest from default initial user.
@@ -65,7 +68,8 @@ public class SwitchToNewGuest {
             mUiAutomation = getUiAutomation();
             mUiAutomation.adoptShellPermissionIdentity(CREATE_USERS_PERMISSION);
             mMultiUserHelper.switchAndWaitForStable(
-                MultiUserConstants.DEFAULT_INITIAL_USER, MultiUserConstants.WAIT_FOR_IDLE_TIME_MS);
+                    MultiUserConstants.DEFAULT_INITIAL_USER,
+                    MultiUserConstants.WAIT_FOR_IDLE_TIME_MS);
 
             // Drop elevated permissions
             mUiAutomation.dropShellPermissionIdentity();
@@ -92,6 +96,10 @@ public class SwitchToNewGuest {
         if (MultiUserConstants.INCLUDE_CREATION_TIME) {
             mGuestId = mMultiUserHelper.createUser(MultiUserConstants.GUEST_NAME, true);
         }
+        Assume.assumeTrue(
+                String.format(
+                        Locale.US, "Target user id is %d but must be greater than 10", mGuestId),
+                mGuestId > 10);
         mMultiUserHelper.switchToUserId(mGuestId);
 
         // Drop elevated permissions

@@ -28,7 +28,6 @@ android_test {
         "automotive-settings-app-helper",
         "app-helpers-common-interfaces",
         "app-helpers-auto-interfaces",
-        "ub-uiautomator",
         "collector-device-lib-platform",
         "common-platform-scenarios",
         "common-platform-scenario-tests",

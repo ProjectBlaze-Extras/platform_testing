@@ -16,7 +16,7 @@
 
 package android.platform.helpers.features;
 
-import android.support.test.uiautomator.BySelector;
+import androidx.test.uiautomator.BySelector;
 
 /**
  * An interface which all the page should implement.

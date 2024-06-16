@@ -61,6 +61,17 @@ public class BootTimeTest extends BaseHostJUnit4Test {
     private static final String IMMEDIATE_DMESG_FILENAME = "Successive_reboots_immediate_dmesg";
     private static final String F2FS_SHUTDOWN_COMMAND = "f2fs_io shutdown 4 /data";
     private static final String F2FS_SHUTDOWN_SUCCESS_OUTPUT = "Shutdown /data with level=4";
+    private static final String BOOT_TIME_PROP = "ro.boot.boottime";
+    private static final String BOOT_TIME_PROP_KEY = "boot_time_prop";
+    private static final String METRIC_KEY_SEPARATOR = "_";
+    private static final String PERFETTO_TRACE_FILE_CHECK_CMD = "ls -l /data/misc/perfetto-traces";
+    private static final String PERFETTO_TRACE_MV_CMD =
+            "mv /data/misc/perfetto-traces/boottrace.perfetto-trace %s";
+    private static final String PERFETTO_FILE_PATH = "perfetto_file_path";
+
+    public static String getBootTimePropKey() {
+        return BOOT_TIME_PROP_KEY;
+    }
 
     @Option(
             name = "boot-count",
@@ -142,10 +153,7 @@ public class BootTimeTest extends BaseHostJUnit4Test {
 
     @Before
     public void setUp() throws Exception {
-        ITestDevice testDevice = getDevice();
         setUpDeviceForSuccessiveBoots();
-        String logcatCommand = mBootTimePatterns.isEmpty() ? LOGCAT_CMD_ALL : LOGCAT_CMD;
-        mRebootLogcatReceiver = new LogcatReceiver(testDevice, logcatCommand, LOGCAT_SIZE, 0);
     }
 
     @Test
@@ -165,21 +173,40 @@ public class BootTimeTest extends BaseHostJUnit4Test {
         if (mForceF2FsShutdown) {
             forseF2FsShutdown();
         }
-        clearLogcat();
+        clearAndStartLogcat();
         sleep(5000);
         getDevice().nonBlockingReboot();
         getDevice().waitForDeviceOnline(mDeviceBootTime);
         getDevice().enableAdbRoot();
         if (mDumpDmesgImmediate) {
-            saveDmesgInfo(String.format("%s_%d", IMMEDIATE_DMESG_FILENAME, iteration));
+            saveDmesgInfo(
+                    String.format(
+                            "%s%s%d", IMMEDIATE_DMESG_FILENAME, METRIC_KEY_SEPARATOR, iteration));
         }
         CLog.v("Waiting for %d msecs immediately after successive boot.", mAfterBootDelayTime);
         sleep(mAfterBootDelayTime);
         getDevice().waitForBootComplete(mDeviceBootTime);
-        saveDmesgInfo(String.format("%s_%d", DMESG_FILENAME, iteration));
+        saveDmesgInfo(String.format("%s%s%d", DMESG_FILENAME, METRIC_KEY_SEPARATOR, iteration));
         saveLogcatInfo(iteration);
-        // TODO(b/288323866): implement
-        // analyzeBootLoaderTimingInfo(iteration);
+        // TODO(b/288323866): figure out why is the prop value null
+        String bootLoaderVal = getDevice().getProperty(BOOT_TIME_PROP);
+        // Sample Output : 1BLL:89,1BLE:590,2BLL:0,2BLE:1344,SW:6734,KL:1193
+        CLog.d("%s value is %s", BOOT_TIME_PROP, bootLoaderVal);
+        testMetrics.addTestMetric(
+                String.format("%s%s%d", BOOT_TIME_PROP_KEY, METRIC_KEY_SEPARATOR, iteration),
+                bootLoaderVal == null ? "" : bootLoaderVal);
+        String perfettoTraceFilePAth =
+                processPerfettoFile(
+                        String.format(
+                                "%s%s%d",
+                                BootTimeTest.class.getSimpleName(),
+                                METRIC_KEY_SEPARATOR,
+                                iteration));
+        if (perfettoTraceFilePAth != null) {
+            testMetrics.addTestMetric(
+                    String.format("%s%s%d", PERFETTO_FILE_PATH, METRIC_KEY_SEPARATOR, iteration),
+                    perfettoTraceFilePAth);
+        }
     }
 
     private void setUpDeviceForSuccessiveBoots() throws DeviceNotAvailableException {
@@ -205,8 +232,9 @@ public class BootTimeTest extends BaseHostJUnit4Test {
 
     private void saveLogcatInfo(int iteration) {
         try (InputStreamSource logcat = mRebootLogcatReceiver.getLogcatData()) {
-            testLog.addTestLog(
-                    String.format("%s_%d", LOGCAT_FILENAME, iteration), LogDataType.LOGCAT, logcat);
+            String testLogKey =
+                    String.format("%s%s%d", LOGCAT_FILENAME, METRIC_KEY_SEPARATOR, iteration);
+            testLog.addTestLog(testLogKey, LogDataType.LOGCAT, logcat);
         }
     }
 
@@ -217,13 +245,60 @@ public class BootTimeTest extends BaseHostJUnit4Test {
                 filename, LogDataType.HOST_LOG, new FileInputStreamSource(dmesgFile, false));
     }
 
-    private void clearLogcat() throws DeviceNotAvailableException {
+    private void clearAndStartLogcat() throws DeviceNotAvailableException {
         getDevice().executeShellCommand(LOGCAT_CMD_CLEAR);
-        getDevice().clearLogcat();
-        mRebootLogcatReceiver.clear();
+        if (mRebootLogcatReceiver != null) {
+            mRebootLogcatReceiver.clear();
+            mRebootLogcatReceiver.stop();
+            mRebootLogcatReceiver = null;
+        }
+        String logcatCommand = mBootTimePatterns.isEmpty() ? LOGCAT_CMD_ALL : LOGCAT_CMD;
+        mRebootLogcatReceiver = new LogcatReceiver(getDevice(), logcatCommand, LOGCAT_SIZE, 0);
+        mRebootLogcatReceiver.start();
     }
 
     private void sleep(long duration) {
         RunUtil.getDefault().sleep(duration);
+    }
+
+    /**
+     * Look for the perfetto trace file collected during reboot under /data/misc/perfetto-traces and
+     * copy the file under /data/local/tmp using the test iteration name and return the path to the
+     * newly copied trace file.
+     */
+    private String processPerfettoFile(String testId) throws DeviceNotAvailableException {
+        CommandResult result = getDevice().executeShellV2Command(PERFETTO_TRACE_FILE_CHECK_CMD);
+        if (result != null) {
+            CLog.i(
+                    "Command Output: Cmd - %s, Output - %s, Error - %s, Status - %s",
+                    PERFETTO_TRACE_FILE_CHECK_CMD,
+                    result.getStdout(),
+                    result.getStderr(),
+                    result.getStatus());
+            if (CommandStatus.SUCCESS.equals(result.getStatus())
+                    && result.getStdout().contains("boottrace.perfetto-trace")) {
+                // Move the perfetto trace file to the new location and rename it using the test
+                // name.
+                String finalTraceFileLocation =
+                        String.format("/data/local/tmp/%s.perfetto-trace", testId);
+                CommandResult moveResult =
+                        getDevice()
+                                .executeShellV2Command(
+                                        String.format(
+                                                PERFETTO_TRACE_MV_CMD, finalTraceFileLocation));
+                if (moveResult != null) {
+                    CLog.i(
+                            "Command Output: Cmd - %s, Output - %s, Error - %s, Status - %s",
+                            PERFETTO_TRACE_MV_CMD,
+                            moveResult.getStdout(),
+                            moveResult.getStderr(),
+                            moveResult.getStatus());
+                    if (CommandStatus.SUCCESS.equals(result.getStatus())) {
+                        return finalTraceFileLocation;
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

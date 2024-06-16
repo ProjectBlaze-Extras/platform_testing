@@ -24,10 +24,10 @@ import android.platform.helpers.IAutoFacetBarHelper;
 import android.platform.test.rules.ConditionalIgnore;
 import android.platform.test.rules.ConditionalIgnoreRule;
 import android.platform.test.rules.IgnoreOnPortrait;
-import android.support.test.uiautomator.UiDevice;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
+import androidx.test.uiautomator.UiDevice;
 
 import org.junit.After;
 import org.junit.Rule;

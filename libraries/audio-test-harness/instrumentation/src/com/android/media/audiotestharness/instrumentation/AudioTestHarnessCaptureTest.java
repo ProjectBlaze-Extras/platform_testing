@@ -19,8 +19,9 @@ package com.android.media.audiotestharness.instrumentation;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
+
+import androidx.test.filters.LargeTest;
 
 import com.android.media.audiotestharness.client.core.AudioCaptureStream;
 import com.android.media.audiotestharness.client.core.AudioTestHarnessClient;

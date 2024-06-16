@@ -308,4 +308,12 @@ public interface IAutoMediaHelper extends IAppHelper, Scrollable {
      * <p>This method is used to click on playlist icon.
      */
     void clickOnPlaylistIcon();
+
+    /**
+     * Setup expectations: Grant restricted parmissions for BT Media
+     *
+     * <p>This method is used to Grant restricted parmissions in runtime
+     */
+    void grantRestrictedPermissionsForBTMedia(String permission);
+
 }

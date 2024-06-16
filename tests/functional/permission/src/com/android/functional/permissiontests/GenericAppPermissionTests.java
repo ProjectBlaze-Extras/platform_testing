@@ -18,19 +18,21 @@ package com.android.functional.permissiontests;
 
 import android.app.UiAutomation;
 import android.content.Context;
-import android.support.test.launcherhelper.ILauncherStrategy;
-import android.support.test.launcherhelper.LauncherStrategyFactory;
-import android.support.test.uiautomator.By;
-import android.support.test.uiautomator.BySelector;
-import android.support.test.uiautomator.UiDevice;
-import android.support.test.uiautomator.UiObject2;
-import android.support.test.uiautomator.UiObjectNotFoundException;
-import android.support.test.uiautomator.Until;
+import android.support.test.launcherhelper2.ILauncherStrategy;
+import android.support.test.launcherhelper2.LauncherStrategyFactory;
 import android.system.helpers.PackageHelper;
 import android.system.helpers.PermissionHelper;
 import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.SmallTest;
+
+import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.BySelector;
+import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.UiObject2;
+import androidx.test.uiautomator.UiObjectNotFoundException;
+import androidx.test.uiautomator.Until;
 
 import java.util.Arrays;
 import java.util.List;

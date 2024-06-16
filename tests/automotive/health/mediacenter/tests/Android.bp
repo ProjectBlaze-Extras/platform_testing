@@ -26,7 +26,6 @@ android_test {
         "automotive-health-test-rules",
         "automotive-media-center-app-helper",
         "app-helpers-auto-interfaces",
-        "ub-uiautomator",
         "collector-device-lib-platform",
         "common-platform-scenarios",
         "common-platform-scenario-tests",

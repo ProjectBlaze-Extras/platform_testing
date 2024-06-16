@@ -14,26 +14,32 @@
 
 import logging
 import time
-from absl import flags
 
 from bluetooth_test import bluetooth_base_test
 from utilities.main_utils import common_main
 from utilities.crystalball_metrics_utils import export_to_crystalball
 
-_BT_PAIRING_ITERATIONS = flags.DEFINE_integer('iterations', 10,
-                                              'Number of iterations to pair/unpair')
-
-_BUFFER_TIME_BETWEEN_ITERATIONS_S = flags.DEFINE_integer('buffer-time-between-iterations', 2,
-                                                         'Time to wait in seconds between test iterations to reduce stress on bt stack')
-
+ITERATIONS_PARAM_NAME = 'iterations'
+DEFAULT_ITERATIONS = 10
+DEFAULT_ITERATION_DELAY_S = 2
 
 class BTPerformancePairingTest(bluetooth_base_test.BluetoothBaseTest):
     """Test Class for Bluetooth Pairing Test."""
 
+    def setup_class(self):
+        super().setup_class()
+        self.iterations = DEFAULT_ITERATIONS
+        self.iteration_delay = DEFAULT_ITERATION_DELAY_S
+        if ITERATIONS_PARAM_NAME in self.user_params:
+            self.iterations = self.user_params[ITERATIONS_PARAM_NAME]
+        else:
+            logging.info(f'{ITERATIONS_PARAM_NAME} is not in testbed config. Using default value')
+        logging.info(f'Setup {self.__class__.__name__} with {ITERATIONS_PARAM_NAME} = {self.iterations} and iteration delay = {self.iteration_delay}')
+
     def test_pairing(self):
         """Test for pairing/unpairing a HU with a bluetooth device"""
         pairing_success_count = 0
-        for i in range(1, _BT_PAIRING_ITERATIONS.value + 1):
+        for i in range(1, self.iterations + 1):
             logging.info(f'Pairing iteration {i}')
             try:
                 self.bt_utils.pair_primary_to_secondary()
@@ -41,11 +47,10 @@ class BTPerformancePairingTest(bluetooth_base_test.BluetoothBaseTest):
             except:
                 logging.error(f'Failed to pair devices on iteration {i}')
             self.bt_utils.unpair()
-            time.sleep(_BUFFER_TIME_BETWEEN_ITERATIONS_S.value)
-        success_rate = pairing_success_count / _BT_PAIRING_ITERATIONS.value
+            time.sleep(self.iteration_delay)
+        success_rate = pairing_success_count / self.iterations
         metrics = {'success_rate': success_rate}
         export_to_crystalball(metrics, self.log_path, self.current_test_info.name)
-
 
 if __name__ == '__main__':
     common_main()

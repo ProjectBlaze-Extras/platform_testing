@@ -22,9 +22,7 @@ import android.graphics.Rect
 import kotlin.collections.List
 import platform.test.screenshot.proto.ScreenshotResultProto
 
-/**
- * Bitmap matching that does an exact comparison of pixels between bitmaps.
- */
+/** Bitmap matching that does an exact comparison of pixels between bitmaps. */
 class PixelPerfectMatcher : BitmapMatcher() {
 
     override fun compareBitmaps(
@@ -51,13 +49,13 @@ class PixelPerfectMatcher : BitmapMatcher() {
             }
         }
 
-        val stats = ScreenshotResultProto.DiffResult.ComparisonStatistics
-            .newBuilder()
-            .setNumberPixelsCompared(width * height)
-            .setNumberPixelsIdentical(same)
-            .setNumberPixelsDifferent(different)
-            .setNumberPixelsIgnored(ignored)
-            .build()
+        val stats =
+            ScreenshotResultProto.DiffResult.ComparisonStatistics.newBuilder()
+                .setNumberPixelsCompared(width * height)
+                .setNumberPixelsIdentical(same)
+                .setNumberPixelsDifferent(different)
+                .setNumberPixelsIgnored(ignored)
+                .build()
 
         return if (different > 0) {
             val diff = Bitmap.createBitmap(diffArray.value, width, height, Bitmap.Config.ARGB_8888)

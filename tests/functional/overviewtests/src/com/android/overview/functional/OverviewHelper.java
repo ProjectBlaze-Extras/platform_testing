@@ -18,16 +18,18 @@ package android.overview.functional;
 
 
 import android.app.Instrumentation;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.SystemClock;
-import android.support.test.uiautomator.By;
-import android.support.test.uiautomator.UiDevice;
-import android.support.test.uiautomator.UiObject2;
-import android.support.test.uiautomator.Until;
+
+import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.UiObject2;
+import androidx.test.uiautomator.Until;
+
 import org.junit.Assert;
 
 public class OverviewHelper {

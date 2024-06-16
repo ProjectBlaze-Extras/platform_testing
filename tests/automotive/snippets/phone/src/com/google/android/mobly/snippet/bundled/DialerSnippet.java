@@ -71,9 +71,20 @@ public class DialerSnippet implements Snippet {
         mDialerHelper.get().openCallHistory();
     }
 
+    /** Open Dialer settings from the Dialer app */
+    @Rpc(description = "Open Dialer Settings from the Dialer app.")
+    public void openDialerSettings() {
+        mDialerHelper.get().openDialerSettings();
+    }
+
     @Rpc(description = "Call Contact From Contact List.")
     public void callContact(String contactName) {
         mDialerHelper.get().callContact(contactName);
+    }
+
+    @Rpc(description = "Return whether the \"Connected Phone\" field holds the given name.")
+    public String getConnectedPhoneName() {
+        return mDialerHelper.get().getConnectedPhoneName();
     }
 
     @Rpc(description = "Delete the dialed number on Dial Pad.")
@@ -117,6 +128,16 @@ public class DialerSnippet implements Snippet {
                     "Call contact from list open in foreground e.g. Favorites, Recents, Contacts.")
     public void dialFromList(String contact) {
         mDialerHelper.get().dialFromList(contact);
+    }
+
+    @Rpc(description = "Returns whether a call is currently ongoing and in full-screen mode.")
+    public boolean isOngoingCallInFullScreen() {
+        return mDialerHelper.get().isOngoingCallInFullScreen();
+    }
+
+    @Rpc(description = "Return whether the Active Call toggle is chechked")
+    public boolean isActiveCallEnabled() {
+        return mDialerHelper.get().isActiveCallEnabled();
     }
 
     @Rpc(description = "Dial a number in call dial pad when call is in progress.")
@@ -224,9 +245,22 @@ public class DialerSnippet implements Snippet {
         mDialerHelper.get().openContacts();
     }
 
+    /** Press 'Device' prompt which comes up when trying to transfer files to a device. */
     @Rpc(description = "Press 'Device' on a prompt, if present.")
     public void pressDevice() {
         mDialerHelper.get().pressDeviceOnPrompt();
+    }
+
+    /** Press Active Call toggle */
+    @Rpc(description = "Press Active Call toggle")
+    public void pressActiveCallToggle() {
+        mDialerHelper.get().pressActiveCallToggle();
+    }
+
+    /** Press Active Call toggle */
+    @Rpc(description = "Press the dialer button on the phone card on the home screen.")
+    public void pressDialerButtonOnPhoneCard() {
+        mDialerHelper.get().pressDialerButtonOnPhoneCard();
     }
 
     /** Rpc to press the Mobile call action button on a contact page */

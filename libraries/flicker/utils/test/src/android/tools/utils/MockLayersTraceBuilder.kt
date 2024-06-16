@@ -16,8 +16,7 @@
 
 package android.tools.utils
 
-import android.tools.common.traces.surfaceflinger.LayerTraceEntry
-import android.tools.common.traces.surfaceflinger.LayersTrace
+import android.tools.traces.surfaceflinger.LayersTrace
 
 class MockLayersTraceBuilder(
     private var entries: MutableList<MockLayerTraceEntryBuilder> = mutableListOf()
@@ -35,7 +34,7 @@ class MockLayersTraceBuilder(
             "Timestamps not strictly increasing between entries."
         }
 
-        val entries = entries.map { it.build() }.toTypedArray<LayerTraceEntry>()
+        val entries = entries.map { it.build() }
         return LayersTrace(entries)
     }
 }

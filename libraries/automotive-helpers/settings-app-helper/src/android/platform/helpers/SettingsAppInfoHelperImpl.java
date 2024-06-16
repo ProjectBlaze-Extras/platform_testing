@@ -268,6 +268,7 @@ public class SettingsAppInfoHelperImpl extends AbstractStandardAppHelper
                         permissions_selector,
                         String.format("Scroll on %s permission to find %s", permission, state));
         getSpectatioUiUtil().clickAndWait(permissions_menu);
+        getSpectatioUiUtil().waitForIdle();
         BySelector permission_selector = By.text(permission);
         UiObject2 permission_menu =
                 mScrollUtility.scrollAndFindUiObject(
@@ -275,49 +276,39 @@ public class SettingsAppInfoHelperImpl extends AbstractStandardAppHelper
                         mScrollDirection,
                         mForwardButtonSelector,
                         mBackwardButtonSelector,
-                        mAppInfoPermissionsScrollableElementSelector,
+                        mScrollableElementSelector,
                         permission_selector,
                         String.format("Scroll on %s permission to find %s", permission, state));
         if (permission_menu == null) {
             throw new RuntimeException("Cannot find the permission_selector" + permission);
         }
         getSpectatioUiUtil().clickAndWait(permission_menu);
+        getSpectatioUiUtil().waitForIdle();
+        getSpectatioUiUtil().wait1Second();
         if (state == State.ENABLE) {
             UiObject2 allow_btn =
-                    mScrollUtility.scrollAndFindUiObject(
-                            mScrollAction,
-                            mScrollDirection,
-                            mForwardButtonSelector,
-                            mBackwardButtonSelector,
-                            mScrollableElementSelector,
-                            getUiElementFromConfig(
-                                    AutomotiveConfigConstants.APP_INFO_SETTINGS_ALLOW_BUTTON),
-                            "Scroll on App info to find Allow Button");
+                    getSpectatioUiUtil()
+                            .findUiObject(
+                                    getUiElementFromConfig(
+                                            AutomotiveConfigConstants
+                                                    .APP_INFO_SETTINGS_ALLOW_BUTTON));
             getSpectatioUiUtil().validateUiObject(allow_btn, "Allow button");
             getSpectatioUiUtil().clickAndWait(allow_btn);
         } else {
             UiObject2 dont_allow_btn =
-                    mScrollUtility.scrollAndFindUiObject(
-                            mScrollAction,
-                            mScrollDirection,
-                            mForwardButtonSelector,
-                            mBackwardButtonSelector,
-                            mScrollableElementSelector,
-                            getUiElementFromConfig(
-                                    AutomotiveConfigConstants.APP_INFO_SETTINGS_DONT_ALLOW_BUTTON),
-                            "Scroll on App info to find Don't Allow Button");
+                    getSpectatioUiUtil()
+                            .findUiObject(
+                                    getUiElementFromConfig(
+                                            AutomotiveConfigConstants
+                                                    .APP_INFO_SETTINGS_DONT_ALLOW_BUTTON));
             getSpectatioUiUtil().clickAndWait(dont_allow_btn);
+            getSpectatioUiUtil().wait1Second();
             UiObject2 dont_allow_anyway_btn =
-                    mScrollUtility.scrollAndFindUiObject(
-                            mScrollAction,
-                            mScrollDirection,
-                            mForwardButtonSelector,
-                            mBackwardButtonSelector,
-                            mScrollableElementSelector,
-                            getUiElementFromConfig(
-                                    AutomotiveConfigConstants
-                                            .APP_INFO_SETTINGS_DONT_ALLOW_ANYWAY_BUTTON),
-                            "Scroll on App info to find Don't Allow anyway Button");
+                    getSpectatioUiUtil()
+                            .findUiObject(
+                                    getUiElementFromConfig(
+                                            AutomotiveConfigConstants
+                                                    .APP_INFO_SETTINGS_DONT_ALLOW_ANYWAY_BUTTON));
             getSpectatioUiUtil().clickAndWait(dont_allow_anyway_btn);
         }
         getSpectatioUiUtil().pressBack();

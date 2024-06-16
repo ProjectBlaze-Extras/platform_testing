@@ -79,8 +79,6 @@ platform_tests += \
     SimpleServiceTestApp2 \
     SimpleServiceTestApp3 \
     SimpleTestApp \
-    skia_dm \
-    skia_nanobench \
     sl4a \
     SmokeTest \
     SmokeTestApp \

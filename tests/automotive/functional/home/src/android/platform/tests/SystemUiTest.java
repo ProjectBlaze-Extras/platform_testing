@@ -21,15 +21,21 @@ import static junit.framework.Assert.assertTrue;
 import android.platform.helpers.HelperAccessor;
 import android.platform.helpers.IAutoFacetBarHelper;
 import android.platform.helpers.IAutoHomeHelper;
+import android.platform.test.rules.ConditionalIgnore;
+import android.platform.test.rules.ConditionalIgnoreRule;
+import android.platform.test.rules.IgnoreOnPortrait;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class SystemUiTest {
+    @Rule public ConditionalIgnoreRule rule = new ConditionalIgnoreRule();
+
     private HelperAccessor<IAutoHomeHelper> mHomeHelper;
     private HelperAccessor<IAutoFacetBarHelper> mFacetBarHelper;
 
@@ -44,6 +50,7 @@ public class SystemUiTest {
     }
 
     @Test
+    @ConditionalIgnore(condition = IgnoreOnPortrait.class)
     public void testSystemUi() {
         mHomeHelper.get().openSystemUi();
         assertTrue("Maps widget is not displayed", mHomeHelper.get().hasMapsWidget());

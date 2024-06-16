@@ -28,6 +28,7 @@ import android.os.Build;
 import android.os.SystemClock;
 import android.os.UserManager;
 import android.support.test.uiautomator.UiDevice;
+import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -42,6 +43,8 @@ import java.util.concurrent.TimeUnit;
  * {@link CarUserManager}, {@link UserManager} to expose functions for user switch end-to-end tests.
  */
 public class MultiUserHelper {
+    private static final String LOG_TAG = MultiUserHelper.class.getSimpleName();
+
     /** For testing purpose we allow a wide range of switching time. */
     private static final int USER_SWITCH_TIMEOUT_SECOND = 300;
 
@@ -107,6 +110,11 @@ public class MultiUserHelper {
      * @param id Id of the user to switch to
      */
     public void switchToUserId(int id) throws Exception {
+        Log.v(
+                LOG_TAG,
+                String.format(
+                        "Switching from user %d to user %d",
+                        getCurrentForegroundUserInfo().id, id));
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             switchUserUsingShell(id);
             return;

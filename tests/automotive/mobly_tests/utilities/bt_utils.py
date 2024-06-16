@@ -19,6 +19,7 @@ import time
 from utilities import constants
 from mobly import asserts
 from mobly.controllers import android_device
+from utilities.media_utils import MediaUtils
 
 # Number of seconds for the target to stay discoverable on Bluetooth.
 DISCOVERABLE_TIME = 60
@@ -33,19 +34,12 @@ class BTUtils:
         self.discoverer = discoverer
         self.target = target
         self.target_adrr = None
+        self.media_utils = MediaUtils(self.target, self.discoverer)
 
-    # Skip Android Auto pop-up
-    # TODO @vitalidim remove this function after b/314385914 resolved
-    def handle_android_auto_pop_up(self):
-        logging.info('Checking for Android Auto pop-up on HU')
-        if self.discoverer.mbs.isStartAndroidAutoPopUpPresent():
-            logging.info('Android Auto pop-up is present on HU')
-            logging.info('Click on <NOT NOW> button on HU')
-            self.discoverer.mbs.skipStartAndroidAutoPopUp()
-            asserts.assert_false(self.discoverer.mbs.isStartAndroidAutoPopUpPresent(),
-                                 'Android Auto pop-up should be closed')
-        else:
-            logging.info('Android Auto pop-up is not present on HU')
+    # Disable Android Auto pop-up on HU
+    def disable_android_auto_popup_on_hu(self):
+        logging.info('Disable Android Auto pop-up on HU with adb')
+        self.media_utils.execute_shell_on_hu_device(constants.DISABLE_ANDROID_AUTO_POP_UP)
 
     # Skip Assistant pop-up
     # TODO @vitalidim remove this function after b/314386661 resolved
@@ -87,6 +81,7 @@ class BTUtils:
         logging.info('Enabling Bluetooth on both devices')
         self.discoverer.mbs.btEnable()
         self.target.mbs.btEnable()
+        self.disable_android_auto_popup_on_hu()
         logging.info('Setting devices to be discoverable')
         self.target.mbs.btBecomeDiscoverable(DISCOVERABLE_TIME)
         self.target.mbs.btStartAutoAcceptIncomingPairRequest()
@@ -105,7 +100,6 @@ class BTUtils:
             'Failed to pair the target device %s over Bluetooth.' %
             target_address)
         time.sleep(constants.DEFAULT_WAIT_TIME_FIVE_SECS)
-        self.handle_android_auto_pop_up()
         self.handle_assistant_pop_up()
 
     def unpair(self):
@@ -120,7 +114,7 @@ class BTUtils:
             logging.info(f"Forget Discoverer device <{discoverer_address}> on Target device")
             self.target.mbs.btUnpairDevice(discoverer_address)
         else:
-            logging.info("Discoverer device not founded on Target device")
+            logging.error("Discoverer device not founded on Target device")
         # unpair Target device from Discoverer
         logging.info("Unpair Target device from Discoverer")
         target_address = self.target.mbs.btGetAddress()
@@ -133,7 +127,7 @@ class BTUtils:
             logging.info(f"Forget Target device <{target_address}> on Discoverer device")
             self.discoverer.mbs.btUnpairDevice(target_address)
         else:
-            logging.info("Target device not founded on Discoverer device")
+            logging.error("Target device not founded on Discoverer device")
 
     def press_allow_on_phone(self):
         """ Repeatedly presses "Allow" on prompts until no more prompts appear"""

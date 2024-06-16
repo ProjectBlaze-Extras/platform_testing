@@ -170,6 +170,13 @@ public interface IAutoStatusBarHelper extends IAppHelper {
     /**
      * Setup expectations: Network & Internet
      *
+     * <p>click on connected Wifi
+     */
+    void clickOnConnectedWifi();
+
+    /**
+     * Setup expectations: Network & Internet
+     *
      * <p>click on forget button
      */
     void forgetWifi();

@@ -186,12 +186,7 @@ public class SettingHelperImpl extends AbstractStandardAppHelper implements IAut
     /** {@inheritDoc} */
     @Override
     public boolean isHotspotOn() {
-        BySelector enableOptionSelector =
-                getUiElementFromConfig(AutomotiveConfigConstants.TOGGLE_HOTSPOT);
-        UiObject2 enableOption = getSpectatioUiUtil().findUiObject(enableOptionSelector);
-        getSpectatioUiUtil()
-                .validateUiObject(enableOption, AutomotiveConfigConstants.TOGGLE_HOTSPOT);
-        return enableOption.isChecked();
+        return !(getSpectatioUiUtil().hasUiElement("Off"));
     }
 
     /** {@inheritDoc} */

@@ -65,9 +65,9 @@ public class KillAppsRule extends TestWatcher {
             return;
         }
 
-        // Force stop each application in sequence if the kill app option is selected.
+        // Stop app processes of each application in sequence if the kill app option is selected.
         for (String app : mApplications) {
-            executeShellCommand(String.format("am force-stop %s", app));
+            executeShellCommand(String.format("am stop-app --user current %s", app));
         }
     }
 }

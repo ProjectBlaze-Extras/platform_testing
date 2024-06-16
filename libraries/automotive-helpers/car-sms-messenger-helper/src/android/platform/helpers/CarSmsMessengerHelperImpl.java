@@ -95,4 +95,21 @@ public class CarSmsMessengerHelperImpl extends AbstractStandardAppHelper
                 getUiElementFromConfig(AutomotiveConfigConstants.SMS_EMPTY_MESSAGE);
         return getSpectatioUiUtil().hasUiElement(noMessagesSelector);
     }
+
+    @Override
+    public void tapToReadAloud() {
+        BySelector smsTextSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.TAP_TO_READ_ALOUD);
+        UiObject2 tapToReadAloudObj = getSpectatioUiUtil().findUiObject(smsTextSelector);
+        getSpectatioUiUtil()
+                .validateUiObject(tapToReadAloudObj, AutomotiveConfigConstants.TAP_TO_READ_ALOUD);
+        getSpectatioUiUtil().clickAndWait(tapToReadAloudObj);
+    }
+
+    @Override
+    public boolean isAssistantSMSTranscriptionPlateDisplayed() {
+        BySelector assistantSMSPlateSelector =
+                getUiElementFromConfig(AutomotiveConfigConstants.ASSISTANT_SMS_TRANSCRIPTION_PLATE);
+        return (getSpectatioUiUtil().hasUiElement(assistantSMSPlateSelector));
+    }
 }

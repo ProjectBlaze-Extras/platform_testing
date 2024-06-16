@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Genrule for handwritten statsd configs.
 package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
+// Genrule for handwritten statsd configs.
 java_genrule {
     name: "statsd-config-protos",
     host_supported: true,
@@ -24,6 +24,7 @@ java_genrule {
         "res/statsd-configs/**/*.pb",
     ],
     out: ["statsd-config-protos.jar"],
+    tools: ["soong_zip"],
     /*
      * Loops over all subdirectories under res/statsd-configs/ and copy all *.pb configs within to
      * an assets/statsd-configs/ directory, which gets packed into a .jar file and ends up under the
@@ -32,10 +33,9 @@ java_genrule {
      *
      * If a config fails to parse, an error is thrown and the build will fail.
      */
-    cmd: "out_dir=$$(dirname $(out)) && assets_dir=\"assets/statsd-configs\" " +
-        "&& mkdir -p $$out_dir/$$assets_dir && protos=($(locations res/statsd-configs/**/*.pb)) " +
-        "&& for file in $${protos[@]} ; do cp $$file $$out_dir/$$assets_dir/ ; done " +
-        "&& jar cf $(out) -C $$(dirname $(out)) $$assets_dir"
+    cmd: "mkdir $(genDir)/pb && protos=($(locations res/statsd-configs/**/*.pb)) " +
+        "&& for file in $${protos[@]} ; do cp $$file $(genDir)/pb/ ; done " +
+        "&& $(location soong_zip) -jar -o $(out) -C $(genDir)/pb -P assets/statsd-configs -D $(genDir)/pb",
 }
 
 // This library enables additional listeners dependent on platform apis.
@@ -53,5 +53,4 @@ java_library {
         "statsd-helper",
         "statsd-config-protos",
     ],
-    platform_apis: true,
 }

@@ -23,6 +23,7 @@ import android.os.SystemClock
 import android.os.SystemClock.sleep
 import android.platform.uiautomator_helpers.DeviceHelpers.context
 import android.platform.uiautomator_helpers.TracingUtils.trace
+import android.platform.uiautomator_helpers.WaitUtils.ensureThat
 import android.util.Log
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.InputDevice
@@ -66,9 +67,6 @@ object BetterSwipe {
 
     /** Starts a swipe from [start] at the current time. */
     @JvmStatic fun from(start: Point) = Swipe(PointF(start.x.toFloat(), start.y.toFloat()))
-
-    /** Starts a swipe for each [starts] point at the current time. */
-    @JvmStatic fun from(vararg starts: PointF) = Swipes(*starts)
 
     class Swipe internal constructor(start: PointF) {
 
@@ -164,14 +162,32 @@ object BetterSwipe {
             sync: Boolean = true
         ) {
             val event = getMotionEvent(downTime, currentTime, action, point, pointerId)
-            check(
-                getInstrumentation()
-                    .uiAutomation
-                    .injectInputEvent(event, sync, /* waitForAnimations= */ false)
-            ) {
-                "Touch injection failed"
+
+            try {
+                trySendMotionEvent(event, sync)
+            } finally {
+                event.recycle()
             }
-            event.recycle()
+        }
+
+        private fun trySendMotionEvent(event: MotionEvent, sync: Boolean) {
+            ensureThat(
+                    "Injecting motion event",
+                    /* timeout= */ Duration.ofMillis(INJECT_EVENT_TIMEOUT_MILLIS),
+                    /* errorProvider= */ {
+                        "Injecting motion event $event failed after retrying for 10 seconds, " +
+                            "see logcat for the error"
+                    }
+                )
+                /* condition= */ {
+                    try {
+                        return@ensureThat getInstrumentation()
+                            .uiAutomation
+                            .injectInputEvent(event, sync, /* waitForAnimations= */ false)
+                    } catch (t: Throwable) {
+                        throw RuntimeException(t)
+                    }
+                }
         }
 
         /** Returns the time when movement finished. */
@@ -311,3 +327,5 @@ val FLING_GESTURE_INTERPOLATOR = LinearInterpolator()
 
 /** Interpolator for a precise drag-like gesture not triggering inertia. */
 val PRECISE_GESTURE_INTERPOLATOR = DecelerateInterpolator()
+
+private const val INJECT_EVENT_TIMEOUT_MILLIS = 10_000L

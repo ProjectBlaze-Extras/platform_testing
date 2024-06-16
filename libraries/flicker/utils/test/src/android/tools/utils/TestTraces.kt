@@ -16,9 +16,9 @@
 
 package android.tools.utils
 
-import android.tools.common.Timestamps
-import android.tools.device.traces.TraceConfig
-import android.tools.device.traces.TraceConfigs
+import android.tools.Timestamps
+import android.tools.traces.TraceConfig
+import android.tools.traces.TraceConfigs
 
 object TestTraces {
     object LayerTrace {
@@ -61,9 +61,8 @@ object TestTraces {
             get() = readAssetAsFile(ASSET)
     }
 
-    object TransitionTrace {
-        private val WM_ASSET = "wm_transition_trace.winscope"
-
+    object LegacyTransitionTrace {
+        private const val WM_ASSET = "wm_transition_trace.winscope"
         private const val SHELL_ASSET = "shell_transition_trace.winscope"
 
         val START_TIME =
@@ -87,8 +86,54 @@ object TestTraces {
             get() = readAssetAsFile(WM_ASSET)
         val SHELL_FILE
             get() = readAssetAsFile(SHELL_ASSET)
-        val FILES
-            get() = listOf(WM_FILE, SHELL_FILE)
+    }
+
+    object TransitionTrace {
+        private const val ASSET = "transitions.perfetto-trace"
+
+        val START_TIME =
+            Timestamps.from(elapsedNanos = 479583450794, systemUptimeNanos = 0, unixNanos = 0)
+        val VALID_SLICE_TIME =
+            Timestamps.from(
+                elapsedNanos = 479583450794 + 5000,
+                systemUptimeNanos = 0,
+                unixNanos = 0
+            )
+        val INVALID_SLICE_TIME =
+            Timestamps.from(
+                elapsedNanos = 487330863192 + 1,
+                systemUptimeNanos = 0,
+                unixNanos = 0,
+            )
+        val END_TIME =
+            Timestamps.from(elapsedNanos = 487330863192, systemUptimeNanos = 0, unixNanos = 0)
+
+        val FILE
+            get() = readAssetAsFile(ASSET)
+    }
+
+    object ProtoLogTrace {
+        private const val ASSET = "protolog.perfetto-trace"
+
+        val START_TIME =
+            Timestamps.from(elapsedNanos = 479583450794, systemUptimeNanos = 0, unixNanos = 0)
+        val VALID_SLICE_TIME =
+            Timestamps.from(
+                elapsedNanos = 479583450794 + 5000,
+                systemUptimeNanos = 0,
+                unixNanos = 0
+            )
+        val INVALID_SLICE_TIME =
+            Timestamps.from(
+                elapsedNanos = 487330863192 + 1,
+                systemUptimeNanos = 0,
+                unixNanos = 0,
+            )
+        val END_TIME =
+            Timestamps.from(elapsedNanos = 487330863192, systemUptimeNanos = 0, unixNanos = 0)
+
+        val FILE
+            get() = readAssetAsFile(ASSET)
     }
 
     val TIME_5 = Timestamps.from(5, 5, 5)

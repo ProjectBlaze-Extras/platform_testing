@@ -42,6 +42,12 @@ annotation class DeniedDevices(vararg val denied: DeviceProduct)
 annotation class ScreenshotTestDevices(vararg val allowed: DeviceProduct = [CF_PHONE, CF_TABLET])
 
 /**
+ * Ignore LimitDevicesRule constraints when [ignoreLimit] is true. Main use case is to allow local
+ * builds to bypass [LimitDevicesRule] and be able to run on any devices.
+ */
+@Retention(RUNTIME) @Target(FUNCTION, CLASS) annotation class IgnoreLimit(val ignoreLimit: Boolean)
+
+/**
  * Limits a test to run specified devices.
  *
  * Devices are specified by [AllowedDevices], [DeniedDevices] and [ScreenshotTestDevices]
@@ -56,6 +62,10 @@ annotation class ScreenshotTestDevices(vararg val allowed: DeviceProduct = [CF_P
 class LimitDevicesRule(private val thisDevice: String = Build.PRODUCT) : TestRule {
 
     override fun apply(base: Statement, description: Description): Statement {
+        if (description.ignoreLimit()) {
+            return base
+        }
+
         val limitDevicesAnnotations = description.limitDevicesAnnotation()
         if (limitDevicesAnnotations.count() > 1) {
             return makeAssumptionViolatedStatement(
@@ -82,15 +92,15 @@ class LimitDevicesRule(private val thisDevice: String = Build.PRODUCT) : TestRul
         listOfNotNull(
                 getAnnotation(AllowedDevices::class.java)?.allowed,
                 getAnnotation(ScreenshotTestDevices::class.java)?.allowed,
-                testClass?.getAnnotation(AllowedDevices::class.java)?.allowed,
-                testClass?.getAnnotation(ScreenshotTestDevices::class.java)?.allowed,
+                testClass?.getClassAnnotation(AllowedDevices::class.java)?.allowed,
+                testClass?.getClassAnnotation(ScreenshotTestDevices::class.java)?.allowed,
             )
             .flatMap { devices -> devices.map { it.product } }
 
     private fun Description.deniedDevices(): List<String> =
         listOfNotNull(
                 getAnnotation(DeniedDevices::class.java)?.denied,
-                testClass?.getAnnotation(DeniedDevices::class.java)?.denied
+                testClass?.getClassAnnotation(DeniedDevices::class.java)?.denied
             )
             .flatMap { devices -> devices.map { it.product } }
 
@@ -99,11 +109,18 @@ class LimitDevicesRule(private val thisDevice: String = Build.PRODUCT) : TestRul
                 getAnnotation(AllowedDevices::class.java),
                 getAnnotation(DeniedDevices::class.java),
                 getAnnotation(ScreenshotTestDevices::class.java),
-                testClass?.getAnnotation(AllowedDevices::class.java),
-                testClass?.getAnnotation(DeniedDevices::class.java),
-                testClass?.getAnnotation(ScreenshotTestDevices::class.java)
+                testClass?.getClassAnnotation(AllowedDevices::class.java),
+                testClass?.getClassAnnotation(DeniedDevices::class.java),
+                testClass?.getClassAnnotation(ScreenshotTestDevices::class.java)
             )
             .toSet()
+
+    private fun Description.ignoreLimit(): Boolean =
+        getAnnotation(IgnoreLimit::class.java)?.ignoreLimit == true ||
+            testClass?.getClassAnnotation(IgnoreLimit::class.java)?.ignoreLimit == true
+
+    private fun <T : Annotation> Class<*>.getClassAnnotation(java: Class<T>) =
+        getLowestAncestorClassAnnotation(this, java)
 }
 
 enum class DeviceProduct(val product: String) {

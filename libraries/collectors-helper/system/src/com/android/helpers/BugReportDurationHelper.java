@@ -54,6 +54,8 @@ public class BugReportDurationHelper implements ICollectorHelper<Double> {
     // Filters for selecting or omitting lines from the raw bug report.
     private static final String DUMPSTATE_DURATION_FILTER = "was the duration of \'";
     private static final String DUMPSYS_DURATION_FILTER = "was the duration of dumpsys";
+    private static final String DUMPSTATE_TIMEOUT_FILTER = "timed out after";
+    private static final String DUMPSTATE_LOG_TAG_FILTER = "dumpstate:";
     private static final String SHOWMAP_FILTER = "SHOW MAP";
 
     // Filters for selecting lines from dumpstate_board.txt. Unlike raw bug reports, dumpstate_board
@@ -98,19 +100,23 @@ public class BugReportDurationHelper implements ICollectorHelper<Double> {
     public class BugReportDurationLines {
         public ArrayList<String> dumpstateLines;
         public ArrayList<String> dumpsysLines;
+        public ArrayList<String> timeoutLines;
 
         public BugReportDurationLines() {
             dumpstateLines = new ArrayList<>();
             dumpsysLines = new ArrayList<>();
+            timeoutLines = new ArrayList<>();
         }
 
         public boolean isEmpty() {
-            return dumpstateLines.isEmpty() && dumpsysLines.isEmpty();
+            return dumpstateLines.isEmpty() && dumpsysLines.isEmpty() && timeoutLines.isEmpty();
         }
 
         // Only used in testing.
         public boolean contains(String s) {
-            return dumpstateLines.contains(s) || dumpsysLines.contains(s);
+            return dumpstateLines.contains(s)
+                    || dumpsysLines.contains(s)
+                    || timeoutLines.contains(s);
         }
     }
 
@@ -195,6 +201,10 @@ public class BugReportDurationHelper implements ICollectorHelper<Double> {
             metrics.put(convertDumpsysSectionToKey(dumpsysSection), duration);
         }
 
+        metrics.put(
+                "dumpstate-section-timeout-count",
+                (double) bugReportDurationLines.timeoutLines.size());
+
         DumpstateBoardLines dumpstateBoardLines = extractAndFilterDumpstateBoard(archive);
         // No lines relevant to dumpstate board durations were found, but we should return the
         // previously-inserted metrics anyways.
@@ -250,7 +260,7 @@ public class BugReportDurationHelper implements ICollectorHelper<Double> {
                     device.executeShellCommand(String.format(LS_CMD, bugReportDir)).split("\n");
             HashSet<String> bugreports = new HashSet<>();
             for (String file : files) {
-                if (file.contains("bugreport") && file.contains("zip")) {
+                if (file.contains("bugreport") && file.endsWith("zip")) {
                     // We don't want to keep track of wifi or telephony bug reports because they
                     // break the assumption that lexicographically-greater bug reports are also
                     // more-recent.
@@ -304,6 +314,9 @@ public class BugReportDurationHelper implements ICollectorHelper<Double> {
                     bugReportDurationLines.dumpstateLines.add(line);
                 } else if (line.contains(DUMPSYS_DURATION_FILTER)) {
                     bugReportDurationLines.dumpsysLines.add(line);
+                } else if (line.contains(DUMPSTATE_LOG_TAG_FILTER)
+                        && line.contains(DUMPSTATE_TIMEOUT_FILTER)) {
+                    bugReportDurationLines.timeoutLines.add(line);
                 }
             }
         } catch (IOException e) {

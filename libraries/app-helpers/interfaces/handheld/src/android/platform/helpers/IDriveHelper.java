@@ -123,4 +123,33 @@ public interface IDriveHelper extends IAppHelper {
      */
     public void scrollVert(Direction dir);
 
+    /**
+     * Setup expectations: Google Drive is open and Files tab is selected at the bottom
+     *
+     * @param fileName File name to check whether it exist or not
+     */
+    boolean doesFileExist(String fileName);
+
+    /**
+     * Setup expectations: Google Drive is open and Files tab is selected at the bottom
+     *
+     * @param fileName File name to upload from local device documents
+     */
+    void uploadFileFromLocalDeviceDocuments(String fileName);
+
+    /**
+     * Setup expectations: Google Drive is open and Files tab is selected at the bottom
+     *
+     * <p>Given file name is visible and clickable to open
+     *
+     * @param fileName File name to open
+     */
+    void openFile(String fileName);
+
+    /**
+     * Setup expectations: Google Drive is open and Click on file to open in Docs Editor
+     *
+     * <p>Waits until the document is fully opened in Docs Editor
+     */
+    void waitForDocumentToOpen();
 }

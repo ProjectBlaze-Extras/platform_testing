@@ -12,7 +12,10 @@ rust_library {
         "liblog_rust",
         "liblogger",
     ],
-    proc_macros: ["libpaste"],
+    proc_macros: [
+        "libpaste",
+        "librdroidtest_macro",
+    ],
     apex_available: [
         "//apex_available:platform",
         "//apex_available:anyapex",
@@ -20,10 +23,25 @@ rust_library {
     vendor_available: true,
 }
 
+rust_proc_macro {
+    name: "librdroidtest_macro",
+    crate_name: "rdroidtest_macro",
+    cargo_env_compat: true,
+    cargo_pkg_version: "0.1.0",
+    srcs: ["macro/lib.rs"],
+    edition: "2021",
+    rustlibs: [
+        "libproc_macro2",
+        "libquote",
+        "libsyn",
+    ],
+}
+
 rust_defaults {
     name: "rdroidtest.defaults",
     test_harness: false,
     cfgs: ["test"],
+    proc_macros: ["librdroidtest_macro"],
     rustlibs: [
         "librdroidtest",
         "liblinkme",
@@ -34,4 +52,14 @@ rust_defaults {
         "-z",
         "nostart-stop-gc",
     ],
+}
+
+rust_test {
+    name: "librdroidtest_test",
+    srcs: ["tests/main.rs"],
+    test_suites: [
+        "general-tests",
+    ],
+    host_supported: true,
+    defaults: ["rdroidtest.defaults"],
 }

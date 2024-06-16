@@ -17,17 +17,19 @@
 package android.platform.helpers.ui;
 
 import static android.platform.helpers.ui.UiAutomatorUtils.getUiDevice;
-import static android.support.test.uiautomator.Until.hasObject;
+
+import static androidx.test.uiautomator.Until.hasObject;
 
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-import android.support.test.uiautomator.BySelector;
-import android.support.test.uiautomator.UiObjectNotFoundException;
-import android.support.test.uiautomator.UiScrollable;
-import android.support.test.uiautomator.UiSelector;
 import android.util.Log;
+
+import androidx.test.uiautomator.BySelector;
+import androidx.test.uiautomator.UiObjectNotFoundException;
+import androidx.test.uiautomator.UiScrollable;
+import androidx.test.uiautomator.UiSelector;
 
 /**
  * Helper class for searching Ui Element.

@@ -18,18 +18,21 @@ package android.platform.helpers.features.common;
 
 import static android.platform.helpers.ui.UiAutomatorUtils.getUiDevice;
 
+import static com.android.systemui.Flags.migrateClocksToBlueprint;
+
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import android.os.RemoteException;
 import android.platform.helpers.features.Page;
-import android.support.test.uiautomator.By;
-import android.support.test.uiautomator.BySelector;
-import android.support.test.uiautomator.Direction;
-import android.support.test.uiautomator.UiObject2;
-import android.support.test.uiautomator.Until;
 import android.util.Log;
+
+import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.BySelector;
+import androidx.test.uiautomator.Direction;
+import androidx.test.uiautomator.UiObject2;
+import androidx.test.uiautomator.Until;
 
 import java.util.regex.Pattern;
 
@@ -50,9 +53,18 @@ public class HomeLockscreenPage implements Page {
     public static final BySelector SWIPEABLE_AREA =
             By.res("com.android.systemui:id/notification_panel");
     // https://hsv.googleplex.com/5130837462876160?node=117
-    public static final Pattern PAGE_TITLE_SELECTOR_PATTERN =
-            Pattern.compile(
+    public static final Pattern PAGE_TITLE_SELECTOR_PATTERN;
+
+    static {
+        if (migrateClocksToBlueprint()) {
+            PAGE_TITLE_SELECTOR_PATTERN = Pattern.compile(
+                    String.format("com.android.systemui:id/%s", "keyguard_indication_area"));
+        } else {
+            PAGE_TITLE_SELECTOR_PATTERN = Pattern.compile(
                     String.format("com.android.systemui:id/%s", "keyguard_clock_container"));
+        }
+    }
+
     private static final BySelector PAGE_TITLE_SELECTOR =
             By.res(PAGE_TITLE_SELECTOR_PATTERN);
     private static final int SHORT_SLEEP_IN_SECONDS = 2;

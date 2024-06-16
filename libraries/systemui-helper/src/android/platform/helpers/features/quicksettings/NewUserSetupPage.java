@@ -24,8 +24,9 @@ import static android.platform.helpers.ui.UiSearch.search;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.platform.helpers.features.Page;
-import android.support.test.uiautomator.By;
-import android.support.test.uiautomator.BySelector;
+
+import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.BySelector;
 
 import java.util.regex.Pattern;
 

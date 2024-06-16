@@ -21,7 +21,6 @@ system_app_crash com.google.android.as.*\s.*\s.*\s.*\s*.*act=android.net.wifi.ST
 system_app_crash com.google.android.googlequicksearchbox[A-Za-z0-9\S\s]+11.26[A-Za-z0-9\S]+ 171971925
 system_app_crash v10804[\s\S]*com.google.android.apps.scone.wifiscorer.WifiScorerService[\s\S]*android.content.Intent.getAction 174277223
 system_app_crash Unable\sto\sget\sprovider\sandroidx.core.content.FileProvider[\S\s]+Couldn't\sfind\smeta-data\sfor\sprovider\swith\sauthority\scom.verizon.mips.services 166457582
-system_app_crash Unable\sto\sget\sprovider\scom.google.android.systemui.keyguard.KeyguardSliceProviderGoogle[\S\s]*com.android.wm.shell.common.magnetictarget.MagnetizedObject.MagneticTarget.setMagneticFieldRadiusPx 181262334
 system_app_crash com.google.android.apps.youtube.music[\S\s]+NullPointerException[\S\s]+com.google.android.apps.youtube.music.mediabrowser.MusicBrowserService.d 211914566
 system_app_native_crash HwBinder*.*com.android.bluetooth 155074413
 system_app_native_crash ReferenceQueueD*.*com.google.android.apps.safetyhub 162103095

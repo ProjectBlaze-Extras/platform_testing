@@ -23,7 +23,7 @@ python_test_host {
     libs: [
         "mobly",
         "utilities",
-        "bluetooth_test"
+        "bluetooth_test",
     ],
     test_suites: [
         "catbox",
@@ -35,6 +35,7 @@ python_test_host {
         // Package the snippet with the mobly test
         ":AutomotiveSnippet",
         ":PhoneSnippet",
+        "bt_performance_10_iterations.yaml",
     ],
     version: {
         py3: {

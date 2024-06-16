@@ -21,20 +21,13 @@ package {
 java_test {
     name: "flickerlib",
     platform_apis: true,
-    kotlincflags: [
-        "-Xmulti-platform",
-        "-opt-in=kotlin.ExperimentalMultiplatform",
-    ],
     optimize: {
         enabled: false
     },
     srcs: [
-        //"src/android/tools/device/AndroidLogger.kt",
-        "src/android/tools/device/flicker/**/*.kt",
-        "src/android/tools/device/flicker/**/*.eventlog"
-    ],
-    common_srcs: [
-        "src/android/tools/common/**/*.kt",
+        "src/android/tools/**/*.kt",
+        "src/android/tools/**/*.java",
+        "src/android/tools/**/*.eventlog",
     ],
     static_libs: [
         "flickerlib-apphelpers",

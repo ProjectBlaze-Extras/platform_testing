@@ -17,12 +17,12 @@
 package android.tools.integration
 
 import android.app.Instrumentation
-import android.tools.common.io.TraceType
 import android.tools.device.apphelpers.ClockAppHelper
-import android.tools.device.flicker.FlickerServiceTracesCollector
-import android.tools.device.flicker.isShellTransitionsEnabled
-import android.tools.device.flicker.rules.ArtifactSaverRule
-import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.flicker.FlickerServiceTracesCollector
+import android.tools.flicker.isShellTransitionsEnabled
+import android.tools.flicker.rules.ArtifactSaverRule
+import android.tools.io.TraceType
+import android.tools.traces.parsers.WindowManagerStateHelper
 import android.tools.utils.CleanFlickerEnvironmentRule
 import android.tools.utils.TEST_SCENARIO
 import android.tools.utils.assertArchiveContainsFiles
@@ -61,9 +61,9 @@ class FlickerServiceTracesCollectorTest {
         testApp.launchViaIntent(wmHelper)
         testApp.exit(wmHelper)
         val reader = collector.stop()
-        Truth.assertThat(reader.readWmTrace()?.entries ?: emptyArray()).isNotEmpty()
-        Truth.assertThat(reader.readLayersTrace()?.entries ?: emptyArray()).isNotEmpty()
-        Truth.assertThat(reader.readTransitionsTrace()?.entries ?: emptyArray()).isNotEmpty()
+        Truth.assertThat(reader.readWmTrace()?.entries).isNotEmpty()
+        Truth.assertThat(reader.readLayersTrace()?.entries).isNotEmpty()
+        Truth.assertThat(reader.readTransitionsTrace()?.entries).isNotEmpty()
     }
 
     @Test
@@ -107,14 +107,24 @@ class FlickerServiceTracesCollectorTest {
 
     companion object {
         val expectedTraces =
-            listOf(
-                "wm_trace.winscope",
-                "wm_log.winscope",
-                "wm_transition_trace.winscope",
-                "shell_transition_trace.winscope",
-                "eventlog.winscope",
-                TraceType.SF.fileName,
-                "${getLauncherPackageName()}_0.vc__view_capture_trace.winscope",
-            )
+            if (android.tracing.Flags.perfettoTransitionTracing()) {
+                listOf(
+                    TraceType.WM.fileName,
+                    TraceType.PROTOLOG.fileName,
+                    TraceType.EVENT_LOG.fileName,
+                    TraceType.PERFETTO.fileName,
+                    "${getLauncherPackageName()}_0.vc__view_capture_trace.winscope",
+                )
+            } else {
+                listOf(
+                    TraceType.WM.fileName,
+                    TraceType.PROTOLOG.fileName,
+                    TraceType.LEGACY_WM_TRANSITION.fileName,
+                    TraceType.LEGACY_SHELL_TRANSITION.fileName,
+                    TraceType.EVENT_LOG.fileName,
+                    TraceType.PERFETTO.fileName,
+                    "${getLauncherPackageName()}_0.vc__view_capture_trace.winscope",
+                )
+            }
     }
 }

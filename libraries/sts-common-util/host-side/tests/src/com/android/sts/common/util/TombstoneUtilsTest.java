@@ -111,12 +111,11 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
     public void testValidCrash() throws Exception {
         assertThat(
                         TombstoneUtils.getSecurityCrashes(
-                                        sTombstones,
-                                        new TombstoneUtils.Config()
-                                                .setIgnoreLowFaultAddress(true)
-                                                .setProcessPatterns(
-                                                        Pattern.compile("synthetic_process_0")))
-                                .size())
+                                sTombstones,
+                                new TombstoneUtils.Config()
+                                        .setIgnoreLowFaultAddress(true)
+                                        .setProcessPatterns(
+                                                Pattern.compile("synthetic_process_0"))))
                 .isNotEqualTo(EMPTY_TOMBSTONE_LIST);
     }
 
@@ -148,12 +147,11 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
     public void testIgnoreMinAddressCheck() throws Exception {
         assertThat(
                         TombstoneUtils.getSecurityCrashes(
-                                        sTombstones,
-                                        new TombstoneUtils.Config()
-                                                .setIgnoreLowFaultAddress(false)
-                                                .setProcessPatterns(
-                                                        Pattern.compile("synthetic_process_1")))
-                                .size())
+                                sTombstones,
+                                new TombstoneUtils.Config()
+                                        .setIgnoreLowFaultAddress(false)
+                                        .setProcessPatterns(
+                                                Pattern.compile("synthetic_process_1"))))
                 .isNotEqualTo(EMPTY_TOMBSTONE_LIST);
     }
 
@@ -170,13 +168,12 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
     public void testGoodAndBadCrashes() throws Exception {
         assertThat(
                         TombstoneUtils.getSecurityCrashes(
-                                        sTombstones,
-                                        new TombstoneUtils.Config()
-                                                .setIgnoreLowFaultAddress(true)
-                                                .setProcessPatterns(
-                                                        Pattern.compile("synthetic_process_0"),
-                                                        Pattern.compile("generic")))
-                                .size())
+                                sTombstones,
+                                new TombstoneUtils.Config()
+                                        .setIgnoreLowFaultAddress(true)
+                                        .setProcessPatterns(
+                                                Pattern.compile("synthetic_process_0"),
+                                                Pattern.compile("generic"))))
                 .isNotEqualTo(EMPTY_TOMBSTONE_LIST);
     }
 
@@ -187,19 +184,15 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
                 Tombstone.newBuilder()
                         .addCommandLine("com.android.bluetooth")
                         .setSignalInfo(
-                                Signal.newBuilder()
-                                        .setCodeName(TombstoneUtils.Signals.SIGSEGV)
-                                        .build())
+                                Signal.newBuilder().setName(TombstoneUtils.Signals.SIGSEGV).build())
                         .build());
         assertThat(
                         TombstoneUtils.getSecurityCrashes(
-                                        crashes,
-                                        new TombstoneUtils.Config()
-                                                .setIgnoreLowFaultAddress(true)
-                                                .setProcessPatterns(
-                                                        Pattern.compile(
-                                                                "com\\.android\\.bluetooth")))
-                                .size())
+                                crashes,
+                                new TombstoneUtils.Config()
+                                        .setIgnoreLowFaultAddress(true)
+                                        .setProcessPatterns(
+                                                Pattern.compile("com\\.android\\.bluetooth"))))
                 .isNotEqualTo(EMPTY_TOMBSTONE_LIST);
     }
 
@@ -210,9 +203,7 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
                 Tombstone.newBuilder()
                         .addCommandLine("com.android.bluetooth")
                         .setSignalInfo(
-                                Signal.newBuilder()
-                                        .setCodeName(TombstoneUtils.Signals.SIGABRT)
-                                        .build())
+                                Signal.newBuilder().setName(TombstoneUtils.Signals.SIGABRT).build())
                         .setAbortMessage(
                                 "'[FATAL:allocation_tracker.cc(143)] Check failed: map_entry !="
                                         + " allocations.end().")
@@ -220,14 +211,12 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
 
         assertThat(
                         TombstoneUtils.getSecurityCrashes(
-                                        crashes,
-                                        new TombstoneUtils.Config()
-                                                .appendSignals(TombstoneUtils.Signals.SIGABRT)
-                                                .appendAbortMessageIncludes("Check failed:")
-                                                .setProcessPatterns(
-                                                        Pattern.compile(
-                                                                "com\\.android\\.bluetooth")))
-                                .size())
+                                crashes,
+                                new TombstoneUtils.Config()
+                                        .appendSignals(TombstoneUtils.Signals.SIGABRT)
+                                        .appendAbortMessageIncludes("Check failed:")
+                                        .setProcessPatterns(
+                                                Pattern.compile("com\\.android\\.bluetooth"))))
                 .isNotEqualTo(EMPTY_TOMBSTONE_LIST);
 
         TombstoneUtils.assertNoSecurityCrashes(
@@ -245,9 +234,7 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
                 Tombstone.newBuilder()
                         .addCommandLine("com.android.bluetooth")
                         .setSignalInfo(
-                                Signal.newBuilder()
-                                        .setCodeName(TombstoneUtils.Signals.SIGABRT)
-                                        .build())
+                                Signal.newBuilder().setName(TombstoneUtils.Signals.SIGABRT).build())
                         .setAbortMessage(
                                 "'[FATAL:allocation_tracker.cc(143)] Check failed: map_entry !="
                                         + " allocations.end().")
@@ -262,14 +249,12 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
 
         assertThat(
                         TombstoneUtils.getSecurityCrashes(
-                                        crashes,
-                                        new TombstoneUtils.Config()
-                                                .appendSignals(TombstoneUtils.Signals.SIGABRT)
-                                                .appendAbortMessageExcludes("exclude not matches")
-                                                .setProcessPatterns(
-                                                        Pattern.compile(
-                                                                "com\\.android\\.bluetooth")))
-                                .size())
+                                crashes,
+                                new TombstoneUtils.Config()
+                                        .appendSignals(TombstoneUtils.Signals.SIGABRT)
+                                        .appendAbortMessageExcludes("exclude not matches")
+                                        .setProcessPatterns(
+                                                Pattern.compile("com\\.android\\.bluetooth"))))
                 .isNotEqualTo(EMPTY_TOMBSTONE_LIST);
     }
 
@@ -280,9 +265,7 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
                 Tombstone.newBuilder()
                         .addCommandLine("/data/local/tmp/CVE-2020-0073")
                         .setSignalInfo(
-                                Signal.newBuilder()
-                                        .setCodeName(TombstoneUtils.Signals.SIGABRT)
-                                        .build())
+                                Signal.newBuilder().setName(TombstoneUtils.Signals.SIGABRT).build())
                         .setAbortMessage(
                                 "'CANNOT LINK EXECUTABLE \"/data/local/tmp/CVE-2020-0073\": library"
                                         + " \"libnfc-nci.so\" (\"(default)\","
@@ -299,9 +282,7 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
                 Tombstone.newBuilder()
                         .addCommandLine("/data/local/tmp/CVE-2015-6616-2")
                         .setSignalInfo(
-                                Signal.newBuilder()
-                                        .setCodeName(TombstoneUtils.Signals.SIGABRT)
-                                        .build())
+                                Signal.newBuilder().setName(TombstoneUtils.Signals.SIGABRT).build())
                         .setAbortMessage(
                                 "'CANNOT LINK EXECUTABLE \"/data/local/tmp/CVE-2015-6616-2\":"
                                     + " cannot locate symbol \""
@@ -320,28 +301,22 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
     public void testBacktraceFilterIncludeFilename() throws Exception {
         assertThat(
                         TombstoneUtils.getSecurityCrashes(
-                                        sTombstones,
-                                        new TombstoneUtils.Config()
-                                                .setProcessPatterns(
-                                                        Pattern.compile("synthetic_process_0"))
-                                                .setBacktraceIncludes(
-                                                        new BacktraceFilterPattern(
-                                                                "libaudioutils", null)))
-                                .size())
+                                sTombstones,
+                                new TombstoneUtils.Config()
+                                        .setProcessPatterns(Pattern.compile("synthetic_process_0"))
+                                        .setBacktraceIncludes(
+                                                new BacktraceFilterPattern("libaudioutils", null))))
                 .isNotEqualTo(EMPTY_TOMBSTONE_LIST);
 
         assertThat(
                         TombstoneUtils.getSecurityCrashes(
-                                        sTombstones,
-                                        new TombstoneUtils.Config()
-                                                .setProcessPatterns(
-                                                        Pattern.compile("synthetic_process_0"))
-                                                .setBacktraceIncludes(
-                                                        new BacktraceFilterPattern(
-                                                                "libstagefright", null),
-                                                        new BacktraceFilterPattern(
-                                                                "libaudioflinger\\.so", null)))
-                                .size())
+                                sTombstones,
+                                new TombstoneUtils.Config()
+                                        .setProcessPatterns(Pattern.compile("synthetic_process_0"))
+                                        .setBacktraceIncludes(
+                                                new BacktraceFilterPattern("libstagefright", null),
+                                                new BacktraceFilterPattern(
+                                                        "libaudioflinger\\.so", null))))
                 .isNotEqualTo(EMPTY_TOMBSTONE_LIST);
 
         TombstoneUtils.assertNoSecurityCrashes(
@@ -370,15 +345,13 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
 
         assertThat(
                         TombstoneUtils.getSecurityCrashes(
-                                        sTombstones,
-                                        new TombstoneUtils.Config()
-                                                .setIgnoreLowFaultAddress(true)
-                                                .setProcessPatterns(
-                                                        Pattern.compile("synthetic_process_0"))
-                                                .setBacktraceExcludes(
-                                                        new BacktraceFilterPattern(
-                                                                "libstagefright", null)))
-                                .size())
+                                sTombstones,
+                                new TombstoneUtils.Config()
+                                        .setIgnoreLowFaultAddress(true)
+                                        .setProcessPatterns(Pattern.compile("synthetic_process_0"))
+                                        .setBacktraceExcludes(
+                                                new BacktraceFilterPattern(
+                                                        "libstagefright", null))))
                 .isNotEqualTo(EMPTY_TOMBSTONE_LIST);
     }
 
@@ -386,28 +359,24 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
     public void testBacktraceFilterIncludeMethodName() throws Exception {
         assertThat(
                         TombstoneUtils.getSecurityCrashes(
-                                        sTombstones,
-                                        new TombstoneUtils.Config()
-                                                .setIgnoreLowFaultAddress(true)
-                                                .setProcessPatterns(
-                                                        Pattern.compile("synthetic_process_0"))
-                                                .setBacktraceIncludes(
-                                                        new BacktraceFilterPattern(
-                                                                null, "memcpy_to_float")))
-                                .size())
+                                sTombstones,
+                                new TombstoneUtils.Config()
+                                        .setIgnoreLowFaultAddress(true)
+                                        .setProcessPatterns(Pattern.compile("synthetic_process_0"))
+                                        .setBacktraceIncludes(
+                                                new BacktraceFilterPattern(
+                                                        null, "memcpy_to_float"))))
                 .isNotEqualTo(EMPTY_TOMBSTONE_LIST);
         assertThat(
                         TombstoneUtils.getSecurityCrashes(
-                                        sTombstones,
-                                        new TombstoneUtils.Config()
-                                                .setIgnoreLowFaultAddress(true)
-                                                .setProcessPatterns(
-                                                        Pattern.compile("synthetic_process_0"))
-                                                .setBacktraceIncludes(
-                                                        new BacktraceFilterPattern(null, "strlen"),
-                                                        new BacktraceFilterPattern(
-                                                                null, "memcpy_[^_]+_float")))
-                                .size())
+                                sTombstones,
+                                new TombstoneUtils.Config()
+                                        .setIgnoreLowFaultAddress(true)
+                                        .setProcessPatterns(Pattern.compile("synthetic_process_0"))
+                                        .setBacktraceIncludes(
+                                                new BacktraceFilterPattern(null, "strlen"),
+                                                new BacktraceFilterPattern(
+                                                        null, "memcpy_[^_]+_float"))))
                 .isNotEqualTo(EMPTY_TOMBSTONE_LIST);
 
         TombstoneUtils.assertNoSecurityCrashes(
@@ -436,14 +405,12 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
                                 new BacktraceFilterPattern(null, "memcpy_[^_]+_float")));
         assertThat(
                         TombstoneUtils.getSecurityCrashes(
-                                        sTombstones,
-                                        new TombstoneUtils.Config()
-                                                .setIgnoreLowFaultAddress(true)
-                                                .setProcessPatterns(
-                                                        Pattern.compile("synthetic_process_0"))
-                                                .setBacktraceExcludes(
-                                                        new BacktraceFilterPattern(null, "strlen")))
-                                .size())
+                                sTombstones,
+                                new TombstoneUtils.Config()
+                                        .setIgnoreLowFaultAddress(true)
+                                        .setProcessPatterns(Pattern.compile("synthetic_process_0"))
+                                        .setBacktraceExcludes(
+                                                new BacktraceFilterPattern(null, "strlen"))))
                 .isNotEqualTo(EMPTY_TOMBSTONE_LIST);
     }
 
@@ -451,26 +418,22 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
     public void testBacktraceFilterCombinations() throws Exception {
         assertThat(
                         TombstoneUtils.getSecurityCrashes(
-                                        sTombstones,
-                                        new TombstoneUtils.Config()
-                                                .setIgnoreLowFaultAddress(true)
-                                                .setProcessPatterns(
-                                                        Pattern.compile("synthetic_process_0"))
-                                                .setBacktraceIncludes(
-                                                        new BacktraceFilterPattern(null, null)))
-                                .size())
+                                sTombstones,
+                                new TombstoneUtils.Config()
+                                        .setIgnoreLowFaultAddress(true)
+                                        .setProcessPatterns(Pattern.compile("synthetic_process_0"))
+                                        .setBacktraceIncludes(
+                                                new BacktraceFilterPattern(null, null))))
                 .isNotEqualTo(EMPTY_TOMBSTONE_LIST);
         assertThat(
                         TombstoneUtils.getSecurityCrashes(
-                                        sTombstones,
-                                        new TombstoneUtils.Config()
-                                                .setIgnoreLowFaultAddress(true)
-                                                .setProcessPatterns(
-                                                        Pattern.compile("synthetic_process_0"))
-                                                .setBacktraceIncludes(
-                                                        new BacktraceFilterPattern(
-                                                                "libaudioutils", "memcpy")))
-                                .size())
+                                sTombstones,
+                                new TombstoneUtils.Config()
+                                        .setIgnoreLowFaultAddress(true)
+                                        .setProcessPatterns(Pattern.compile("synthetic_process_0"))
+                                        .setBacktraceIncludes(
+                                                new BacktraceFilterPattern(
+                                                        "libaudioutils", "memcpy"))))
                 .isNotEqualTo(EMPTY_TOMBSTONE_LIST);
         TombstoneUtils.assertNoSecurityCrashes(
                 sTombstones,
@@ -485,11 +448,10 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
     public void testMteAlwaysFails() throws Exception {
         assertThat(
                         TombstoneUtils.getSecurityCrashes(
-                                        sTombstones,
-                                        new TombstoneUtils.Config()
-                                                .setProcessPatterns(
-                                                        Pattern.compile("com.redacted.mte-fail")))
-                                .size())
+                                sTombstones,
+                                new TombstoneUtils.Config()
+                                        .setProcessPatterns(
+                                                Pattern.compile("com.redacted.mte-fail"))))
                 .isNotEqualTo(EMPTY_TOMBSTONE_LIST);
     }
 
@@ -497,11 +459,9 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
     public void testAsanAlwaysFails() throws Exception {
         assertThat(
                         TombstoneUtils.getSecurityCrashes(
-                                        sTombstones,
-                                        new TombstoneUtils.Config()
-                                                .setProcessPatterns(
-                                                        Pattern.compile("/data/data/avrc_poc")))
-                                .size())
+                                sTombstones,
+                                new TombstoneUtils.Config()
+                                        .setProcessPatterns(Pattern.compile("avrc_poc"))))
                 .isNotEqualTo(EMPTY_TOMBSTONE_LIST);
     }
 
@@ -609,5 +569,21 @@ public class TombstoneUtilsTest extends BaseHostJUnit4Test {
         assertFalse(
                 TombstoneUtils.isSecurityCrash(
                         Tombstone.newBuilder().build(), new TombstoneUtils.Config()));
+    }
+
+    @Test
+    public void testTidNotOverwrittenForMultithreadedProcess() throws Exception {
+        assertThat(
+                        TombstoneUtils.getSecurityCrashes(
+                                        sTombstones,
+                                        new TombstoneUtils.Config()
+                                                .setProcessPatterns(
+                                                        Pattern.compile(
+                                                                "android.hardware.sensors@2.0-service.multihal"))
+                                                .setBacktraceIncludes(
+                                                        new BacktraceFilterPattern(
+                                                                "sensors.ssc.so",
+                                                                "sensor_factory::discover_sensors"))))
+                .isNotEqualTo(EMPTY_TOMBSTONE_LIST);
     }
 }

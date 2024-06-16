@@ -16,7 +16,7 @@
 
 package android.tools.utils
 
-import android.tools.common.traces.wm.WindowManagerTrace
+import android.tools.traces.wm.WindowManagerTrace
 
 class MockWindowManagerTraceBuilder(
     private var entries: MutableList<MockWindowStateBuilder> = mutableListOf()
@@ -34,7 +34,7 @@ class MockWindowManagerTraceBuilder(
             "Timestamps not strictly increasing between entries."
         }
 
-        val entries = entries.map { it.build() }.toTypedArray()
+        val entries = entries.map { it.build() }
         return WindowManagerTrace(entries)
     }
 }

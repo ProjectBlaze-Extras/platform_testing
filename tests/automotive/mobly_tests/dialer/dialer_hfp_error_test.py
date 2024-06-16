@@ -5,8 +5,7 @@ Pairing Test
 from mobly import asserts
 from mobly import test_runner
 from bluetooth_test import bluetooth_base_test
-
-from mbs_utils.main_utils import common_main
+from utilities.main_utils import common_main
 
 
 class DialerHFPError(bluetooth_base_test.BluetoothBaseTest):

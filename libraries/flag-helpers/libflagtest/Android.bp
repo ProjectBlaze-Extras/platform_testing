@@ -21,6 +21,7 @@ package {
 aconfig_declarations {
     name: "flag_checker_tests",
     package: "android.test.myflags",
+    container: "system",
     srcs: ["android.test.myflags.aconfig"],
 }
 
@@ -41,20 +42,20 @@ cc_defaults {
 cc_defaults {
     name: "libflagtest_host_defaults",
     target: {
-        linux_bionic : {
+        linux_bionic: {
             enabled: true,
         },
         windows: {
             enabled: true,
-        }
-    }
+        },
+    },
 }
 
 cc_library_static {
     name: "libflagtest",
     defaults: [
         "libflagtest_defaults",
-        "libflagtest_host_defaults"
+        "libflagtest_host_defaults",
     ],
     vendor_available: true,
     product_available: true,

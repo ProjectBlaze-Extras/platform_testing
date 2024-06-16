@@ -16,10 +16,10 @@
 
 package android.tools.rules
 
-import android.tools.common.CrossPlatform
-import android.tools.common.TimestampFactory
-import android.tools.device.AndroidLogger
-import android.tools.device.traces.formatRealTimestamp
+import android.tools.AndroidLogger
+import android.tools.CrossPlatform
+import android.tools.TimestampFactory
+import android.tools.traces.formatRealTimestamp
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement

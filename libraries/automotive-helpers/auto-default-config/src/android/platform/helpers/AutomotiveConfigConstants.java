@@ -75,6 +75,8 @@ public class AutomotiveConfigConstants {
     public static final String CALL_MOBILE_BUTTON = "CALL_MOBILE_BUTTON";
     public static final String CONTACT_SETTINGS = "CONTACT_SETTINGS";
     public static final String DIAL_PAD_FRAGMENT = "DIAL_PAD_FRAGMENT";
+
+    public static final String DIALER_CONNECTED_PHONE_NAME = "DIALER_CONNECTED_PHONE_NAME";
     public static final String DIGIT_ZERO = "0";
     public static final String DIGIT_ONE = "1";
     public static final String DIGIT_TWO = "2";
@@ -538,6 +540,7 @@ public class AutomotiveConfigConstants {
     public static final String NETWORK_PALETTE_WIFI = "NETWORK_PALETTE_WIFI";
     public static final String NETWORK_PALETTE_SUMMARY = "NETWORK_PALETTE_SUMMARY";
     public static final String NETWORK_PALETTE_SWITCH_WIDGET = "NETWORK_PALETTE_SWITCH_WIDGET";
+    public static final String CONNECTED_WIFI = "CONNECTED_WIFI";
     public static final String FORGET_WIFI = "FORGET_WIFI";
     public static final String CLOCK_TIME = "CLOCK_TIME";
 
@@ -602,6 +605,9 @@ public class AutomotiveConfigConstants {
     public static final String SMS_UNREAD_BADGE = "SMS_UNREAD_BADGE";
     public static final String SMS_PREVIEW_TEXT = "SMS_PREVIEW_TEXT";
     public static final String SMS_PREVIEW_TIMESTAMP = "SMS_PREVIEW_TIMESTAMP";
+    public static final String TAP_TO_READ_ALOUD = "TAP_TO_READ_ALOUD";
+    public static final String ASSISTANT_SMS_TRANSCRIPTION_PLATE =
+            "ASSISTANT_SMS_TRANSCRIPTION_PLATE";
     public static final String SMS_EMPTY_MESSAGE = "SMS_EMPTY_MESSAGE";
 
     // Bluetooth Tests Constants
@@ -612,6 +618,8 @@ public class AutomotiveConfigConstants {
     // BT
     public static final String PHONE_BUTTON = "PHONE_BUTTON";
     public static final String MEDIA_BUTTON = "MEDIA_BUTTON";
+    public static final String TOGGLE_DEVICE_MEDIA = "TOGGLE_DEVICE_MEDIA";
+    public static final String TOGGLE_DEVICE_PHONE = "TOGGLE_DEVICE_PHONE";
     public static final String DEVICE_NAME = "DEVICE_NAME";
 
     public static final String DEVICE_TITLE = "DEVICE_TITLE";
@@ -647,4 +655,17 @@ public class AutomotiveConfigConstants {
     public static final String DIALER_CONTACTS = "DIALER_CONTACTS";
     public static final String DIALER_FAVORITES = "DIALER_FAVORITES";
     public static final String DIALER_DIALPAD = "DIALER_DIALPAD";
+    public static final String DIALER_ACTIVE_CALL_TOGGLE = "DIALER_ACTIVE_CALL_TOGGLE";
+    public static final String DIALER_ONGOING_CALL_CONTROL_BAR = "DIALER_ONGOING_CALL_CONTROL_BAR";
+    public static final String DIALER_SETTINGS_BUTTON = "DIALER_SETTINGS_BUTTON";
+
+    // Phone Device Identifiers
+    public static final String MOBILE_CALL_BUTTON = "MOBILE_CALL_BUTTON";
+    public static final String MOBILE_DIAL_PAD_ICON = "MOBILE_DIALPAD_ICON";
+    public static final String MOBILE_PHONE_ICON = "MOBILE_PHONE_ICON";
+    public static final String PHONE_DEVICE_PACKAGE = "PHONE_DEVICE_PACAKAGE";
+    public static final String MOBILE_DIALPAD_INPUT = "MOBILE_DIALPAD_INPUT";
+
+    // Phone Card Identifiers
+    public static final String PHONE_CARD_DIALER_BUTTON = "PHONE_CARD_DIALER_BUTTON";
 }

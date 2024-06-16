@@ -33,6 +33,4 @@ java_library {
         "platformprotosnano",
         "statsdprotonano",
     ],
-
-    platform_apis: true,
 }

@@ -20,9 +20,9 @@ import android.annotation.SuppressLint
 import android.app.Instrumentation
 import android.tools.device.apphelpers.BrowserAppHelper
 import android.tools.device.apphelpers.MessagingAppHelper
-import android.tools.device.flicker.datastore.DataStore
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.runner.TransitionRunner
+import android.tools.flicker.datastore.DataStore
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.runner.TransitionRunner
 import android.tools.utils.TEST_SCENARIO
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.runner.Description
@@ -58,7 +58,7 @@ object Utils {
             .build()
 
     fun runTransition(onExecuted: () -> Unit) {
-        DataStore.clear()
+        android.tools.flicker.datastore.DataStore.clear()
         val flicker = createFlicker(onExecuted)
 
         val runner = TransitionRunner(TEST_SCENARIO, instrumentation)

@@ -16,6 +16,8 @@
 
 package android.platform.helpers.media;
 
+import static android.platform.uiautomator_helpers.DeviceHelpers.assertVisibility;
+
 import static org.junit.Assert.assertNotNull;
 
 import android.app.Notification;
@@ -38,6 +40,7 @@ import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.UiObject2;
 import androidx.test.uiautomator.Until;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -212,6 +215,15 @@ public final class MediaInstrumentation {
         return mDevice.hasObject(By.res(PKG, MEDIA_CONTROLLER_RES_ID));
     }
 
+    /** Assert that the media notification is visible with a 10 second timeout. */
+    public void assertMediaNotificationVisible() {
+        assertVisibility(
+                By.res(PKG, MEDIA_CONTROLLER_RES_ID),
+                true,
+                Duration.ofSeconds(10),
+                () -> "UMO should be visible on lockscreen.");
+    }
+
     public void addMediaSessionStateChangedListeners(Consumer<Integer> listener) {
         mMediaSessionStateChangedListeners.add(listener);
     }
@@ -245,8 +257,8 @@ public final class MediaInstrumentation {
         mMediaSession.setMetadata(mMediaSources.get(mCurrentMediaSource));
         mPlayer.setDataSource(mMediaSources.get(mCurrentMediaSource));
         mPlayer.reset();
-        mPlayer.start();
-        setCurrentMediaState(PlaybackState.STATE_PLAYING);
+        mPlayer.pause();
+        setCurrentMediaState(PlaybackState.STATE_PAUSED);
         createNotification();
     }
 

@@ -29,10 +29,10 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.MediumTest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

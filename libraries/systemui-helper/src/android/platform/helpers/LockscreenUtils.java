@@ -22,6 +22,7 @@ import static android.platform.helpers.CommonUtils.executeShellCommand;
 import static android.platform.helpers.Constants.SHORT_WAIT_TIME_IN_SECONDS;
 import static android.platform.helpers.ui.UiAutomatorUtils.getUiDevice;
 import static android.platform.uiautomator_helpers.DeviceHelpers.getContext;
+import static android.platform.uiautomator_helpers.WaitUtils.ensureThat;
 import static android.view.KeyEvent.KEYCODE_ENTER;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -174,6 +175,8 @@ public class LockscreenUtils {
 
     /**
      * Goes to the Locked screen page
+     *
+     * @deprecated use Root.goToLockscreen() to improve validation b/322870306
      */
     public static void goToLockScreen() {
         try {
@@ -189,6 +192,12 @@ public class LockscreenUtils {
     public static void ensureLockscreen() {
         HomeLockscreenPage page = new HomeLockscreenPage();
         HealthTestingUtils.waitForCondition(() -> "Lock screen is not visible", page::isVisible);
+    }
+
+    /** Ensures that the lockscreen is not visible. */
+    public static void ensureNoLockscreen() {
+        HomeLockscreenPage page = new HomeLockscreenPage();
+        ensureThat("Lock screen is invisible", () -> !page.isVisible());
     }
 
     /**

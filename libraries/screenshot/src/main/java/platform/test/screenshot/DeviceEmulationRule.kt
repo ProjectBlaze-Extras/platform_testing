@@ -131,34 +131,29 @@ class DeviceEmulationRule(private val spec: DeviceEmulationSpec) : TestRule {
     }
 
     private fun setDisplayDensity(density: Int) {
-        val wm = WindowManagerGlobal.getWindowManagerService()
-            ?: error("Unable to acquire WindowManager")
-        wm.setForcedDisplayDensityForUser(
-            Display.DEFAULT_DISPLAY,
-            density,
-            UserHandle.myUserId()
-        )
+        val wm =
+            WindowManagerGlobal.getWindowManagerService()
+                ?: error("Unable to acquire WindowManager")
+        wm.setForcedDisplayDensityForUser(Display.DEFAULT_DISPLAY, density, UserHandle.myUserId())
         prevDensity = density
     }
 
-    private fun setDisplaySize(
-        width: Int,
-        height: Int
-    ) {
-        val wm = WindowManagerGlobal.getWindowManagerService()
-            ?: error("Unable to acquire WindowManager")
+    private fun setDisplaySize(width: Int, height: Int) {
+        val wm =
+            WindowManagerGlobal.getWindowManagerService()
+                ?: error("Unable to acquire WindowManager")
         wm.setForcedDisplaySize(Display.DEFAULT_DISPLAY, width, height)
         prevWidth = width
         prevHeight = height
     }
 
     private fun setNightMode(nightMode: Int) {
-       val uiModeManager =
-           InstrumentationRegistry.getInstrumentation()
-               .targetContext
-               .getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
-       uiModeManager.setApplicationNightMode(nightMode)
-       prevNightMode = nightMode
+        val uiModeManager =
+            InstrumentationRegistry.getInstrumentation()
+                .targetContext
+                .getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
+        uiModeManager.setApplicationNightMode(nightMode)
+        prevNightMode = nightMode
     }
 }
 

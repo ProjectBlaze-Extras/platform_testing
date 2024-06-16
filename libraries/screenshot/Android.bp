@@ -22,7 +22,7 @@ android_test {
     manifest: "src/androidTest/manifest/AndroidManifest.xml",
     platform_apis: true,
     optimize: {
-        enabled: false
+        enabled: false,
     },
     srcs: [
         "src/**/*.java",
@@ -39,7 +39,6 @@ android_test {
         "platform-screenshot-diff-core",
         "platform-test-annotations",
         "truth",
-        "ub-uiautomator",
     ],
     asset_dirs: ["src/androidTest/assets"],
     test_suites: ["general-tests"],
@@ -49,9 +48,11 @@ android_library {
     name: "platform-screenshot-diff-core",
     manifest: "AndroidManifest.xml",
     platform_apis: true,
-    lint: { test: true },
+    lint: {
+        test: true,
+    },
     optimize: {
-        enabled: false
+        enabled: false,
     },
     srcs: [
         "src/main/java/platform/test/screenshot/**/*.java",
@@ -66,6 +67,7 @@ android_library {
         "androidx.appcompat_appcompat",
         "guava",
         "uiautomator-helpers",
+        "androidx.concurrent_concurrent-futures-ktx",
     ],
 }
 
@@ -75,6 +77,6 @@ java_library {
         "**/*.proto",
     ],
     optimize: {
-        enabled: false
-    }
+        enabled: false,
+    },
 }

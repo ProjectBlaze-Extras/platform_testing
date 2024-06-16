@@ -19,14 +19,13 @@ package platform.test.screenshot
 import android.app.Activity
 import android.app.Dialog
 import android.graphics.Bitmap
-import android.os.Build
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import java.util.concurrent.TimeUnit
 import platform.test.screenshot.matchers.BitmapMatcher
 
 fun <A : Activity> dialogScreenshotTest(
     activityRule: ActivityScenarioRule<A>,
-    screenshotRule: ScreenshotTestRule,
+    bitmapDiffer: BitmapDiffer,
     matcher: BitmapMatcher,
     goldenIdentifier: String,
     waitForIdle: () -> Unit = {},
@@ -59,7 +58,8 @@ fun <A : Activity> dialogScreenshotTest(
 
     try {
         val bitmap = dialog?.toBitmap() ?: error("dialog is null")
-        screenshotRule.assertBitmapAgainstGolden(
+
+        bitmapDiffer.assertBitmapAgainstGolden(
             bitmap,
             goldenIdentifier,
             matcher,
@@ -71,11 +71,6 @@ fun <A : Activity> dialogScreenshotTest(
 
 private fun Dialog.toBitmap(): Bitmap {
     val window = checkNotNull(window)
-    val isRobolectric = Build.FINGERPRINT.contains("robolectric")
-    return if (isRobolectric) {
-        return window.decorView.captureToBitmap(window).get(10, TimeUnit.SECONDS)
-            ?: error("timeout while trying to capture view to bitmap for window")
-    } else {
-        return window.decorView.toBitmap(window)
-    }
+    return window.decorView.captureToBitmapAsync().get(10, TimeUnit.SECONDS)
+        ?: error("timeout while trying to capture view to bitmap for window")
 }

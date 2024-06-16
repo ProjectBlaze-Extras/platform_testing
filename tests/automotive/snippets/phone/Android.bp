@@ -40,10 +40,12 @@ android_test {
     static_libs: [
         "mobly-bundled-snippets-lib",
         "automotive-general-ui-helper",
-        "automotive-dial-app-helper"
+        "automotive-dial-app-helper",
+        "automotive-phone-helper",
     ],
     srcs: ["src/**/PhoneSnippet.java",
-           "src/**/UISnippet.java",],
+           "src/**/UISnippet.java",
+           "src/**/DialerSnippet.java"],
     manifest: "AndroidPhoneManifest.xml",
     compile_multilib: "both",
     target_sdk_version: "31",

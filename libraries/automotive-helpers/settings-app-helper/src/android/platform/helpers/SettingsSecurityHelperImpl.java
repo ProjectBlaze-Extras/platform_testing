@@ -105,15 +105,7 @@ public class SettingsSecurityHelperImpl extends AbstractStandardAppHelper
         }
         BySelector profileLockMenuSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.SECURITY_SETTINGS_PROFILE_LOCK);
-        UiObject2 profileLockMenu =
-                mScrollUtility.scrollAndFindUiObject(
-                        mScrollAction,
-                        mScrollDirection,
-                        mForwardButtonSelector,
-                        mBackwardButtonSelector,
-                        mScrollableElementSelector,
-                        profileLockMenuSelector,
-                        "Scroll to find Profile lock");
+        UiObject2 profileLockMenu = getSpectatioUiUtil().findUiObject(profileLockMenuSelector);
         getSpectatioUiUtil()
                 .validateUiObject(
                         profileLockMenu, String.format("Profile Lock %s", profileLockMenuSelector));
@@ -220,7 +212,7 @@ public class SettingsSecurityHelperImpl extends AbstractStandardAppHelper
     /** {@inheritDoc} */
     @Override
     public void removeLock() {
-        openChooseLockTypeMenu();
+
         BySelector none_menuSelector =
                 getUiElementFromConfig(AutomotiveConfigConstants.SECURITY_SETTINGS_LOCK_TYPE_NONE);
         UiObject2 none_menu = getSpectatioUiUtil().findUiObject(none_menuSelector);

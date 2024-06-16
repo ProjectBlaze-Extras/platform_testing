@@ -43,6 +43,12 @@ public abstract class Flag {
     private static final String PACKAGE_NAME_SIMPLE_NAME_SEPARATOR = ".";
     private static final String FLAGS_CLASS_FORMAT = "%s.Flags";
 
+    /**
+     * The possible prefix when flag repackaging is happened on the class. TODO(b/324009565): Remove
+     * this prefix when the long term solution is ready.
+     */
+    private static final String REPACKAGE_PREFIX = "com.android.internal.hidden_from_bootclasspath";
+
     public static Flag createFlag(String flag) {
         String namespace = null;
         String fullFlagName = null;
@@ -82,6 +88,30 @@ public abstract class Flag {
 
     @Nullable
     public String flagsClassName() {
-        return packageName() == null ? null : String.format(FLAGS_CLASS_FORMAT, packageName());
+        return flagsClassPackageName() == null
+                ? null
+                : String.format(FLAGS_CLASS_FORMAT, flagsClassPackageName());
+    }
+
+    /**
+     * The real package name of the Flags class. May be different to the packageName when
+     * repackaging is applied.
+     */
+    @Nullable
+    public String flagsClassPackageName() {
+        String packageName = packageName();
+        if (packageName == null) {
+            return null;
+        }
+
+        try {
+            Class.forName(
+                    String.format(FLAGS_CLASS_FORMAT, packageName),
+                    false,
+                    this.getClass().getClassLoader());
+            return packageName;
+        } catch (ClassNotFoundException e) {
+            return String.format("%s.%s", REPACKAGE_PREFIX, packageName);
+        }
     }
 }

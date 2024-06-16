@@ -16,12 +16,12 @@
 
 package android.tools.utils
 
-import android.tools.common.datatypes.Rect
-import android.tools.common.datatypes.Size
-import android.tools.common.traces.surfaceflinger.Display
-import android.tools.common.traces.surfaceflinger.Layer
-import android.tools.common.traces.surfaceflinger.LayerTraceEntry
-import android.tools.common.traces.surfaceflinger.Transform
+import android.tools.datatypes.Rect
+import android.tools.datatypes.Size
+import android.tools.traces.surfaceflinger.Display
+import android.tools.traces.surfaceflinger.Layer
+import android.tools.traces.surfaceflinger.LayerTraceEntry
+import android.tools.traces.surfaceflinger.Transform
 
 class MockLayerTraceEntryBuilder() {
     private val displays = mutableListOf<Display>()
@@ -43,11 +43,11 @@ class MockLayerTraceEntryBuilder() {
     fun addDisplay(rootLayers: List<MockLayerBuilder>): MockLayerTraceEntryBuilder = apply {
         val displayLayer =
             MockLayerBuilder("Display").setAbsoluteBounds(bounds).addChildren(rootLayers).build()
-        val displayId = 1UL
+        val displayId = 1L
         val stackId = 1
         this.displays.add(
             Display.from(
-                id = "$displayId",
+                id = displayId,
                 name = "Display",
                 layerStackId = stackId,
                 size = Size.from(bounds.width, bounds.height),
@@ -73,9 +73,9 @@ class MockLayerTraceEntryBuilder() {
             clockTimestamp = null,
             hwcBlob = "",
             where = "",
-            displays = displays.toTypedArray(),
+            displays = displays,
             vSyncId = 100,
-            _rootLayers = layers.toTypedArray()
+            _rootLayers = layers
         )
     }
 

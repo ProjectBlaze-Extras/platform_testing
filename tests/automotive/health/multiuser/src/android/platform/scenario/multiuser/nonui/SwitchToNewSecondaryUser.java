@@ -24,10 +24,13 @@ import android.platform.test.scenario.annotation.Scenario;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import java.util.Locale;
 
 /**
  * This test will switch to a new secondary non-guest user from default initial user.
@@ -65,15 +68,16 @@ public class SwitchToNewSecondaryUser {
             // Execute user manager APIs with elevated permissions
             mUiAutomation.adoptShellPermissionIdentity(CREATE_USERS_PERMISSION);
             mMultiUserHelper.switchAndWaitForStable(
-                MultiUserConstants.DEFAULT_INITIAL_USER, MultiUserConstants.WAIT_FOR_IDLE_TIME_MS);
+                    MultiUserConstants.DEFAULT_INITIAL_USER,
+                    MultiUserConstants.WAIT_FOR_IDLE_TIME_MS);
 
             // Drop elevated permissions
             mUiAutomation.dropShellPermissionIdentity();
         }
         // Execute user manager APIs with elevated permissions
         mUiAutomation.adoptShellPermissionIdentity(CREATE_USERS_PERMISSION);
-        UserInfo targetUser = mMultiUserHelper
-            .getUserByName(MultiUserConstants.SECONDARY_USER_NAME);
+        UserInfo targetUser =
+                mMultiUserHelper.getUserByName(MultiUserConstants.SECONDARY_USER_NAME);
 
         if (targetUser != null) {
             if (!mMultiUserHelper.removeUser(targetUser)) {
@@ -81,8 +85,8 @@ public class SwitchToNewSecondaryUser {
             }
         }
         if (!MultiUserConstants.INCLUDE_CREATION_TIME) {
-            mTargetUserId = mMultiUserHelper
-                .createUser(MultiUserConstants.SECONDARY_USER_NAME, false);
+            mTargetUserId =
+                    mMultiUserHelper.createUser(MultiUserConstants.SECONDARY_USER_NAME, false);
         }
 
         // Drop elevated permissions
@@ -95,9 +99,15 @@ public class SwitchToNewSecondaryUser {
         mUiAutomation = getUiAutomation();
         mUiAutomation.adoptShellPermissionIdentity(CREATE_USERS_PERMISSION);
         if (MultiUserConstants.INCLUDE_CREATION_TIME) {
-            mTargetUserId = mMultiUserHelper
-                .createUser(MultiUserConstants.SECONDARY_USER_NAME, false);
+            mTargetUserId =
+                    mMultiUserHelper.createUser(MultiUserConstants.SECONDARY_USER_NAME, false);
         }
+        Assume.assumeTrue(
+                String.format(
+                        Locale.US,
+                        "Target user id is %d but must be greater than 10",
+                        mTargetUserId),
+                mTargetUserId > 10);
         mMultiUserHelper.switchToUserId(mTargetUserId);
 
         // Drop elevated permissions

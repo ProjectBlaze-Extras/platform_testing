@@ -136,7 +136,7 @@ public class BugReportDurationHelperTest {
         createArchive("bugreport", bugReportLines, dumpstateBoardLines);
 
         Map<String, Double> metrics = helper.getMetrics();
-        assertEquals(8, metrics.size());
+        assertEquals(9, metrics.size());
         assertEquals(44.619, metrics.get("bugreport-duration-dumpstate_board()"), DELTA);
         assertEquals(21.397, metrics.get("bugreport-duration-dumpsys"), DELTA);
         assertEquals(0.022, metrics.get("bugreport-duration-dumpsys-critical-proto"), DELTA);
@@ -146,6 +146,7 @@ public class BugReportDurationHelperTest {
         assertEquals(12532, metrics.get("bugreport-dumpstate_board-duration-dump_modemlog"), DELTA);
         assertEquals(
                 7705, metrics.get("bugreport-dumpstate_board-duration-dump_thermal.sh"), DELTA);
+        assertEquals(0, metrics.get("dumpstate-section-timeout-count"), DELTA);
     }
 
     @Test
@@ -175,6 +176,16 @@ public class BugReportDurationHelperTest {
         String invalidLine = "unrelated log line";
         String showmapLine =
                 "------ 0.076s was the duration of \'SHOW MAP 22930 (com.android.chrome)\' ------";
+
+        // Timeout lines should be gathered from logs instead of the "raw" text, as the latter is a
+        // subset of the former.
+        String validTimeoutLine =
+                "02-12 16:34:21.826 shell 14095 14095 E dumpstate: "
+                        + "*** command '/system/xbin/su root bugreport_procdump' "
+                        + "timed out after 10.002s (killing pid 15063)";
+        String invalidTimeoutLine =
+                "*** command '/system/xbin/su root bugreport_procdump' "
+                        + "timed out after 10.002s (killing pid 15063)";
         List<String> lines =
                 Arrays.asList(
                         dumpstateLine1,
@@ -182,7 +193,9 @@ public class BugReportDurationHelperTest {
                         dumpsysLine1,
                         dumpsysLine2,
                         invalidLine,
-                        showmapLine);
+                        showmapLine,
+                        validTimeoutLine,
+                        invalidTimeoutLine);
 
         File archive = createArchive("bugreport", lines, null);
 
@@ -193,8 +206,10 @@ public class BugReportDurationHelperTest {
         assertTrue(filtered.contains(dumpstateLine2));
         assertTrue(filtered.contains(dumpsysLine1));
         assertTrue(filtered.contains(dumpsysLine2));
+        assertTrue(filtered.contains(validTimeoutLine));
         assertFalse(filtered.contains(invalidLine));
         assertFalse(filtered.contains(showmapLine));
+        assertFalse(filtered.contains(invalidTimeoutLine));
     }
 
     @Test
